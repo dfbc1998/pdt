@@ -1,3 +1,337 @@
-<p>
-  freelancer-profile-setup works!
-</p>
+<app-header [title]="'Configurar Perfil de Freelancer'"></app-header>
+
+<ion-content class="setup-content">
+  <div class="setup-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <app-loading [message]="'Preparando tu perfil...'"></app-loading>
+    </div>
+
+    <!-- Setup Form -->
+    <div *ngIf="!isLoading" class="setup-wrapper">
+
+      <!-- Progress Header -->
+      <div class="progress-section">
+        <div class="progress-content">
+          <h1 class="progress-title">¡Completa tu perfil profesional!</h1>
+          <p class="progress-subtitle">
+            Ayúdanos a conocerte mejor para conectarte con los mejores proyectos
+          </p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgressPercentage()">
+            </div>
+          </div>
+          <div class="progress-text">
+            {{ currentStep }} de {{ totalSteps }} completados
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Steps -->
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+
+        <!-- Step 1: Basic Information -->
+        <div class="form-step" [class.active]="currentStep >= 1">
+          <div class="step-header">
+            <div class="step-number completed">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="step-info">
+              <h3>Información Básica</h3>
+              <p>Tu nombre profesional y título</p>
+            </div>
+          </div>
+
+          <div class="step-content" *ngIf="currentStep === 1">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="professionalTitle">Título Profesional *</label>
+                <ion-input id="professionalTitle" formControlName="professionalTitle"
+                  placeholder="ej: Desarrollador Full Stack Senior" fill="outline" class="custom-input"
+                  [class.error]="isFieldInvalid('professionalTitle')">
+                </ion-input>
+                <div *ngIf="isFieldInvalid('professionalTitle')" class="error-message">
+                  El título profesional es requerido
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="yearsExperience">Años de Experiencia *</label>
+                <ion-select id="yearsExperience" formControlName="yearsExperience" placeholder="Selecciona"
+                  fill="outline" class="custom-select" [class.error]="isFieldInvalid('yearsExperience')">
+                  <ion-select-option value="junior">0-2 años (Junior)</ion-select-option>
+                  <ion-select-option value="intermediate">3-5 años (Intermedio)</ion-select-option>
+                  <ion-select-option value="senior">6-10 años (Senior)</ion-select-option>
+                  <ion-select-option value="expert">10+ años (Expert)</ion-select-option>
+                </ion-select>
+                <div *ngIf="isFieldInvalid('yearsExperience')" class="error-message">
+                  La experiencia es requerida
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="availability">Disponibilidad *</label>
+                <ion-select id="availability" formControlName="availability" placeholder="Selecciona" fill="outline"
+                  class="custom-select" [class.error]="isFieldInvalid('availability')">
+                  <ion-select-option value="full_time">Tiempo Completo (40+ hrs/sem)</ion-select-option>
+                  <ion-select-option value="part_time">Medio Tiempo (20-40 hrs/sem)</ion-select-option>
+                  <ion-select-option value="project_based">Por Proyectos (Flexible)</ion-select-option>
+                  <ion-select-option value="weekends">Solo Fines de Semana</ion-select-option>
+                </ion-select>
+                <div *ngIf="isFieldInvalid('availability')" class="error-message">
+                  La disponibilidad es requerida
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="bio">Descripción Profesional *</label>
+                <ion-textarea id="bio" formControlName="bio"
+                  placeholder="Cuéntanos sobre tu experiencia, especialidades y qué te hace único..." rows="4"
+                  fill="outline" class="custom-textarea" [class.error]="isFieldInvalid('bio')" maxlength="500"
+                  counter="true">
+                </ion-textarea>
+                <div *ngIf="isFieldInvalid('bio')" class="error-message">
+                  La descripción debe tener al menos 100 caracteres
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Skills & Expertise -->
+        <div class="form-step" [class.active]="currentStep >= 2">
+          <div class="step-header">
+            <div class="step-number" [class.completed]="currentStep > 2">
+              <span *ngIf="currentStep <= 2">2</span>
+              <ion-icon *ngIf="currentStep > 2" name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="step-info">
+              <h3>Habilidades y Experiencia</h3>
+              <p>Tus especialidades técnicas y profesionales</p>
+            </div>
+          </div>
+
+          <div class="step-content" *ngIf="currentStep === 2">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="skills">Habilidades Principales *</label>
+                <div class="skills-input-container">
+                  <ion-input id="skillInput" placeholder="Escribe una habilidad y presiona Enter" fill="outline"
+                    class="custom-input" (keydown.enter)="addSkill($event)" #skillInput>
+                  </ion-input>
+                  <ion-button fill="clear" color="primary" (click)="addSkill()">
+                    <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </div>
+
+                <div class="skills-container" *ngIf="selectedSkills.length > 0">
+                  <div *ngFor="let skill of selectedSkills; trackBy: trackBySkill" class="skill-tag">
+                    <span>{{ skill }}</span>
+                    <ion-button fill="clear" size="small" (click)="removeSkill(skill)">
+                      <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+
+                <div class="skills-suggestions">
+                  <p>Sugerencias populares:</p>
+                  <div class="suggested-skills">
+                    <button *ngFor="let skill of suggestedSkills" type="button" class="suggested-skill"
+                      (click)="addSuggestedSkill(skill)" [disabled]="selectedSkills.includes(skill)">
+                      {{ skill }}
+                    </button>
+                  </div>
+                </div>
+
+                <div *ngIf="selectedSkills.length === 0 && profileForm.get('skills')?.touched" class="error-message">
+                  Agrega al menos 3 habilidades
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="hourlyRate">Tarifa por Hora (USD) *</label>
+                <div class="rate-input-container">
+                  <span class="currency-symbol">$</span>
+                  <ion-input id="hourlyRate" formControlName="hourlyRateMin" type="number" placeholder="15"
+                    fill="outline" class="custom-input rate-input" [class.error]="isFieldInvalid('hourlyRateMin')">
+                  </ion-input>
+                  <span class="rate-separator">-</span>
+                  <ion-input formControlName="hourlyRateMax" type="number" placeholder="50" fill="outline"
+                    class="custom-input rate-input" [class.error]="isFieldInvalid('hourlyRateMax')">
+                  </ion-input>
+                </div>
+                <div *ngIf="isFieldInvalid('hourlyRateMin') || isFieldInvalid('hourlyRateMax')" class="error-message">
+                  Ingresa un rango de tarifa válido
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="languages">Idiomas</label>
+                <ion-select id="languages" formControlName="languages" multiple="true" placeholder="Selecciona idiomas"
+                  fill="outline" class="custom-select">
+                  <ion-select-option value="es">Español (Nativo)</ion-select-option>
+                  <ion-select-option value="en">Inglés</ion-select-option>
+                  <ion-select-option value="pt">Portugués</ion-select-option>
+                  <ion-select-option value="fr">Francés</ion-select-option>
+                  <ion-select-option value="de">Alemán</ion-select-option>
+                  <ion-select-option value="it">Italiano</ion-select-option>
+                  <ion-select-option value="zh">Chino</ion-select-option>
+                  <ion-select-option value="ja">Japonés</ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Portfolio & Education -->
+        <div class="form-step" [class.active]="currentStep >= 3">
+          <div class="step-header">
+            <div class="step-number" [class.completed]="currentStep > 3">
+              <span *ngIf="currentStep <= 3">3</span>
+              <ion-icon *ngIf="currentStep > 3" name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="step-info">
+              <h3>Portafolio y Educación</h3>
+              <p>Muestra tu trabajo y formación académica</p>
+            </div>
+          </div>
+
+          <div class="step-content" *ngIf="currentStep === 3">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Enlaces de Portafolio</label>
+                <div class="portfolio-links">
+                  <div *ngFor="let link of portfolioLinks; let i = index" class="portfolio-link-item">
+                    <ion-input [placeholder]="'https://ejemplo.com/mi-proyecto-' + (i + 1)" fill="outline"
+                      class="custom-input" [(ngModel)]="link.url" [ngModelOptions]="{ standalone: true }">
+                    </ion-input>
+                    <ion-button fill="clear" color="danger" (click)="removePortfolioLink(i)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+
+                  <ion-button fill="outline" color="primary" class="add-link-btn" (click)="addPortfolioLink()">
+                    <ion-icon name="add-outline" slot="start"></ion-icon>
+                    Agregar Enlace
+                  </ion-button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="education">Educación</label>
+                <ion-select id="education" formControlName="education" placeholder="Nivel de educación" fill="outline"
+                  class="custom-select">
+                  <ion-select-option value="high_school">Educación Secundaria</ion-select-option>
+                  <ion-select-option value="vocational">Educación Técnica</ion-select-option>
+                  <ion-select-option value="associate">Técnico Superior</ion-select-option>
+                  <ion-select-option value="bachelor">Licenciatura</ion-select-option>
+                  <ion-select-option value="master">Maestría</ion-select-option>
+                  <ion-select-option value="phd">Doctorado</ion-select-option>
+                  <ion-select-option value="bootcamp">Bootcamp/Curso Intensivo</ion-select-option>
+                  <ion-select-option value="self_taught">Autodidacta</ion-select-option>
+                </ion-select>
+              </div>
+
+              <div class="form-group">
+                <label for="location">Ubicación</label>
+                <ion-input id="location" formControlName="location" placeholder="Ciudad, País" fill="outline"
+                  class="custom-input">
+                </ion-input>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Final Review -->
+        <div class="form-step" [class.active]="currentStep >= 4">
+          <div class="step-header">
+            <div class="step-number" [class.completed]="currentStep > 4">
+              <span *ngIf="currentStep <= 4">4</span>
+              <ion-icon *ngIf="currentStep > 4" name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="step-info">
+              <h3>Revisión Final</h3>
+              <p>Confirma tu información antes de crear tu perfil</p>
+            </div>
+          </div>
+
+          <div class="step-content" *ngIf="currentStep === 4">
+            <div class="review-section">
+              <h4>Resumen de tu Perfil</h4>
+
+              <div class="review-card">
+                <div class="review-header">
+                  <h5>{{ profileForm.get('professionalTitle')?.value || 'Tu Título Profesional' }}</h5>
+                  <div class="review-meta">
+                    <span class="experience-badge">{{ getExperienceLabel(profileForm.get('yearsExperience')?.value)
+                      }}</span>
+                    <span class="availability-badge">{{ getAvailabilityLabel(profileForm.get('availability')?.value)
+                      }}</span>
+                  </div>
+                </div>
+
+                <div class="review-bio">
+                  <p>{{ profileForm.get('bio')?.value || 'Tu descripción profesional aparecerá aquí...' }}</p>
+                </div>
+
+                <div class="review-skills" *ngIf="selectedSkills.length > 0">
+                  <h6>Habilidades:</h6>
+                  <div class="skills-preview">
+                    <span *ngFor="let skill of selectedSkills" class="skill-preview-tag">{{ skill }}</span>
+                  </div>
+                </div>
+
+                <div class="review-rate" *ngIf="profileForm.get('hourlyRateMin')?.value">
+                  <h6>Tarifa:</h6>
+                  <p class="rate-display">
+                    ${{ profileForm.get('hourlyRateMin')?.value }} - ${{ profileForm.get('hourlyRateMax')?.value }}
+                    USD/hora
+                  </p>
+                </div>
+
+                <div class="review-portfolio" *ngIf="portfolioLinks.length > 0">
+                  <h6>Enlaces de Portafolio:</h6>
+                  <div class="portfolio-preview">
+                    <div *ngFor="let link of portfolioLinks" class="portfolio-preview-link">
+                      <ion-icon name="link-outline"></ion-icon>
+                      <span>{{ link.url }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Navigation -->
+        <div class="form-navigation">
+          <ion-button *ngIf="currentStep > 1" fill="outline" color="primary" (click)="previousStep()"
+            class="nav-button">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            Anterior
+          </ion-button>
+
+          <div class="nav-spacer"></div>
+
+          <ion-button *ngIf="currentStep < totalSteps" fill="solid" color="primary" (click)="nextStep()"
+            class="nav-button" [disabled]="!isStepValid(currentStep)">
+            Siguiente
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+
+          <ion-button *ngIf="currentStep === totalSteps" fill="solid" color="success" type="submit"
+            class="nav-button submit-button" [disabled]="!profileForm.valid || isSubmitting">
+            <ion-icon *ngIf="!isSubmitting" name="checkmark-outline" slot="start"></ion-icon>
+            <ion-spinner *ngIf="isSubmitting" name="crescent" color="light"></ion-spinner>
+            {{ isSubmitting ? 'Creando Perfil...' : 'Crear Perfil' }}
+          </ion-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</ion-content>

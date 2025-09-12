@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+// src/app/core/services/auth.service.ts
+import { Injectable, inject, NgZone } from '@angular/core';
 import { Auth, User as FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
@@ -9,9 +10,10 @@ import { User, UserRole, LoginRequest, RegisterRequest, ApiResponse } from '../i
     providedIn: 'root'
 })
 export class AuthService {
-    private auth = inject(Auth);
+    public auth = inject(Auth);
     private firestore = inject(Firestore);
     private router = inject(Router);
+    private ngZone = inject(NgZone); // ✅ AGREGADO: Para manejar el contexto de Angular
 
     private currentUserSubject = new BehaviorSubject<User | null>(null);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -24,19 +26,23 @@ export class AuthService {
     }
 
     private initAuthListener(): void {
+        // ✅ CORREGIDO: Ejecutar dentro del contexto de Angular Zone
         onAuthStateChanged(this.auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                try {
-                    const user = await this.getUserData(firebaseUser.uid);
-                    this.currentUserSubject.next(user);
-                } catch (error) {
-                    console.error('Error loading user data:', error);
+            this.ngZone.run(async () => {
+                if (firebaseUser) {
+                    try {
+                        const user = await this.getUserData(firebaseUser.uid);
+                        this.currentUserSubject.next(user);
+                    } catch (error) {
+                        console.log('User document not found, this is normal during registration or recovery flow');
+                        // ✅ CORREGIDO: No establecer como error, mantener usuario como null para que el guard maneje la recuperación
+                        this.currentUserSubject.next(null);
+                    }
+                } else {
                     this.currentUserSubject.next(null);
                 }
-            } else {
-                this.currentUserSubject.next(null);
-            }
-            this.loadingSubject.next(false);
+                this.loadingSubject.next(false);
+            });
         });
     }
 
@@ -48,8 +54,8 @@ export class AuthService {
                 credentials.password
             );
 
-            // Wait a moment for the auth state listener to process
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // ✅ CORREGIDO: Esperar más tiempo para que el listener procese
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Check if user document exists
             try {
@@ -66,10 +72,10 @@ export class AuthService {
                 };
             } catch (error) {
                 console.log('User document not found, user needs recovery');
-                // Don't redirect here, let the auth guard handle it
+                // ✅ CORREGIDO: Retornar éxito pero sin datos para activar flujo de recuperación
                 return {
                     success: true,
-                    data: null as any, // This will trigger the recovery flow
+                    data: null as any,
                     message: 'Login successful, completing setup...'
                 };
             }
@@ -107,22 +113,47 @@ export class AuthService {
                 isActive: true
             };
 
+            // ✅ CORREGIDO: Crear documento y esperar a que se complete
             await this.createUserDocument(user);
 
-            // Send email verification
-            await sendEmailVerification(result.user);
+            // ✅ CORREGIDO: Esperar un poco más para asegurar que Firestore se actualice
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-            this.currentUserSubject.next(user);
+            // ✅ CORREGIDO: Verificar que el documento se creó correctamente
+            try {
+                const createdUser = await this.getUserData(result.user.uid);
+                this.currentUserSubject.next(createdUser);
 
-            // Redirect to appropriate onboarding
-            this.redirectAfterRegistration(userData.role);
+                // Send email verification
+                await sendEmailVerification(result.user);
 
-            return {
-                success: true,
-                data: user,
-                message: 'Registration successful. Please check your email for verification.'
-            };
+                // Redirect to appropriate onboarding
+                this.redirectAfterRegistration(userData.role);
+
+                return {
+                    success: true,
+                    data: createdUser,
+                    message: 'Registration successful. Please check your email for verification.'
+                };
+            } catch (verifyError) {
+                console.error('Error verifying created user document:', verifyError);
+                // ✅ CORREGIDO: Aún así considerarlo éxito, el documento se creó
+                this.currentUserSubject.next(user);
+
+                // Send email verification
+                await sendEmailVerification(result.user);
+
+                // Redirect to appropriate onboarding
+                this.redirectAfterRegistration(userData.role);
+
+                return {
+                    success: true,
+                    data: user,
+                    message: 'Registration successful. Please check your email for verification.'
+                };
+            }
         } catch (error: any) {
+            console.error('Registration error:', error);
             return {
                 success: false,
                 error: this.getAuthErrorMessage(error.code),
@@ -188,69 +219,156 @@ export class AuthService {
         }
     }
 
-    private async getUserData(uid: string): Promise<User> {
-        const userRef = doc(this.firestore, 'users', uid);
-        const userSnap = await getDoc(userRef);
+    getCurrentFirebaseUser(): FirebaseUser | null {
+        return this.auth.currentUser;
+    }
 
-        if (!userSnap.exists()) {
-            throw new Error('User document not found');
+    async recreateUserDocument(role: UserRole): Promise<ApiResponse<User>> {
+        try {
+            const firebaseUser = this.getCurrentFirebaseUser();
+            if (!firebaseUser) {
+                return {
+                    success: false,
+                    error: 'No authenticated Firebase user found'
+                };
+            }
+
+            // Create user document in Firestore
+            const user: User = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                displayName: firebaseUser.displayName || '',
+                photoURL: firebaseUser.photoURL || undefined,
+                role: role,
+                isEmailVerified: firebaseUser.emailVerified,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                isActive: true
+            };
+
+            await this.createUserDocument(user);
+
+            // ✅ CORREGIDO: Esperar un poco para que Firestore se actualice
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // ✅ CORREGIDO: Verificar que el documento se creó correctamente
+            try {
+                const createdUser = await this.getUserData(firebaseUser.uid);
+                this.currentUserSubject.next(createdUser);
+
+                return {
+                    success: true,
+                    data: createdUser,
+                    message: 'User document recreated successfully'
+                };
+            } catch (verifyError) {
+                // ✅ CORREGIDO: Incluso si no podemos verificar, considerar éxito
+                this.currentUserSubject.next(user);
+
+                return {
+                    success: true,
+                    data: user,
+                    message: 'User document recreated successfully'
+                };
+            }
+        } catch (error: any) {
+            console.error('Error recreating user document:', error);
+            return {
+                success: false,
+                error: error.message || 'Failed to recreate user document'
+            };
         }
+    }
 
-        const userData = userSnap.data();
-        return {
-            uid,
-            email: userData['email'],
-            displayName: userData['displayName'],
-            photoURL: userData['photoURL'],
-            role: userData['role'],
-            isEmailVerified: userData['isEmailVerified'],
-            createdAt: userData['createdAt']?.toDate() || new Date(),
-            updatedAt: userData['updatedAt']?.toDate() || new Date(),
-            isActive: userData['isActive'] ?? true
-        };
+    // ✅ CORREGIDO: Mejorar manejo de errores en getUserData
+    private async getUserData(uid: string): Promise<User> {
+        try {
+            const userRef = doc(this.firestore, 'users', uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                throw new Error('User document not found');
+            }
+
+            const userData = userSnap.data();
+
+            // ✅ CORREGIDO: Validar que los datos necesarios existen
+            if (!userData) {
+                throw new Error('User document is empty');
+            }
+
+            return {
+                uid,
+                email: userData['email'] || '',
+                displayName: userData['displayName'] || '',
+                photoURL: userData['photoURL'],
+                role: userData['role'],
+                isEmailVerified: userData['isEmailVerified'] || false,
+                createdAt: userData['createdAt']?.toDate() || new Date(),
+                updatedAt: userData['updatedAt']?.toDate() || new Date(),
+                isActive: userData['isActive'] ?? true
+            };
+        } catch (error: any) {
+            console.error('Error getting user data for uid:', uid, error);
+            throw error;
+        }
     }
 
     private async createUserDocument(user: User): Promise<void> {
-        const userRef = doc(this.firestore, 'users', user.uid);
-        await setDoc(userRef, {
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            role: user.role,
-            isEmailVerified: user.isEmailVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            isActive: user.isActive
-        });
+        try {
+            const userRef = doc(this.firestore, 'users', user.uid);
+
+            // ✅ CORREGIDO: Asegurar que los datos estén bien formateados
+            const userData = {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL || null,
+                role: user.role,
+                isEmailVerified: user.isEmailVerified,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                isActive: user.isActive
+            };
+
+            await setDoc(userRef, userData);
+            console.log('User document created successfully for:', user.uid);
+        } catch (error: any) {
+            console.error('Error creating user document:', error);
+            throw error;
+        }
     }
 
     private redirectAfterLogin(role: UserRole): void {
-        switch (role) {
-            case UserRole.CLIENT:
-                this.router.navigate(['/dashboard/client']);
-                break;
-            case UserRole.FREELANCER:
-                this.router.navigate(['/dashboard/freelancer']);
-                break;
-            case UserRole.ADMIN:
-                this.router.navigate(['/dashboard/admin']);
-                break;
-            default:
-                this.router.navigate(['/dashboard']);
-        }
+        this.ngZone.run(() => {
+            switch (role) {
+                case UserRole.CLIENT:
+                    this.router.navigate(['/dashboard/client']);
+                    break;
+                case UserRole.FREELANCER:
+                    this.router.navigate(['/dashboard/freelancer']);
+                    break;
+                case UserRole.ADMIN:
+                    this.router.navigate(['/dashboard/admin']);
+                    break;
+                default:
+                    this.router.navigate(['/dashboard']);
+            }
+        });
     }
 
     private redirectAfterRegistration(role: UserRole): void {
-        switch (role) {
-            case UserRole.CLIENT:
-                this.router.navigate(['/profile/client/setup']);
-                break;
-            case UserRole.FREELANCER:
-                this.router.navigate(['/profile/freelancer/setup']);
-                break;
-            default:
-                this.router.navigate(['/dashboard']);
-        }
+        this.ngZone.run(() => {
+            switch (role) {
+                case UserRole.CLIENT:
+                    this.router.navigate(['/profile/client/setup']);
+                    break;
+                case UserRole.FREELANCER:
+                    this.router.navigate(['/profile/freelancer/setup']);
+                    break;
+                default:
+                    this.router.navigate(['/dashboard']);
+            }
+        });
     }
 
     private getAuthErrorMessage(errorCode: string): string {

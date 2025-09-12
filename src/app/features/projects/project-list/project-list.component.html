@@ -1,3 +1,199 @@
-<p>
-  project-list works!
-</p>
+<app-header [title]="'Proyectos'"></app-header>
+
+<ion-content class="projects-content">
+  <div class="projects-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <app-loading [message]="'Cargando proyectos...'"></app-loading>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading" class="projects-wrapper">
+
+      <!-- Header Section -->
+      <div class="projects-header">
+        <div class="header-content">
+          <h1 class="page-title">{{ getPageTitle() }}</h1>
+          <p class="page-subtitle">{{ getPageSubtitle() }}</p>
+        </div>
+
+        <!-- Create Project Button (Only for Clients) -->
+        <div class="header-actions" *ngIf="currentUserRole === 'client'">
+          <ion-button fill="solid" color="primary" (click)="createProject()" class="create-btn">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Crear Proyecto
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="filters-row">
+          <!-- Search Bar -->
+          <div class="search-container">
+            <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchChange($event)"
+              placeholder="Buscar proyectos..." show-clear-button="focus" debounce="300" class="custom-searchbar">
+            </ion-searchbar>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="filter-container">
+            <ion-select [(ngModel)]="selectedCategory" (ionChange)="onCategoryChange($event)" placeholder="Categoría"
+              interface="popover" class="custom-select">
+              <ion-select-option value="">Todas las categorías</ion-select-option>
+              <ion-select-option *ngFor="let category of categories" [value]="category.value">
+                {{ category.label }}
+              </ion-select-option>
+            </ion-select>
+          </div>
+
+          <!-- Budget Filter -->
+          <div class="filter-container">
+            <ion-select [(ngModel)]="selectedBudgetRange" (ionChange)="onBudgetChange($event)" placeholder="Presupuesto"
+              interface="popover" class="custom-select">
+              <ion-select-option value="">Cualquier presupuesto</ion-select-option>
+              <ion-select-option value="0-1000">$0 - $1,000</ion-select-option>
+              <ion-select-option value="1000-5000">$1,000 - $5,000</ion-select-option>
+              <ion-select-option value="5000-10000">$5,000 - $10,000</ion-select-option>
+              <ion-select-option value="10000+">$10,000+</ion-select-option>
+            </ion-select>
+          </div>
+
+          <!-- Sort Options -->
+          <div class="filter-container">
+            <ion-select [(ngModel)]="sortBy" (ionChange)="onSortChange($event)" placeholder="Ordenar por"
+              interface="popover" class="custom-select">
+              <ion-select-option value="newest">Más recientes</ion-select-option>
+              <ion-select-option value="budget_high">Mayor presupuesto</ion-select-option>
+              <ion-select-option value="budget_low">Menor presupuesto</ion-select-option>
+              <ion-select-option value="proposals">Más propuestas</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+
+        <!-- Results Info -->
+        <div class="results-info">
+          <span class="results-count">{{ filteredProjects.length }} proyecto{{ filteredProjects.length !== 1 ? 's' : ''
+            }}</span>
+          <ion-button *ngIf="hasActiveFilters()" fill="clear" color="medium" size="small" (click)="clearFilters()">
+            <ion-icon name="close-outline" slot="start"></ion-icon>
+            Limpiar filtros
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Projects Grid -->
+      <div class="projects-grid" *ngIf="filteredProjects.length > 0">
+        <div *ngFor="let project of paginatedProjects; trackBy: trackByProjectId" class="project-card"
+          (click)="viewProject(project.id)">
+
+          <!-- Project Header -->
+          <div class="project-header">
+            <div class="project-meta">
+              <span class="project-category">{{ getCategoryLabel(project.category) }}</span>
+              <span class="project-date">{{ project.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+            <div class="project-status-badge" [ngClass]="'status-' + project.status">
+              {{ getStatusLabel(project.status.toString()) }}
+            </div>
+          </div>
+
+          <!-- Project Content -->
+          <div class="project-content">
+            <h3 class="project-title">{{ project.title }}</h3>
+            <p class="project-description">{{ project.description | slice:0:120 }}...</p>
+
+            <!-- Skills Tags -->
+            <div class="project-skills">
+              <span *ngFor="let skill of project.requiredSkills.slice(0, 4)" class="skill-tag">
+                {{ skill }}
+              </span>
+              <span *ngIf="project.requiredSkills.length > 4" class="skill-more">
+                +{{ project.requiredSkills.length - 4 }} más
+              </span>
+            </div>
+          </div>
+
+          <!-- Project Footer -->
+          <div class="project-footer">
+            <div class="project-stats">
+              <div class="stat-item">
+                <ion-icon name="card-outline"></ion-icon>
+                <span>${{ project.budget.amount || 0 | number:'1.0-0' }}</span>
+              </div>
+              <div class="stat-item">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>{{ project.proposalCount }} propuestas</span>
+              </div>
+              <div class="stat-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ getTimeAgo(project.createdAt) }}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="project-actions">
+              <ion-button *ngIf="currentUserRole === 'freelancer' && project.status === 'published'" fill="solid"
+                color="primary" size="small" (click)="$event.stopPropagation(); sendProposal(project.id)">
+                <ion-icon name="send-outline" slot="start"></ion-icon>
+                Enviar Propuesta
+              </ion-button>
+
+              <ion-button *ngIf="currentUserRole === 'client' && isProjectOwner(project)" fill="outline" color="primary"
+                size="small" (click)="$event.stopPropagation(); editProject(project.id)">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Editar
+              </ion-button>
+
+              <ion-button fill="clear" color="medium" size="small"
+                (click)="$event.stopPropagation(); viewProject(project.id)">
+                Ver detalles
+                <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredProjects.length === 0 && !isLoading" class="empty-state">
+        <div class="empty-content">
+          <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+          <h3 class="empty-title">No se encontraron proyectos</h3>
+          <p class="empty-message">{{ getEmptyStateMessage() }}</p>
+
+          <div class="empty-actions">
+            <ion-button *ngIf="currentUserRole === 'client'" fill="solid" color="primary" (click)="createProject()">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              Crear mi primer proyecto
+            </ion-button>
+
+            <ion-button *ngIf="hasActiveFilters()" fill="outline" color="primary" (click)="clearFilters()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Limpiar filtros
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-container" *ngIf="filteredProjects.length > pageSize">
+        <ion-button fill="outline" color="medium" [disabled]="currentPage === 1" (click)="previousPage()">
+          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          Anterior
+        </ion-button>
+
+        <div class="page-info">
+          Página {{ currentPage }} de {{ totalPages }}
+        </div>
+
+        <ion-button fill="outline" color="medium" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Siguiente
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

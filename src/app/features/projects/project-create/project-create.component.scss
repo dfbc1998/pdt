@@ -1,0 +1,462 @@
+// src/app/features/projects/project-create/project-create.component.scss
+
+// Step navigation
+.step-navigation {
+    .step-item {
+        @apply transition-all duration-200 cursor-pointer;
+
+        &.active {
+            @apply text-primary-600;
+
+            .step-circle {
+                @apply bg-primary-600 border-primary-600 text-white;
+            }
+        }
+
+        &.completed {
+            @apply text-primary-600;
+
+            .step-circle {
+                @apply bg-primary-600 border-primary-600 text-white;
+            }
+        }
+
+        &.inactive {
+            @apply text-gray-400;
+
+            .step-circle {
+                @apply border-gray-300 text-gray-400;
+            }
+        }
+    }
+
+    .step-circle {
+        @apply w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-200;
+    }
+}
+
+// Form styling
+.step-card {
+    @apply shadow-lg border-0 rounded-xl mb-6;
+
+    ion-card-header {
+        @apply pb-4;
+
+        ion-card-title {
+            @apply text-xl font-bold text-gray-800 flex items-center;
+        }
+    }
+
+    ion-card-content {
+        @apply pt-0;
+    }
+}
+
+.form-item {
+    @apply mb-4 rounded-lg;
+    --background: #ffffff;
+    --border-color: #e5e7eb;
+    --color: #374151;
+
+    &:hover {
+        --border-color: #3b82f6;
+    }
+
+    &.error {
+        --border-color: #dc2626;
+        --color: #dc2626;
+    }
+
+    ion-label {
+        &.form-label {
+            @apply font-medium text-gray-700 mb-2;
+            --color: #374151;
+        }
+    }
+
+    ion-input,
+    ion-textarea {
+        --padding-top: 12px;
+        --padding-bottom: 12px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+    }
+
+    ion-select {
+        --padding-top: 12px;
+        --padding-bottom: 12px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+    }
+}
+
+.error-message {
+    @apply text-sm text-red-600 mt-1 ml-4;
+}
+
+// Budget and timeline cards
+.budget-type-card,
+.experience-card,
+.visibility-card {
+    @apply transition-all duration-200;
+
+    &:hover {
+        @apply scale-105;
+    }
+
+    &.selected {
+        @apply transform scale-105;
+    }
+
+    .card-content {
+        @apply p-4 border-2 rounded-lg transition-all duration-200;
+
+        &:hover {
+            @apply border-primary-300;
+        }
+    }
+
+    &.selected .card-content {
+        @apply border-primary-600 bg-primary-50;
+    }
+}
+
+// Skills
+.skill-chip {
+    @apply bg-primary-100 text-primary-800;
+    --background: #dbeafe;
+    --color: #1e40af;
+
+    ion-icon {
+        @apply cursor-pointer text-primary-600 hover:text-primary-800;
+        --color: #2563eb;
+
+        &:hover {
+            --color: #1e40af;
+        }
+    }
+}
+
+.skill-button {
+    @apply text-sm;
+    --border-color: #e5e7eb;
+    --color: #374151;
+
+    &:hover {
+        --border-color: #3b82f6;
+        --color: #3b82f6;
+    }
+}
+
+// Milestones
+.milestone-card {
+    @apply border border-gray-200 rounded-lg p-4 mb-4 transition-all duration-200;
+
+    &:hover {
+        @apply border-primary-300 shadow-md;
+    }
+
+    .milestone-header {
+        @apply flex items-center justify-between mb-4;
+
+        h4 {
+            @apply font-medium text-gray-800;
+        }
+    }
+
+    .deliverable-item {
+        @apply flex items-center gap-2 mb-2;
+
+        ion-input {
+            @apply flex-1;
+        }
+    }
+}
+
+// Navigation buttons
+.navigation-buttons {
+    @apply flex justify-between items-center mt-8 mb-4;
+
+    .nav-button {
+        @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+
+        &.primary {
+            @apply bg-primary-600 text-white hover:bg-primary-700;
+        }
+
+        &.secondary {
+            @apply border border-gray-300 text-gray-700 hover:border-primary-300 hover:text-primary-600;
+        }
+
+        &:disabled {
+            @apply opacity-50 cursor-not-allowed;
+        }
+    }
+}
+
+.submit-button {
+    @apply px-8 py-3 rounded-lg font-semibold transition-all duration-200;
+    --background: #3b82f6;
+    --color: #ffffff;
+
+    &:hover {
+        --background: #2563eb;
+    }
+
+    &:disabled {
+        --background: #9ca3af;
+        @apply cursor-not-allowed;
+    }
+}
+
+// Progress bar
+ion-progress-bar {
+    @apply h-2 rounded-full;
+    --background: #e5e7eb;
+    --progress-background: #3b82f6;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .step-card {
+        @apply mx-2;
+    }
+
+    .navigation-buttons {
+        @apply flex-col gap-4;
+
+        .nav-left,
+        .nav-right {
+            @apply w-full;
+        }
+    }
+
+    .grid {
+        &.grid-cols-2 {
+            @apply grid-cols-1;
+        }
+
+        &.grid-cols-3 {
+            @apply grid-cols-1;
+        }
+    }
+
+    .budget-type-card,
+    .experience-card,
+    .visibility-card {
+        @apply mb-3;
+    }
+}
+
+// Modal styling
+ion-modal {
+    .skill-modal-content {
+        ion-header {
+            ion-toolbar {
+                --background: #3b82f6;
+                --color: #ffffff;
+            }
+        }
+
+        ion-content {
+            --background: #ffffff;
+        }
+    }
+}
+
+// Custom checkbox styling
+ion-checkbox {
+    --size: 20px;
+    --checkbox-background-checked: #3b82f6;
+    --border-color-checked: #3b82f6;
+    --checkmark-color: #ffffff;
+}
+
+// Custom datetime styling
+ion-datetime {
+    --background: #ffffff;
+    --background-rgb: 255, 255, 255;
+}
+
+// Alert customization
+ion-alert {
+    --background: #ffffff;
+    --color: #374151;
+
+    .alert-head {
+        .alert-title {
+            @apply font-bold text-lg;
+        }
+    }
+
+    .alert-message {
+        @apply text-gray-600;
+    }
+
+    .alert-button {
+        &.alert-button-role-cancel {
+            --color: #6b7280;
+        }
+
+        &.alert-button-role-confirm {
+            --color: #dc2626;
+            @apply font-semibold;
+        }
+    }
+}
+
+// Toast styling
+ion-toast {
+    &.toast-success {
+        --background: #10b981;
+        --color: #ffffff;
+    }
+
+    &.toast-error {
+        --background: #dc2626;
+        --color: #ffffff;
+    }
+}
+
+// Loading spinner
+ion-spinner {
+    --color: #ffffff;
+
+    &.spinner-primary {
+        --color: #3b82f6;
+    }
+}
+
+// Animation classes
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.3s ease-in-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+// Focus states
+.form-item:focus-within {
+    --border-color: #3b82f6;
+
+    ion-label {
+        --color: #3b82f6;
+    }
+}
+
+// Validation states
+.form-item.ng-valid.ng-touched {
+    --border-color: #10b981;
+}
+
+.form-item.ng-invalid.ng-touched {
+    --border-color: #dc2626;
+}
+
+// Summary section
+.project-summary {
+    @apply bg-gray-50 p-6 rounded-lg border border-gray-200;
+
+    h3 {
+        @apply text-lg font-semibold text-gray-800 mb-4;
+    }
+
+    .summary-grid {
+        @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+
+        .summary-item {
+            @apply mb-3;
+
+            .label {
+                @apply font-medium text-gray-700 text-sm;
+            }
+
+            .value {
+                @apply text-gray-600 text-sm mt-1;
+            }
+        }
+    }
+}
+
+// Empty states
+.empty-state {
+    @apply text-center py-8 border-2 border-dashed border-gray-300 rounded-lg;
+
+    ion-icon {
+        @apply text-4xl text-gray-400 mb-2;
+    }
+
+    p {
+        @apply text-gray-500 mb-2;
+
+        &.subtitle {
+            @apply text-xs text-gray-400 mb-4;
+        }
+    }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+    .form-item {
+        --border-color: #000000;
+    }
+
+    .budget-type-card,
+    .experience-card,
+    .visibility-card {
+        &.selected .card-content {
+            @apply border-black bg-white;
+        }
+    }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

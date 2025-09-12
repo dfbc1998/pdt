@@ -1,0 +1,578 @@
+// Freelancer Profile Setup Styles
+.setup-content {
+    --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --padding-top: 0;
+    --padding-bottom: 0;
+}
+
+.setup-container {
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
+
+.setup-wrapper {
+    padding: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+}
+
+// Progress Section
+.progress-section {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1),
+        0 10px 10px -5px rgba(59, 130, 246, 0.04);
+
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+    }
+}
+
+.progress-content {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.progress-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+
+    @media (max-width: 768px) {
+        font-size: 1.5rem;
+    }
+}
+
+.progress-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.progress-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+// Profile Form
+.profile-form {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+// Form Steps
+.form-step {
+    opacity: 0.5;
+    border-bottom: 1px solid #f3f4f6;
+
+    &.active {
+        opacity: 1;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+}
+
+.step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    background: #e5e7eb;
+    color: #6b7280;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+
+    &.completed {
+        background: #10b981;
+        color: white;
+
+        ion-icon {
+            font-size: 1rem;
+        }
+    }
+
+    .form-step.active & {
+        background: #3b82f6;
+        color: white;
+    }
+}
+
+.step-info {
+    flex: 1;
+
+    h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+}
+
+.step-content {
+    padding: 2rem 1.5rem;
+
+    @media (max-width: 768px) {
+        padding: 1.5rem 1rem;
+    }
+}
+
+// Form Grid
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &.full-width {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+}
+
+// Custom Form Controls
+.custom-input,
+.custom-textarea,
+.custom-select {
+    --border-width: 1px;
+    --border-color: #d1d5db;
+    --color: #374151;
+    --placeholder-color: #9ca3af;
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --border-radius: 0.5rem;
+
+    &:focus-within {
+        --border-color: #3b82f6;
+        --border-width: 2px;
+    }
+
+    &.error {
+        --border-color: #dc2626;
+        --border-width: 2px;
+    }
+}
+
+.custom-textarea {
+    --padding-top: 0.75rem;
+    --padding-bottom: 0.75rem;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+// Skills Input
+.skills-input-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    ion-button {
+        --padding-start: 0;
+        --padding-end: 0;
+        margin: 0;
+        height: auto;
+        font-size: 0.75rem;
+        --color: #1e40af;
+
+        ion-icon {
+            font-size: 0.875rem;
+        }
+    }
+}
+
+.skills-suggestions {
+    margin-top: 1rem;
+
+    p {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0 0 0.5rem 0;
+    }
+}
+
+.suggested-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.suggested-skill {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// Rate Input
+.rate-input-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0 0.75rem;
+
+    &:focus-within {
+        border-color: #3b82f6;
+        border-width: 2px;
+    }
+}
+
+.currency-symbol,
+.rate-separator {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.rate-input {
+    --border-width: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+// Portfolio Links
+.portfolio-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.portfolio-link-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.add-link-btn {
+    --border-width: 1px;
+    --border-style: dashed;
+    align-self: flex-start;
+}
+
+// Review Section
+.review-section {
+    h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 1.5rem 0;
+        text-align: center;
+    }
+}
+
+.review-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.review-header {
+    text-align: center;
+    margin-bottom: 1rem;
+
+    h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
+}
+
+.review-meta {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.experience-badge,
+.availability-badge {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.review-bio {
+    margin: 1rem 0;
+
+    p {
+        color: #6b7280;
+        line-height: 1.5;
+        text-align: center;
+        font-style: italic;
+    }
+}
+
+.review-skills,
+.review-rate,
+.review-portfolio {
+    margin: 1rem 0;
+
+    h6 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 0.5rem 0;
+    }
+}
+
+.skills-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.skill-preview-tag {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.rate-display {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #059669;
+    text-align: center;
+    margin: 0;
+}
+
+.portfolio-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.portfolio-preview-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #3b82f6;
+
+    ion-icon {
+        font-size: 1rem;
+    }
+}
+
+// Form Navigation
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+        flex-direction: column;
+    }
+}
+
+.nav-spacer {
+    flex: 1;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.nav-button {
+    --border-radius: 0.5rem;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
+
+    &.submit-button {
+        --background: #059669;
+        --background-hover: #047857;
+        --background-activated: #047857;
+        --color: white;
+    }
+}
+
+// Animations
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-content {
+    animation: slideInUp 0.3s ease-out;
+}
+
+// Loading States
+ion-spinner {
+    width: 1rem;
+    height: 1rem;
+}
+
+// Focus States
+.custom-input:focus-within,
+.custom-textarea:focus-within,
+.custom-select:focus-within {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+// Validation States
+.form-group.ng-invalid.ng-touched {
+
+    .custom-input,
+    .custom-textarea,
+    .custom-select {
+        --border-color: #dc2626;
+    }
+}
+
+.form-group.ng-valid.ng-touched {
+
+    .custom-input,
+    .custom-textarea,
+    .custom-select {
+        --border-color: #10b981;
+    }
+}

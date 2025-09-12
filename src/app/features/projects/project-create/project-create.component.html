@@ -1,3 +1,626 @@
-<p>
-  project-create works!
-</p>
+<!-- src/app/features/projects/project-create/project-create.component.html -->
+<app-header title="Crear Proyecto"></app-header>
+
+<ion-content class="ion-padding">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Progress Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Crear Nuevo Proyecto</h1>
+        <ion-button fill="clear" (click)="onExit()" class="text-gray-500">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-4">
+        <ion-progress-bar [value]="getProgressPercentage() / 100" class="h-2 rounded-full"></ion-progress-bar>
+        <div class="flex justify-between mt-2 text-sm text-gray-600">
+          <span>Paso {{ currentStep }} de {{ totalSteps }}</span>
+          <span>{{ getProgressPercentage() }}% completado</span>
+        </div>
+      </div>
+
+      <!-- Step Navigation -->
+      <div class="flex justify-between mb-6">
+        @for (step of [1, 2, 3, 4]; track step) {
+        <div class="flex flex-col items-center cursor-pointer transition-all duration-200"
+          [class]="step <= currentStep ? 'text-primary-600' : 'text-gray-400'" (click)="goToStep(step)">
+          <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2 transition-all duration-200"
+            [class]="step < currentStep ? 'bg-primary-600 border-primary-600 text-white' : 
+                       step === currentStep ? 'border-primary-600 text-primary-600' : 
+                       'border-gray-300 text-gray-400'">
+            @if (step < currentStep) { <ion-icon name="checkmark-outline" class="text-sm"></ion-icon>
+              } @else {
+              <span class="text-sm font-medium">{{ step }}</span>
+              }
+          </div>
+          <span class="text-xs text-center max-w-20">{{ getStepTitle(step) }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+
+      <!-- Step 1: Basic Information -->
+      @if (currentStep === 1) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center text-xl">
+            <ion-icon name="document-text-outline" class="mr-3 text-primary-600"></ion-icon>
+            Información Básica del Proyecto
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Project Title -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="projectForm.get('title')?.invalid && projectForm.get('title')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Título del Proyecto *
+                <span class="text-xs text-gray-500 block">Sé específico y descriptivo (10-100 caracteres)</span>
+              </ion-label>
+              <ion-input formControlName="title"
+                placeholder="Ej: Desarrollo de aplicación móvil para delivery de comida" maxlength="100"
+                counter="true"></ion-input>
+            </ion-item>
+            @if (projectForm.get('title')?.invalid && projectForm.get('title')?.touched) {
+            <div class="error-message">
+              @if (projectForm.get('title')?.errors?.['required']) {
+              El título es requerido
+              }
+              @if (projectForm.get('title')?.errors?.['minlength']) {
+              El título debe tener al menos 10 caracteres
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Project Description -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="projectForm.get('description')?.invalid && projectForm.get('description')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Descripción del Proyecto *
+                <span class="text-xs text-gray-500 block">Explica detalladamente qué necesitas (50-2000
+                  caracteres)</span>
+              </ion-label>
+              <ion-textarea formControlName="description"
+                placeholder="Describe tu proyecto: objetivos, funcionalidades específicas, diseño esperado, integraciones necesarias, etc."
+                rows="6" maxlength="2000" counter="true"></ion-textarea>
+            </ion-item>
+            @if (projectForm.get('description')?.invalid && projectForm.get('description')?.touched) {
+            <div class="error-message">
+              @if (projectForm.get('description')?.errors?.['required']) {
+              La descripción es requerida
+              }
+              @if (projectForm.get('description')?.errors?.['minlength']) {
+              La descripción debe tener al menos 50 caracteres
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Category Selection -->
+          <ion-grid class="p-0">
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <ion-item class="form-item"
+                  [class.error]="projectForm.get('category')?.invalid && projectForm.get('category')?.touched">
+                  <ion-label position="stacked" class="form-label">Categoría *</ion-label>
+                  <ion-select formControlName="category" placeholder="Selecciona una categoría" interface="popover">
+                    @for (category of categories; track category.value) {
+                    <ion-select-option [value]="category.value">
+                      {{ category.label }}
+                    </ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                <ion-item class="form-item"
+                  [class.error]="projectForm.get('subcategory')?.invalid && projectForm.get('subcategory')?.touched">
+                  <ion-label position="stacked" class="form-label">Subcategoría *</ion-label>
+                  <ion-select formControlName="subcategory" placeholder="Selecciona una subcategoría"
+                    interface="popover" [disabled]="!projectForm.get('category')?.value">
+                    @if (projectForm.get('category')?.value && subcategories[projectForm.get('category')?.value]) {
+                    @for (sub of subcategories[projectForm.get('category')?.value]; track sub) {
+                    <ion-select-option [value]="sub">{{ sub }}</ion-select-option>
+                    }
+                    }
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 2: Budget & Timeline -->
+      @if (currentStep === 2) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center text-xl">
+            <ion-icon name="cash-outline" class="mr-3 text-primary-600"></ion-icon>
+            Presupuesto y Cronograma
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Budget Type Selection -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Tipo de Presupuesto *</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              @for (budgetType of budgetTypes; track budgetType.value) {
+              <div class="budget-type-card cursor-pointer transition-all duration-200"
+                [class.selected]="projectForm.get('budgetType')?.value === budgetType.value"
+                (click)="projectForm.get('budgetType')?.setValue(budgetType.value)">
+                <div class="p-4 border-2 rounded-lg" [class]="projectForm.get('budgetType')?.value === budgetType.value ? 
+                                  'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-primary-300'">
+                  <h4 class="font-semibold text-gray-800">{{ budgetType.label }}</h4>
+                  <p class="text-sm text-gray-600 mt-1">{{ budgetType.description }}</p>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Budget Amount Fields -->
+          @if (projectForm.get('budgetType')?.value === 'fixed' || projectForm.get('budgetType')?.value === 'hourly') {
+          <div>
+            <ion-item class="form-item"
+              [class.error]="projectForm.get('budgetAmount')?.invalid && projectForm.get('budgetAmount')?.touched">
+              <ion-label position="stacked" class="form-label">
+                {{ projectForm.get('budgetType')?.value === 'hourly' ? 'Tarifa por Hora' : 'Presupuesto Total' }} *
+              </ion-label>
+              <ion-input formControlName="budgetAmount" type="number" min="1" placeholder="0">
+                <div slot="start" class="text-gray-600 mr-2">$</div>
+                <div slot="end" class="text-gray-600 ml-2">{{ projectForm.get('currency')?.value }}</div>
+              </ion-input>
+            </ion-item>
+          </div>
+          }
+
+          @if (projectForm.get('budgetType')?.value === 'range') {
+          <ion-grid class="p-0">
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <ion-item class="form-item"
+                  [class.error]="projectForm.get('budgetMinAmount')?.invalid && projectForm.get('budgetMinAmount')?.touched">
+                  <ion-label position="stacked" class="form-label">Presupuesto Mínimo *</ion-label>
+                  <ion-input formControlName="budgetMinAmount" type="number" min="1" placeholder="0">
+                    <div slot="start" class="text-gray-600 mr-2">$</div>
+                    <div slot="end" class="text-gray-600 ml-2">{{ projectForm.get('currency')?.value }}</div>
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-md="6">
+                <ion-item class="form-item"
+                  [class.error]="projectForm.get('budgetMaxAmount')?.invalid && projectForm.get('budgetMaxAmount')?.touched">
+                  <ion-label position="stacked" class="form-label">Presupuesto Máximo *</ion-label>
+                  <ion-input formControlName="budgetMaxAmount" type="number" min="1" placeholder="0">
+                    <div slot="start" class="text-gray-600 mr-2">$</div>
+                    <div slot="end" class="text-gray-600 ml-2">{{ projectForm.get('currency')?.value }}</div>
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          }
+
+          <!-- Timeline -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Cronograma del Proyecto *</h3>
+            <ion-grid class="p-0">
+              <ion-row>
+                <ion-col size="12" size-md="4">
+                  <ion-item class="form-item">
+                    <ion-label position="stacked" class="form-label">Duración *</ion-label>
+                    <ion-input formControlName="timelineDuration" type="number" min="1" placeholder="1"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="4">
+                  <ion-item class="form-item">
+                    <ion-label position="stacked" class="form-label">Unidad de Tiempo *</ion-label>
+                    <ion-select formControlName="timelineType" placeholder="Seleccionar" interface="popover">
+                      @for (timeline of timelineTypes; track timeline.value) {
+                      <ion-select-option [value]="timeline.value">
+                        {{ timeline.label }}
+                      </ion-select-option>
+                      }
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="4">
+                  <ion-item class="form-item">
+                    <ion-checkbox formControlName="isFlexibleTimeline"></ion-checkbox>
+                    <ion-label class="ml-3">Cronograma flexible</ion-label>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+
+          <!-- Application Deadline -->
+          <div>
+            <ion-item class="form-item">
+              <ion-label position="stacked" class="form-label">
+                Fecha límite para aplicaciones (opcional)
+                <span class="text-xs text-gray-500 block">Después de esta fecha no se aceptarán propuestas</span>
+              </ion-label>
+              <ion-datetime formControlName="applicationDeadline" display-format="DD/MM/YYYY" picker-format="DD/MM/YYYY"
+                [min]="getCurrentDate()" placeholder="Seleccionar fecha"></ion-datetime>
+            </ion-item>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 3: Requirements & Skills -->
+      @if (currentStep === 3) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center text-xl">
+            <ion-icon name="people-outline" class="mr-3 text-primary-600"></ion-icon>
+            Requisitos y Habilidades
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Required Skills -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Habilidades Requeridas *</h3>
+              <ion-button fill="outline" (click)="openSkillModal()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                Agregar Habilidades
+              </ion-button>
+            </div>
+
+            @if (selectedSkills.length > 0) {
+            <div class="flex flex-wrap gap-2 mb-4">
+              @for (skill of selectedSkills; track skill) {
+              <ion-chip class="skill-chip">
+                <ion-label>{{ skill }}</ion-label>
+                <ion-icon name="close-outline" (click)="removeSkill(skill)"></ion-icon>
+              </ion-chip>
+              }
+            </div>
+            } @else {
+            <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+              <ion-icon name="people-outline" class="text-4xl text-gray-400 mb-2"></ion-icon>
+              <p class="text-gray-500">No hay habilidades seleccionadas</p>
+              <ion-button fill="clear" (click)="openSkillModal()">
+                Agregar habilidades requeridas
+              </ion-button>
+            </div>
+            }
+          </div>
+
+          <!-- Experience Level -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Nivel de Experiencia Preferido *</h3>
+            <div class="space-y-3">
+              @for (level of experienceLevels; track level.value) {
+              <div class="experience-card cursor-pointer transition-all duration-200"
+                [class.selected]="projectForm.get('preferredExperience')?.value === level.value"
+                (click)="projectForm.get('preferredExperience')?.setValue(level.value)">
+                <div class="p-4 border-2 rounded-lg" [class]="projectForm.get('preferredExperience')?.value === level.value ? 
+                                  'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-primary-300'">
+                  <div class="flex items-center">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800">{{ level.label }}</h4>
+                      <p class="text-sm text-gray-600 mt-1">{{ level.description }}</p>
+                    </div>
+                    @if (projectForm.get('preferredExperience')?.value === level.value) {
+                    <ion-icon name="checkmark-circle-outline" class="text-primary-600 text-xl"></ion-icon>
+                    }
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Additional Requirements -->
+          <div>
+            <ion-item class="form-item">
+              <ion-label position="stacked" class="form-label">
+                Requisitos Adicionales (opcional)
+                <span class="text-xs text-gray-500 block">Especifica cualquier otro requisito importante</span>
+              </ion-label>
+              <ion-textarea formControlName="additionalRequirements"
+                placeholder="Ej: Experiencia con metodologías ágiles, disponibilidad en horario específico, conocimiento del sector, etc."
+                rows="4" maxlength="500"></ion-textarea>
+            </ion-item>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 4: Project Settings -->
+      @if (currentStep === 4) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center text-xl">
+            <ion-icon name="checkmark-circle-outline" class="mr-3 text-primary-600"></ion-icon>
+            Configuración del Proyecto
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Project Visibility -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Visibilidad del Proyecto *</h3>
+            <div class="space-y-3">
+              @for (visibility of visibilityOptions; track visibility.value) {
+              <div class="visibility-card cursor-pointer transition-all duration-200"
+                [class.selected]="projectForm.get('visibility')?.value === visibility.value"
+                (click)="projectForm.get('visibility')?.setValue(visibility.value)">
+                <div class="p-4 border-2 rounded-lg" [class]="projectForm.get('visibility')?.value === visibility.value ? 
+                                  'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-primary-300'">
+                  <div class="flex items-center">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800">{{ visibility.label }}</h4>
+                      <p class="text-sm text-gray-600 mt-1">{{ visibility.description }}</p>
+                    </div>
+                    @if (projectForm.get('visibility')?.value === visibility.value) {
+                    <ion-icon name="checkmark-circle-outline" class="text-primary-600 text-xl"></ion-icon>
+                    }
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Estimated Freelancers -->
+          <div>
+            <ion-item class="form-item">
+              <ion-label position="stacked" class="form-label">
+                Número estimado de freelancers a contratar *
+                <span class="text-xs text-gray-500 block">¿Cuántos freelancers necesitas para este proyecto?</span>
+              </ion-label>
+              <ion-input formControlName="estimatedFreelancers" type="number" min="1" max="10"
+                placeholder="1"></ion-input>
+            </ion-item>
+          </div>
+
+          <!-- Milestones Section -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Hitos del Proyecto (opcional)</h3>
+              <ion-button fill="outline" (click)="addMilestone()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                Agregar Hito
+              </ion-button>
+            </div>
+
+            @if (milestonesArray.length > 0) {
+            <div class="space-y-4">
+              @for (milestone of milestonesArray.controls; track $index; let i = $index) {
+              <div class="milestone-card p-4 border border-gray-200 rounded-lg">
+                <div class="flex items-center justify-between mb-4">
+                  <h4 class="font-medium text-gray-800">Hito #{{ i + 1 }}</h4>
+                  <ion-button fill="clear" color="danger" (click)="removeMilestone(i)">
+                    <ion-icon name="close-outline"></ion-icon>
+                  </ion-button>
+                </div>
+
+                <div formArrayName="milestones">
+                  <div [formGroupName]="i" class="space-y-4">
+                    <ion-grid class="p-0">
+                      <ion-row>
+                        <ion-col size="12" size-md="8">
+                          <ion-item class="form-item">
+                            <ion-label position="stacked" class="form-label">Título del Hito *</ion-label>
+                            <ion-input formControlName="title" placeholder="Ej: Diseño UI/UX completado"></ion-input>
+                          </ion-item>
+                        </ion-col>
+                        <ion-col size="12" size-md="4">
+                          <ion-item class="form-item">
+                            <ion-label position="stacked" class="form-label">Monto ($) *</ion-label>
+                            <ion-input formControlName="amount" type="number" min="1" placeholder="0"></ion-input>
+                          </ion-item>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+
+                    <ion-item class="form-item">
+                      <ion-label position="stacked" class="form-label">Descripción *</ion-label>
+                      <ion-textarea formControlName="description"
+                        placeholder="Describe qué se debe entregar en este hito" rows="3"></ion-textarea>
+                    </ion-item>
+
+                    <ion-item class="form-item">
+                      <ion-label position="stacked" class="form-label">Fecha de vencimiento (opcional)</ion-label>
+                      <ion-datetime formControlName="dueDate" display-format="DD/MM/YYYY" picker-format="DD/MM/YYYY"
+                        [min]="getCurrentDate()" placeholder="Seleccionar fecha"></ion-datetime>
+                    </ion-item>
+
+                    <!-- Deliverables -->
+                    <div>
+                      <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-700">Entregables *</label>
+                        <ion-button size="small" fill="clear" (click)="addDeliverable(i)">
+                          <ion-icon name="add-outline"></ion-icon>
+                        </ion-button>
+                      </div>
+
+                      <div formArrayName="deliverables" class="space-y-2">
+                        @for (deliverable of getDeliverables(i).controls; track $index; let j = $index) {
+                        <div class="flex items-center gap-2">
+                          <ion-input [formControlName]="j" placeholder="Ej: Prototipo interactivo en Figma"
+                            class="flex-1"></ion-input>
+                          @if (getDeliverables(i).length > 1) {
+                          <ion-button size="small" fill="clear" color="danger" (click)="removeDeliverable(i, j)">
+                            <ion-icon name="close-outline"></ion-icon>
+                          </ion-button>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+            } @else {
+            <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+              <ion-icon name="flag-outline" class="text-4xl text-gray-400 mb-2"></ion-icon>
+              <p class="text-gray-500 mb-2">No hay hitos definidos</p>
+              <p class="text-xs text-gray-400 mb-4">Los hitos ayudan a organizar el trabajo y los pagos</p>
+              <ion-button fill="clear" (click)="addMilestone()">
+                Agregar primer hito
+              </ion-button>
+            </div>
+            }
+          </div>
+
+          <!-- Project Summary -->
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold mb-4">Resumen del Proyecto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="font-medium text-gray-700">Título:</span>
+                <p class="text-gray-600">{{ projectForm.get('title')?.value || 'Sin título' }}</p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-700">Categoría:</span>
+                <p class="text-gray-600">{{ getCategoryLabel(projectForm.get('category')?.value) }}</p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-700">Presupuesto:</span>
+                <p class="text-gray-600">
+                  @if (projectForm.get('budgetType')?.value === 'fixed') {
+                  ${{ projectForm.get('budgetAmount')?.value || 0 }} {{ projectForm.get('currency')?.value }} (Fijo)
+                  } @else if (projectForm.get('budgetType')?.value === 'hourly') {
+                  ${{ projectForm.get('budgetAmount')?.value || 0 }}/hora {{ projectForm.get('currency')?.value }}
+                  } @else if (projectForm.get('budgetType')?.value === 'range') {
+                  ${{ projectForm.get('budgetMinAmount')?.value || 0 }} - ${{ projectForm.get('budgetMaxAmount')?.value
+                  || 0 }} {{ projectForm.get('currency')?.value }}
+                  } @else {
+                  No definido
+                  }
+                </p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-700">Cronograma:</span>
+                <p class="text-gray-600">
+                  {{ projectForm.get('timelineDuration')?.value || 0 }}
+                  {{ getTimelineLabel(projectForm.get('timelineType')?.value) }}
+                </p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-700">Habilidades:</span>
+                <p class="text-gray-600">{{ selectedSkills.length }} seleccionadas</p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-700">Experiencia:</span>
+                <p class="text-gray-600">{{ getExperienceLabel(projectForm.get('preferredExperience')?.value) }}</p>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center mt-8 mb-4">
+        <div>
+          @if (currentStep > 1) {
+          <ion-button fill="outline" (click)="previousStep()">
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+            Anterior
+          </ion-button>
+          }
+        </div>
+
+        <div class="flex gap-4">
+          <!-- Save Draft Button -->
+          @if (currentStep === 1 && projectForm.get('title')?.value) {
+          <ion-button fill="clear" (click)="saveDraft()">
+            Guardar Borrador
+          </ion-button>
+          }
+
+          <!-- Next/Submit Button -->
+          @if (currentStep < totalSteps) { <ion-button (click)="nextStep()" [disabled]="!isStepValid(currentStep)">
+            Siguiente
+            <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+            } @else {
+            <ion-button type="submit" [disabled]="!projectForm.valid || selectedSkills.length === 0 || isSubmitting"
+              class="submit-button">
+              @if (isSubmitting) {
+              <ion-spinner slot="start" name="crescent"></ion-spinner>
+              Creando...
+              } @else {
+              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+              Crear Proyecto
+              }
+            </ion-button>
+            }
+        </div>
+      </div>
+    </form>
+  </div>
+</ion-content>
+
+<!-- Skills Selection Modal -->
+<ion-modal [isOpen]="showSkillModal" (didDismiss)="closeSkillModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Seleccionar Habilidades</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeSkillModal()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <!-- Search Skills -->
+      <ion-item class="mb-4">
+        <ion-label position="stacked">Buscar habilidades</ion-label>
+        <ion-input [(ngModel)]="skillSearch" placeholder="Escribe para buscar..." clearInput="true"></ion-input>
+      </ion-item>
+
+      <!-- Skills Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        @for (skill of filteredSkills; track skill) {
+        <ion-button fill="outline" size="small" (click)="addSkill(skill)" class="skill-button">
+          {{ skill }}
+        </ion-button>
+        }
+      </div>
+
+      @if (filteredSkills.length === 0) {
+      <div class="text-center py-8">
+        <p class="text-gray-500">No se encontraron habilidades</p>
+      </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Exit Confirmation Alert -->
+<ion-alert [isOpen]="showExitAlert" header="¿Salir sin guardar?"
+  message="Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?" [buttons]="alertButtons"></ion-alert>
+
+<!-- Success Toast -->
+<ion-toast [isOpen]="showSuccessToast" [message]="toastMessage" duration="3000" color="success" position="top"
+  (didDismiss)="showSuccessToast = false"></ion-toast>
+
+<!-- Error Toast -->
+<ion-toast [isOpen]="showErrorToast" [message]="toastMessage" duration="4000" color="danger" position="top"
+  (didDismiss)="showErrorToast = false"></ion-toast>

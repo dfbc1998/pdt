@@ -1,0 +1,581 @@
+// Client Dashboard Styles
+.dashboard-content {
+    --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --padding-top: 0;
+    --padding-bottom: 0;
+}
+
+.dashboard-container {
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
+
+.dashboard-wrapper {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+}
+
+// Welcome Section
+.welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1),
+        0 10px 10px -5px rgba(59, 130, 246, 0.04);
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+}
+
+.welcome-content {
+    flex: 1;
+}
+
+.welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+
+    @media (max-width: 768px) {
+        font-size: 1.75rem;
+    }
+}
+
+.welcome-subtitle {
+    font-size: 1.125rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+
+.action-btn {
+    --border-radius: 0.75rem;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    height: 3rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
+}
+
+.primary-btn {
+    --background: rgba(255, 255, 255, 0.15);
+    --background-hover: rgba(255, 255, 255, 0.25);
+    --color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.outline-btn {
+    --border-color: rgba(255, 255, 255, 0.3);
+    --color: white;
+    --background: transparent;
+    --background-hover: rgba(255, 255, 255, 0.1);
+}
+
+// Stats Grid
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+}
+
+.stat-icon-container {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+        font-size: 1.5rem;
+        color: white;
+    }
+}
+
+.projects-icon {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+}
+
+.active-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.freelancers-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.budget-icon {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #6b7280;
+
+    ion-icon {
+        font-size: 0.875rem;
+    }
+
+    &.positive {
+        color: #059669;
+
+        ion-icon {
+            color: #059669;
+        }
+    }
+}
+
+// Main Content Grid
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+// Section Cards
+.section-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    ion-icon {
+        color: #3b82f6;
+        font-size: 1.25rem;
+    }
+}
+
+.see-all-btn {
+    --color: #3b82f6;
+    --padding-start: 0.5rem;
+    --padding-end: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+// Projects List
+.projects-list {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #f9fafb;
+        border-color: #3b82f6;
+        transform: translateX(4px);
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.project-info {
+    flex: 1;
+}
+
+.project-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.project-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.project-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    margin-right: 1rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+
+    &.status-draft {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    &.status-published {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    &.status-in-progress {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    &.status-completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    &.status-cancelled {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+}
+
+.project-budget {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.25rem;
+
+    ion-button {
+        --padding-start: 0.5rem;
+        --padding-end: 0.5rem;
+    }
+}
+
+// Activity Feed
+.activity-list {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+
+    &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+.activity-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+        font-size: 1.25rem;
+        color: white;
+    }
+
+    &.activity-proposal {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+    }
+
+    &.activity-message {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    &.activity-payment {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    &.activity-project {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.activity-description {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.activity-actions {
+    ion-button {
+        --padding-start: 0.75rem;
+        --padding-end: 0.75rem;
+        --height: 2rem;
+        font-size: 0.8rem;
+    }
+}
+
+// Quick Actions Section
+.quick-actions-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+        background: #f9fafb;
+        transform: translateY(-2px);
+    }
+}
+
+.quick-action-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+
+    ion-icon {
+        font-size: 1.5rem;
+        color: white;
+    }
+}
+
+.project-icon {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+}
+
+.freelancer-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.message-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.report-icon {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.quick-action-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: #dc2626;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Empty States
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+
+    &.small {
+        padding: 2rem 1rem;
+    }
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.empty-text {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+.empty-action {
+    --border-radius: 0.75rem;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+}

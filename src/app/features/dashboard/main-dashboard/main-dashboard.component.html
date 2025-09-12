@@ -1,3 +1,157 @@
-<p>
-  main-dashboard works!
-</p>
+<app-header [title]="'Dashboard'"></app-header>
+
+<ion-content class="main-dashboard-content">
+  <div class="main-dashboard-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <app-loading [message]="'Configurando tu dashboard...'"></app-loading>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="hasError && !isLoading" class="error-container">
+      <div class="error-content">
+        <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+        <h2 class="error-title">Error al cargar el dashboard</h2>
+        <p class="error-message">{{ errorMessage }}</p>
+        <ion-button fill="solid" color="primary" (click)="retryLoad()" class="retry-button">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Reintentar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div *ngIf="!isLoading && !hasError" class="dashboard-wrapper">
+
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+        <div class="welcome-content">
+          <h1 class="welcome-title">
+            ¡Bienvenido a FreelancePro, {{ currentUser?.displayName || 'Usuario' }}!
+          </h1>
+          <p class="welcome-subtitle">
+            Tu plataforma profesional para conectar con oportunidades increíbles
+          </p>
+        </div>
+
+        <!-- User Role Badge -->
+        <div class="role-badge" [ngClass]="'role-' + currentUserRole">
+          <ion-icon [name]="getRoleIcon(currentUserRole)"></ion-icon>
+          <span>{{ getRoleLabel(currentUserRole) }}</span>
+        </div>
+      </div>
+
+      <!-- Dashboard Redirect Info -->
+      <div class="redirect-section">
+        <div class="redirect-card">
+          <div class="redirect-icon" [ngClass]="'redirect-' + currentUserRole">
+            <ion-icon [name]="getDashboardIcon(currentUserRole)"></ion-icon>
+          </div>
+
+          <div class="redirect-content">
+            <h3 class="redirect-title">{{ getDashboardTitle(currentUserRole) }}</h3>
+            <p class="redirect-description">{{ getDashboardDescription(currentUserRole) }}</p>
+
+            <div class="redirect-features">
+              <div *ngFor="let feature of getDashboardFeatures(currentUserRole)" class="feature-item">
+                <ion-icon name="checkmark-circle-outline" class="feature-icon"></ion-icon>
+                <span>{{ feature }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="redirect-actions">
+            <ion-button fill="solid" color="primary" size="large" (click)="goToDashboard()" class="dashboard-button">
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+              Ir al Dashboard
+            </ion-button>
+
+            <ion-button fill="outline" color="medium" size="default" (click)="exploreFeatures()" class="explore-button">
+              <ion-icon name="compass-outline" slot="start"></ion-icon>
+              Explorar Características
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Overview -->
+      <div class="quick-stats-section">
+        <h4 class="stats-title">Resumen Rápido</h4>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon projects-stat">
+              <ion-icon name="briefcase-outline"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ quickStats.projects }}</div>
+              <div class="stat-label">Proyectos</div>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon users-stat">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ quickStats.users }}</div>
+              <div class="stat-label">{{ currentUserRole === 'client' ? 'Freelancers' : 'Clientes' }}</div>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon activity-stat">
+              <ion-icon name="pulse-outline"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ quickStats.activity }}</div>
+              <div class="stat-label">Actividad</div>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon success-stat">
+              <ion-icon name="trophy-outline"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ quickStats.success }}%</div>
+              <div class="stat-label">Éxito</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-section">
+        <h4 class="actions-title">Acciones Rápidas</h4>
+
+        <div class="actions-grid">
+          <div *ngFor="let action of getQuickActions(currentUserRole)" class="action-card"
+            (click)="executeQuickAction(action)">
+            <div class="action-icon" [ngClass]="action.colorClass">
+              <ion-icon [name]="action.icon"></ion-icon>
+            </div>
+            <div class="action-content">
+              <div class="action-title">{{ action.title }}</div>
+              <div class="action-description">{{ action.description }}</div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="action-arrow"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform Info -->
+      <div class="platform-info">
+        <div class="info-card">
+          <ion-icon name="information-circle-outline" class="info-icon"></ion-icon>
+          <div class="info-content">
+            <h5>Tip del día</h5>
+            <p>{{ dailyTip }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

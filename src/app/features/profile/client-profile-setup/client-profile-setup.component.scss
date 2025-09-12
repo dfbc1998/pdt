@@ -1,0 +1,416 @@
+// src/app/features/profile/client-profile-setup/client-profile-setup.component.scss
+
+// Welcome header
+.welcome-header {
+    .welcome-icon {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    h1 {
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    p {
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .progress-container {
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+}
+
+// Step navigation
+.step-navigation {
+    .step-item {
+        @apply transition-all duration-300;
+
+        &.active {
+            @apply text-primary-600;
+
+            .step-circle {
+                @apply bg-primary-600 border-primary-600 text-white shadow-lg;
+                transform: scale(1.1);
+            }
+        }
+
+        &.completed {
+            @apply text-primary-600;
+
+            .step-circle {
+                @apply bg-success-600 border-success-600 text-white;
+            }
+        }
+
+        &.inactive {
+            @apply text-gray-400;
+
+            .step-circle {
+                @apply border-gray-300 text-gray-400 bg-white;
+            }
+        }
+    }
+
+    .step-circle {
+        @apply w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300;
+
+        ion-icon {
+            @apply text-lg;
+        }
+    }
+
+    .step-label {
+        @apply text-center max-w-24;
+    }
+}
+
+// Form styling
+.step-card {
+    @apply shadow-xl border-0 rounded-2xl mb-6;
+    animation: slideInUp 0.5s ease-out;
+
+    ion-card-header {
+        @apply pb-4 bg-gradient-to-r from-primary-50 to-blue-50;
+        border-radius: 1rem 1rem 0 0;
+
+        ion-card-title {
+            @apply text-xl font-bold text-gray-800;
+        }
+    }
+
+    ion-card-content {
+        @apply pt-6;
+    }
+}
+
+.form-item {
+    @apply mb-6 rounded-xl;
+    --background: #ffffff;
+    --border-color: #e5e7eb;
+    --color: #374151;
+    border: 2px solid var(--border-color);
+
+    &:hover {
+        --border-color: #3b82f6;
+        transform: translateY(-1px);
+    }
+
+    &.error {
+        --border-color: #dc2626;
+        --color: #dc2626;
+    }
+
+    ion-label {
+        &.form-label {
+            @apply font-semibold text-gray-700 mb-2;
+            --color: #374151;
+        }
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+        --padding-top: 16px;
+        --padding-bottom: 16px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+    }
+}
+
+.error-message {
+    @apply text-sm text-red-600 mt-2 ml-4 font-medium;
+    animation: fadeInDown 0.3s ease-out;
+}
+
+// Company size cards
+.size-card {
+    @apply transition-all duration-300;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    &.selected {
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .p-4 {
+        transition: all 0.3s ease;
+    }
+}
+
+// Progress bar styling
+ion-progress-bar {
+    --background: #e5e7eb;
+    --progress-background: linear-gradient(90deg, #3b82f6, #1e40af);
+    height: 8px;
+    border-radius: 4px;
+
+    &.rounded-full {
+        border-radius: 9999px;
+    }
+}
+
+// Buttons
+.submit-button {
+    --background: linear-gradient(135deg, #3b82f6, #1e40af);
+    --border-radius: 12px;
+    --box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.5);
+    --color: #ffffff;
+    font-weight: 600;
+    text-transform: none;
+    padding: 12px 24px;
+
+    &:hover {
+        --background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        --box-shadow: 0 12px 30px -5px rgba(59, 130, 246, 0.6);
+    }
+
+    &:disabled {
+        --background: #9ca3af;
+        transform: none;
+        --box-shadow: none;
+    }
+}
+
+// Contact info summary
+.bg-blue-50 {
+    border-left: 4px solid #3b82f6;
+
+    ion-icon {
+        @apply text-base;
+    }
+}
+
+// Profile preview
+.bg-gradient-to-r {
+    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+
+    .bg-white {
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+}
+
+// Toast overrides
+ion-toast {
+    --border-radius: 12px;
+    --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+// Alert overrides
+ion-alert {
+    --border-radius: 16px;
+}
+
+// Animations
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .step-navigation {
+        .step-label {
+            @apply text-xs;
+        }
+
+        .step-circle {
+            @apply w-10 h-10;
+
+            ion-icon {
+                @apply text-base;
+            }
+        }
+    }
+
+    .welcome-header {
+        h1 {
+            @apply text-2xl;
+        }
+
+        p {
+            @apply text-base;
+        }
+    }
+
+    .step-card {
+        @apply mx-2;
+    }
+}
+
+@media (max-width: 640px) {
+    .step-navigation {
+        .step-item {
+            @apply space-y-1;
+        }
+
+        .step-label {
+            @apply hidden;
+        }
+    }
+}
+
+// Enhanced focus states
+.form-item:focus-within {
+    --border-color: #3b82f6;
+    --box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+// Hover effects for interactive elements
+.size-card:hover .p-4 {
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+// Step transition effects
+.step-card {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Loading states
+.form-item.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+// Company size selection highlight
+.size-card.selected .p-4 {
+    box-shadow: 0 0 0 2px #3b82f6, 0 8px 25px -5px rgba(59, 130, 246, 0.3);
+}
+
+// Progress line styling
+.progress-line {
+    .bg-gray-200 {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bg-primary-600 {
+        background: linear-gradient(90deg, #3b82f6, #1e40af);
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+// Icon animations
+ion-icon {
+    transition: all 0.3s ease;
+}
+
+.step-circle ion-icon {
+    animation: none;
+}
+
+.step-item.active .step-circle ion-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+// Success state
+.form-item.success {
+    --border-color: #10b981;
+
+    ion-icon[slot="end"] {
+        color: #10b981;
+    }
+}
+
+// Card hover effects
+.step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+// Typography enhancements
+h1,
+h2,
+h3,
+h4 {
+    letter-spacing: -0.025em;
+}
+
+.form-label {
+    line-height: 1.4;
+}
+
+// Custom scrollbar for long content
+ion-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+ion-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+ion-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+ion-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

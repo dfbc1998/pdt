@@ -1,3 +1,410 @@
-<p>
-  client-profile-setup works!
-</p>
+<!-- src/app/features/profile/client-profile-setup/client-profile-setup.component.html -->
+<app-header title="Configurar Perfil de Cliente"></app-header>
+
+<ion-content class="ion-padding">
+  @if (isLoading) {
+  <app-loading message="Verificando perfil..."></app-loading>
+  } @else {
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Welcome Header -->
+    <div class="welcome-header mb-8 text-center">
+      <div class="welcome-icon mb-4">
+        <ion-icon name="business-outline" class="text-6xl text-primary-600"></ion-icon>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">¡Bienvenido a FreelancePro!</h1>
+      <p class="text-lg text-gray-600 mb-4">Configura tu perfil de empresa para comenzar a contratar talento</p>
+
+      <!-- Progress indicator -->
+      <div class="progress-container bg-gray-100 p-4 rounded-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700">Progreso del perfil</span>
+          <span class="text-sm font-medium text-primary-600">{{ getCompletionPercentage() }}%</span>
+        </div>
+        <ion-progress-bar [value]="getCompletionPercentage() / 100" class="rounded-full"></ion-progress-bar>
+      </div>
+    </div>
+
+    <!-- Step Navigation -->
+    <div class="step-navigation mb-8">
+      <div class="flex justify-between items-center">
+        @for (step of [1, 2, 3]; track step) {
+        <div class="step-item flex flex-col items-center cursor-pointer"
+          [class]="step <= currentStep ? 'active' : step < currentStep ? 'completed' : 'inactive'"
+          (click)="goToStep(step)">
+          <div class="step-circle mb-2">
+            @if (step < currentStep) { <ion-icon name="checkmark-outline"></ion-icon>
+              } @else {
+              <ion-icon [name]="getStepIcon(step)"></ion-icon>
+              }
+          </div>
+          <span class="step-label text-sm font-medium">{{ getStepTitle(step) }}</span>
+        </div>
+        }
+      </div>
+
+      <!-- Progress line -->
+      <div class="progress-line mt-4">
+        <div class="bg-gray-200 h-2 rounded-full relative">
+          <div class="bg-primary-600 h-2 rounded-full transition-all duration-300"
+            [style.width]="getProgressPercentage() + '%'"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+      <!-- Step 1: Company Information -->
+      @if (currentStep === 1) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center">
+            <ion-icon name="business-outline" class="mr-3 text-primary-600"></ion-icon>
+            Información de la Empresa
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Company Name -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('companyName')?.invalid && profileForm.get('companyName')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Nombre de la Empresa *
+                <span class="text-xs text-gray-500 block">Como aparecerá públicamente en tu perfil</span>
+              </ion-label>
+              <ion-input formControlName="companyName" placeholder="Ej: Innovatech Solutions"
+                maxlength="100"></ion-input>
+            </ion-item>
+            @if (profileForm.get('companyName')?.invalid && profileForm.get('companyName')?.touched) {
+            <div class="error-message">
+              @if (profileForm.get('companyName')?.errors?.['required']) {
+              El nombre de la empresa es requerido
+              }
+              @if (profileForm.get('companyName')?.errors?.['minlength']) {
+              El nombre debe tener al menos 2 caracteres
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Industry -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('industry')?.invalid && profileForm.get('industry')?.touched">
+              <ion-label position="stacked" class="form-label">Industria o Sector *</ion-label>
+              <ion-select formControlName="industry" placeholder="Selecciona tu industria" interface="popover">
+                @for (industry of industryOptions; track industry) {
+                <ion-select-option [value]="industry">{{ industry }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            @if (profileForm.get('industry')?.invalid && profileForm.get('industry')?.touched) {
+            <div class="error-message">La industria es requerida</div>
+            }
+          </div>
+
+          <!-- Company Size -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Tamaño de la Empresa *</h3>
+            <div class="space-y-3">
+              @for (size of companySizeOptions; track size.value) {
+              <div class="size-card cursor-pointer"
+                [class.selected]="profileForm.get('companySize')?.value === size.value"
+                (click)="profileForm.get('companySize')?.setValue(size.value)">
+                <div class="p-4 border-2 rounded-lg transition-all duration-200" [class]="profileForm.get('companySize')?.value === size.value ? 
+                                    'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-primary-300'">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800">{{ size.label }}</h4>
+                      <p class="text-sm text-gray-600 mt-1">{{ size.description }}</p>
+                    </div>
+                    @if (profileForm.get('companySize')?.value === size.value) {
+                    <ion-icon name="checkmark-circle-outline" class="text-primary-600 text-xl"></ion-icon>
+                    }
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+            @if (profileForm.get('companySize')?.invalid && profileForm.get('companySize')?.touched) {
+            <div class="error-message mt-2">Selecciona el tamaño de tu empresa</div>
+            }
+          </div>
+
+          <!-- Website (Optional) -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('website')?.invalid && profileForm.get('website')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Sitio Web (opcional)
+                <span class="text-xs text-gray-500 block">Ayuda a los freelancers a conocer mejor tu empresa</span>
+              </ion-label>
+              <ion-input formControlName="website" placeholder="https://www.tuempresa.com" type="url">
+                <ion-icon name="globe-outline" slot="start" class="text-gray-400"></ion-icon>
+              </ion-input>
+            </ion-item>
+            @if (profileForm.get('website')?.invalid && profileForm.get('website')?.touched) {
+            <div class="error-message">
+              Ingresa una URL válida (ej: https://www.ejemplo.com)
+            </div>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 2: Contact & Location -->
+      @if (currentStep === 2) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center">
+            <ion-icon name="location-outline" class="mr-3 text-primary-600"></ion-icon>
+            Contacto y Ubicación
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Location -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('location')?.invalid && profileForm.get('location')?.touched">
+              <ion-label position="stacked" class="form-label">
+                País/Ubicación *
+                <span class="text-xs text-gray-500 block">Donde está ubicada tu empresa</span>
+              </ion-label>
+              <ion-select formControlName="location" placeholder="Selecciona tu país" interface="popover">
+                @for (location of locationOptions; track location) {
+                <ion-select-option [value]="location">{{ location }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            @if (profileForm.get('location')?.invalid && profileForm.get('location')?.touched) {
+            <div class="error-message">La ubicación es requerida</div>
+            }
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Teléfono de Contacto (opcional)
+                <span class="text-xs text-gray-500 block">Para comunicación directa con freelancers</span>
+              </ion-label>
+              <ion-input formControlName="phone" placeholder="+1 234 567 8900" type="tel">
+                <ion-icon name="phone-portrait-outline" slot="start" class="text-gray-400"></ion-icon>
+              </ion-input>
+            </ion-item>
+            @if (profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched) {
+            <div class="error-message">Ingresa un número de teléfono válido</div>
+            }
+          </div>
+
+          <!-- Contact Info Summary -->
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-blue-800 mb-2">📍 Tu información de contacto</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center">
+                <ion-icon name="business-outline" class="text-blue-600 mr-2"></ion-icon>
+                <span>{{ profileForm.get('companyName')?.value || 'Nombre de empresa' }}</span>
+              </div>
+              <div class="flex items-center">
+                <ion-icon name="location-outline" class="text-blue-600 mr-2"></ion-icon>
+                <span>{{ profileForm.get('location')?.value || 'Ubicación' }}</span>
+              </div>
+              @if (profileForm.get('website')?.value) {
+              <div class="flex items-center">
+                <ion-icon name="globe-outline" class="text-blue-600 mr-2"></ion-icon>
+                <span>{{ profileForm.get('website')?.value }}</span>
+              </div>
+              }
+              @if (profileForm.get('phone')?.value) {
+              <div class="flex items-center">
+                <ion-icon name="phone-portrait-outline" class="text-blue-600 mr-2"></ion-icon>
+                <span>{{ profileForm.get('phone')?.value }}</span>
+              </div>
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 3: Company Description & Goals -->
+      @if (currentStep === 3) {
+      <ion-card class="step-card">
+        <ion-card-header>
+          <ion-card-title class="flex items-center">
+            <ion-icon name="document-text-outline" class="mr-3 text-primary-600"></ion-icon>
+            Descripción y Objetivos
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="space-y-6">
+          <!-- Company Description -->
+          <div>
+            <ion-item class="form-item"
+              [class.error]="profileForm.get('description')?.invalid && profileForm.get('description')?.touched">
+              <ion-label position="stacked" class="form-label">
+                Descripción de la Empresa *
+                <span class="text-xs text-gray-500 block">
+                  Cuéntale a los freelancers sobre tu empresa, misión y cultura (100-1000 caracteres)
+                </span>
+              </ion-label>
+              <ion-textarea formControlName="description"
+                placeholder="Describe tu empresa: qué hacen, su misión, valores, cultura de trabajo y qué tipo de proyectos manejan. Esto ayudará a los freelancers a entender mejor si son compatibles con tu empresa."
+                rows="6" maxlength="1000" counter="true"></ion-textarea>
+            </ion-item>
+            @if (profileForm.get('description')?.invalid && profileForm.get('description')?.touched) {
+            <div class="error-message">
+              @if (profileForm.get('description')?.errors?.['required']) {
+              La descripción es requerida
+              }
+              @if (profileForm.get('description')?.errors?.['minlength']) {
+              La descripción debe tener al menos 100 caracteres
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Quick Questions (Optional) -->
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold mb-4">Información Adicional (Opcional)</h3>
+            <p class="text-sm text-gray-600 mb-4">Esta información ayudará a hacer mejores matches con freelancers</p>
+
+            <div class="space-y-4">
+              <!-- Project Types -->
+              <div>
+                <ion-item class="form-item">
+                  <ion-label position="stacked" class="form-label">
+                    ¿Qué tipos de proyectos sueles manejar?
+                    <span class="text-xs text-gray-500 block">Ej: Desarrollo web, Marketing digital, Diseño</span>
+                  </ion-label>
+                  <ion-input formControlName="projectTypes"
+                    placeholder="Desarrollo web, apps móviles, marketing digital..."></ion-input>
+                </ion-item>
+              </div>
+
+              <!-- Budget Range -->
+              <div>
+                <ion-item class="form-item">
+                  <ion-label position="stacked" class="form-label">
+                    Rango de presupuesto típico por proyecto
+                    <span class="text-xs text-gray-500 block">Ayuda a los freelancers a saber si son compatibles</span>
+                  </ion-label>
+                  <ion-select formControlName="budgetRange" placeholder="Selecciona un rango" interface="popover">
+                    <ion-select-option value="500-2000">$500 - $2,000</ion-select-option>
+                    <ion-select-option value="2000-5000">$2,000 - $5,000</ion-select-option>
+                    <ion-select-option value="5000-10000">$5,000 - $10,000</ion-select-option>
+                    <ion-select-option value="10000-25000">$10,000 - $25,000</ion-select-option>
+                    <ion-select-option value="25000+">$25,000+</ion-select-option>
+                    <ion-select-option value="variable">Variable según proyecto</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+
+              <!-- Hiring Frequency -->
+              <div>
+                <ion-item class="form-item">
+                  <ion-label position="stacked" class="form-label">
+                    ¿Con qué frecuencia contratas freelancers?
+                    <span class="text-xs text-gray-500 block">Para entender tus necesidades de contratación</span>
+                  </ion-label>
+                  <ion-select formControlName="hiringFrequency" placeholder="Selecciona frecuencia" interface="popover">
+                    <ion-select-option value="first-time">Es mi primera vez</ion-select-option>
+                    <ion-select-option value="occasionally">Ocasionalmente (1-2 proyectos/año)</ion-select-option>
+                    <ion-select-option value="regularly">Regularmente (3-6 proyectos/año)</ion-select-option>
+                    <ion-select-option value="frequently">Frecuentemente (mensual)</ion-select-option>
+                    <ion-select-option value="ongoing">Contratación continua</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Preview -->
+          <div class="bg-gradient-to-r from-primary-50 to-blue-50 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">✨ Vista previa de tu perfil</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <div class="flex items-start space-x-4">
+                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                  <ion-icon name="business-outline" class="text-2xl text-primary-600"></ion-icon>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-gray-800">
+                    {{ profileForm.get('companyName')?.value || 'Tu Empresa' }}
+                  </h4>
+                  <p class="text-gray-600 mb-2">
+                    {{ profileForm.get('industry')?.value || 'Industria' }} •
+                    {{ getCompanySizeLabel(profileForm.get('companySize')?.value).split(' ')[0] || 'Tamaño' }}
+                  </p>
+                  <div class="flex items-center text-sm text-gray-500">
+                    <ion-icon name="location-outline" class="mr-1"></ion-icon>
+                    <span>{{ profileForm.get('location')?.value || 'Ubicación' }}</span>
+                  </div>
+                </div>
+              </div>
+              @if (profileForm.get('description')?.value) {
+              <p class="mt-4 text-gray-700 text-sm">
+                {{ profileForm.get('description')?.value | slice:0:150 }}{{
+                profileForm.get('description')?.value?.length > 150 ? '...' : '' }}
+              </p>
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center mt-8 mb-4">
+        <div>
+          @if (currentStep > 1) {
+          <ion-button fill="outline" (click)="previousStep()">
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+            Anterior
+          </ion-button>
+          } @else {
+          <ion-button fill="clear" (click)="onExit()" class="text-gray-500">
+            Salir
+          </ion-button>
+          }
+        </div>
+
+        <div>
+          @if (currentStep < totalSteps) { <ion-button (click)="nextStep()" [disabled]="!isStepValid(currentStep)">
+            Siguiente
+            <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+            } @else {
+            <ion-button type="submit" [disabled]="!profileForm.valid || isSubmitting" class="submit-button">
+              @if (isSubmitting) {
+              <ion-spinner slot="start" name="crescent"></ion-spinner>
+              Creando perfil...
+              } @else {
+              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+              Completar Perfil
+              }
+            </ion-button>
+            }
+        </div>
+      </div>
+    </form>
+  </div>
+  }
+</ion-content>
+
+<!-- Exit Confirmation Alert -->
+<ion-alert [isOpen]="showExitAlert" header="¿Salir sin completar?"
+  message="Tu progreso se perderá si sales ahora. ¿Estás seguro de que quieres salir?"
+  [buttons]="alertButtons"></ion-alert>
+
+<!-- Success Toast -->
+<ion-toast [isOpen]="showSuccessToast" [message]="toastMessage" duration="3000" color="success" position="top"
+  (didDismiss)="showSuccessToast = false"></ion-toast>
+
+<!-- Error Toast -->
+<ion-toast [isOpen]="showErrorToast" [message]="toastMessage" duration="4000" color="danger" position="top"
+  (didDismiss)="showErrorToast = false"></ion-toast>
