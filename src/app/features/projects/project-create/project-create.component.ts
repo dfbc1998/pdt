@@ -474,35 +474,82 @@ export class ProjectCreateComponent implements OnInit, OnDestroy {
         throw new Error('Usuario no autenticado');
       }
 
+      // Build budget object based on type
+      const budgetType = formValue.budgetType;
+      let budget: any = {
+        type: budgetType,
+        currency: formValue.currency || 'USD'
+      };
+
+      // Only add the fields that are relevant for each budget type
+      switch (budgetType) {
+        case BudgetType.FIXED:
+        case BudgetType.HOURLY:
+          budget.amount = formValue.budgetAmount || 0;
+          break;
+        case BudgetType.RANGE:
+          budget.minAmount = formValue.budgetMinAmount || 0;
+          budget.maxAmount = formValue.budgetMaxAmount || 0;
+          break;
+      }
+
+      // Build timeline object
+      const timeline: any = {
+        type: formValue.timelineType,
+        isFlexible: formValue.isFlexibleTimeline || false
+      };
+
+      // Only add duration if it exists
+      if (formValue.timelineDuration) {
+        timeline.duration = formValue.timelineDuration;
+      }
+
+      // Process milestones to remove undefined values
+      const milestones = (formValue.milestones || []).map((milestone: any) => {
+        const processedMilestone: any = {
+          title: milestone.title || '',
+          description: milestone.description || '',
+          deliverables: milestone.deliverables || []
+        };
+
+        // Only add amount if it exists and is valid
+        if (milestone.amount && milestone.amount > 0) {
+          processedMilestone.amount = milestone.amount;
+        }
+
+        // Only add dueDate if it exists
+        if (milestone.dueDate) {
+          processedMilestone.dueDate = new Date(milestone.dueDate);
+        }
+
+        return processedMilestone;
+      });
+
       const projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'> = {
         clientId: currentUser.uid,
         title: formValue.title,
         description: formValue.description,
         category: formValue.category,
         subcategory: formValue.subcategory,
-        budget: {
-          type: formValue.budgetType,
-          amount: formValue.budgetType === BudgetType.RANGE ? undefined : formValue.budgetAmount,
-          minAmount: formValue.budgetType === BudgetType.RANGE ? formValue.budgetMinAmount : undefined,
-          maxAmount: formValue.budgetType === BudgetType.RANGE ? formValue.budgetMaxAmount : undefined,
-          currency: formValue.currency
-        },
-        timeline: {
-          type: formValue.timelineType,
-          duration: formValue.timelineDuration,
-          isFlexible: formValue.isFlexibleTimeline
-        },
+        budget: budget,
+        timeline: timeline,
         requiredSkills: this.selectedSkills,
         preferredExperience: formValue.preferredExperience,
         visibility: formValue.visibility,
         status: ProjectStatus.DRAFT,
         attachments: [],
-        milestones: formValue.milestones || [],
-        applicationDeadline: formValue.applicationDeadline ? new Date(formValue.applicationDeadline) : undefined,
+        milestones: milestones,
         proposalCount: 0,
         viewCount: 0,
         isFeatured: false
       };
+
+      // Only add applicationDeadline if it exists
+      if (formValue.applicationDeadline) {
+        projectData.applicationDeadline = new Date(formValue.applicationDeadline);
+      }
+
+      console.log('Project data being sent:', projectData); // Debug log
 
       const response: ApiResponse<Project> = await this.projectService.createProject(projectData);
 
