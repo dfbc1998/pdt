@@ -1,17 +1,67 @@
-// src/app/features/profile/client-profile-setup/client-profile-setup.component.scss
+// Client Profile Setup Styles - Sin @apply
+
+// Main container
+.setup-content {
+    --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --padding-top: 0;
+    --padding-bottom: 0;
+}
+
+.setup-container {
+    min-height: 100vh;
+    background: var(--background);
+    padding: 1rem;
+
+    @media (max-width: 768px) {
+        padding: 0.5rem;
+    }
+}
+
+// Loading state
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
 
 // Welcome header
 .welcome-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
     .welcome-icon {
+        font-size: 4rem;
+        color: rgb(59 130 246); // primary-500
+        margin-bottom: 1rem;
         animation: fadeInUp 0.8s ease-out;
     }
 
     h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: rgb(31 41 55); // gray-800
+        margin: 0 0 1rem 0;
         animation: fadeInUp 0.8s ease-out 0.2s both;
+
+        @media (max-width: 768px) {
+            font-size: 1.75rem;
+        }
     }
 
     p {
+        font-size: 1.125rem;
+        color: rgb(107 114 128); // gray-500
+        margin: 0 0 2rem 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
         animation: fadeInUp 0.8s ease-out 0.4s both;
+
+        @media (max-width: 768px) {
+            font-size: 1rem;
+        }
     }
 
     .progress-container {
@@ -21,186 +71,323 @@
 
 // Step navigation
 .step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (max-width: 768px) {
+        margin-bottom: 2rem;
+    }
+
     .step-item {
-        @apply transition-all duration-300;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        transition: all 0.3s ease;
+
+        &:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 1.5rem;
+            left: calc(50% + 1.5rem);
+            right: calc(-50% + 1.5rem);
+            height: 2px;
+            background: rgb(209 213 219); // gray-300
+            z-index: 0;
+        }
 
         &.active {
-            @apply text-primary-600;
+            color: rgb(59 130 246); // primary-600
 
             .step-circle {
-                @apply bg-primary-600 border-primary-600 text-white shadow-lg;
+                background: rgb(59 130 246);
+                border-color: rgb(59 130 246);
+                color: white;
+                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
                 transform: scale(1.1);
+            }
+
+            &::after {
+                background: rgb(59 130 246);
             }
         }
 
         &.completed {
-            @apply text-primary-600;
+            color: rgb(59 130 246);
 
             .step-circle {
-                @apply bg-success-600 border-success-600 text-white;
+                background: rgb(34 197 94); // success-600
+                border-color: rgb(34 197 94);
+                color: white;
+            }
+
+            &::after {
+                background: rgb(34 197 94);
             }
         }
 
         &.inactive {
-            @apply text-gray-400;
+            color: rgb(156 163 175); // gray-400
 
             .step-circle {
-                @apply border-gray-300 text-gray-400 bg-white;
+                border-color: rgb(209 213 219);
+                color: rgb(156 163 175);
+                background: white;
             }
         }
     }
 
     .step-circle {
-        @apply w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        border: 2px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
 
         ion-icon {
-            @apply text-lg;
+            font-size: 1.125rem;
         }
     }
 
     .step-label {
-        @apply text-center max-w-24;
+        text-align: center;
+        max-width: 6rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1.2;
+
+        @media (max-width: 768px) {
+            font-size: 0.75rem;
+        }
     }
 }
 
 // Form styling
 .step-card {
-    @apply shadow-xl border-0 rounded-2xl mb-6;
+    background: white;
+    border-radius: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
     animation: slideInUp 0.5s ease-out;
 
     ion-card-header {
-        @apply pb-4 bg-gradient-to-r from-primary-50 to-blue-50;
-        border-radius: 1rem 1rem 0 0;
+        padding-bottom: 1rem;
+        background: linear-gradient(135deg, rgb(239 246 255) 0%, rgb(219 234 254) 100%);
+        border-radius: 1.5rem 1.5rem 0 0;
 
         ion-card-title {
-            @apply text-xl font-bold text-gray-800;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: rgb(31 41 55);
         }
     }
 
     ion-card-content {
-        @apply pt-6;
+        padding-top: 1.5rem;
     }
 }
 
+// Form items
 .form-item {
-    @apply mb-6 rounded-xl;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
     --background: #ffffff;
     --border-color: #e5e7eb;
     --color: #374151;
     border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
 
     &:hover {
-        --border-color: #3b82f6;
-        transform: translateY(-1px);
+        --border-color: #d1d5db;
     }
 
-    &.error {
-        --border-color: #dc2626;
-        --color: #dc2626;
+    &.item-has-focus {
+        --border-color: rgb(59 130 246);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     ion-label {
-        &.form-label {
-            @apply font-semibold text-gray-700 mb-2;
-            --color: #374151;
-        }
+        font-weight: 600;
+        color: rgb(55 65 81);
+        margin-bottom: 0.5rem;
     }
 
     ion-input,
     ion-textarea,
     ion-select {
-        --padding-top: 16px;
-        --padding-bottom: 16px;
-        --padding-start: 16px;
-        --padding-end: 16px;
+        --padding-start: 1rem;
+        --padding-end: 1rem;
+        font-size: 1rem;
+        color: rgb(17 24 39);
+    }
+
+    ion-textarea {
+        min-height: 120px;
     }
 }
 
-.error-message {
-    @apply text-sm text-red-600 mt-2 ml-4 font-medium;
-    animation: fadeInDown 0.3s ease-out;
+// Company size chips
+.company-size-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
 }
 
-// Company size cards
-.size-card {
-    @apply transition-all duration-300;
+.size-option {
+    padding: 1rem;
+    border: 2px solid rgb(229 231 235);
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
 
     &:hover {
-        transform: translateY(-2px);
+        border-color: rgb(59 130 246);
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
     }
 
     &.selected {
-        transform: translateY(-2px) scale(1.02);
+        border-color: rgb(59 130 246);
+        background: rgb(239 246 255);
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+
+        .size-title {
+            color: rgb(59 130 246);
+        }
     }
 
-    .p-4 {
-        transition: all 0.3s ease;
+    .size-icon {
+        font-size: 2rem;
+        color: rgb(59 130 246);
+        margin-bottom: 0.5rem;
+    }
+
+    .size-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: rgb(31 41 55);
+        margin-bottom: 0.25rem;
+    }
+
+    .size-description {
+        font-size: 0.875rem;
+        color: rgb(107 114 128);
     }
 }
 
-// Progress bar styling
-ion-progress-bar {
-    --background: #e5e7eb;
-    --progress-background: linear-gradient(90deg, #3b82f6, #1e40af);
-    height: 8px;
-    border-radius: 4px;
-
-    &.rounded-full {
-        border-radius: 9999px;
-    }
+// Industry tags
+.industry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
 }
 
-// Buttons
-.submit-button {
-    --background: linear-gradient(135deg, #3b82f6, #1e40af);
-    --border-radius: 12px;
-    --box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.5);
-    --color: #ffffff;
-    font-weight: 600;
-    text-transform: none;
-    padding: 12px 24px;
+.industry-tag {
+    padding: 0.5rem 1rem;
+    background: rgb(243 244 246);
+    color: rgb(55 65 81);
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 
     &:hover {
-        --background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        transform: translateY(-2px);
-        --box-shadow: 0 12px 30px -5px rgba(59, 130, 246, 0.6);
+        background: rgb(229 231 235);
     }
 
-    &:disabled {
-        --background: #9ca3af;
-        transform: none;
-        --box-shadow: none;
+    &.selected {
+        background: rgb(59 130 246);
+        color: white;
     }
 }
 
-// Contact info summary
-.bg-blue-50 {
-    border-left: 4px solid #3b82f6;
+// Action buttons
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(229 231 235);
 
-    ion-icon {
-        @apply text-base;
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 1rem;
+
+        ion-button {
+            width: 100%;
+        }
+    }
+
+    .btn-back {
+        --color: rgb(107 114 128);
+        --border-color: rgb(209 213 219);
+        --background: transparent;
+        --padding-start: 1.5rem;
+        --padding-end: 1.5rem;
+        --border-radius: 0.75rem;
+        font-weight: 500;
+    }
+
+    .btn-next,
+    .btn-submit {
+        --background: rgb(59 130 246);
+        --color: white;
+        --padding-start: 2rem;
+        --padding-end: 2rem;
+        --border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+
+        &:hover {
+            --background: rgb(37 99 235);
+        }
+
+        &:disabled {
+            --background: rgb(156 163 175);
+            box-shadow: none;
+        }
+    }
+
+    .step-info {
+        color: rgb(107 114 128);
+        font-size: 0.875rem;
+        font-weight: 500;
     }
 }
 
-// Profile preview
-.bg-gradient-to-r {
-    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-
-    .bg-white {
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-}
-
-// Toast overrides
-ion-toast {
-    --border-radius: 12px;
-    --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-// Alert overrides
-ion-alert {
-    --border-radius: 16px;
+// Progress bar
+ion-progress-bar {
+    --background: rgb(229 231 235);
+    --progress-background: rgb(59 130 246);
+    height: 0.5rem;
+    border-radius: 9999px;
+    margin: 1rem 0 2rem 0;
 }
 
 // Animations
@@ -228,189 +415,35 @@ ion-alert {
     }
 }
 
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+// Error states
+.form-item.item-has-error {
+    --border-color: rgb(239 68 68);
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    ion-label {
+        color: rgb(239 68 68);
     }
 }
 
-// Responsive adjustments
-@media (max-width: 768px) {
-    .step-navigation {
-        .step-label {
-            @apply text-xs;
-        }
-
-        .step-circle {
-            @apply w-10 h-10;
-
-            ion-icon {
-                @apply text-base;
-            }
-        }
-    }
-
-    .welcome-header {
-        h1 {
-            @apply text-2xl;
-        }
-
-        p {
-            @apply text-base;
-        }
-    }
-
-    .step-card {
-        @apply mx-2;
-    }
-}
-
-@media (max-width: 640px) {
-    .step-navigation {
-        .step-item {
-            @apply space-y-1;
-        }
-
-        .step-label {
-            @apply hidden;
-        }
-    }
-}
-
-// Enhanced focus states
-.form-item:focus-within {
-    --border-color: #3b82f6;
-    --box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    transform: translateY(-2px);
-}
-
-// Hover effects for interactive elements
-.size-card:hover .p-4 {
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-// Step transition effects
-.step-card {
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-// Loading states
-.form-item.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-// Company size selection highlight
-.size-card.selected .p-4 {
-    box-shadow: 0 0 0 2px #3b82f6, 0 8px 25px -5px rgba(59, 130, 246, 0.3);
-}
-
-// Progress line styling
-.progress-line {
-    .bg-gray-200 {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .bg-primary-600 {
-        background: linear-gradient(90deg, #3b82f6, #1e40af);
-        position: relative;
-
-        &::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        left: -100%;
-    }
-
-    100% {
-        left: 100%;
-    }
-}
-
-// Icon animations
-ion-icon {
-    transition: all 0.3s ease;
-}
-
-.step-circle ion-icon {
-    animation: none;
-}
-
-.step-item.active .step-circle ion-icon {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
+.error-message {
+    color: rgb(239 68 68);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    padding-left: 1rem;
 }
 
 // Success state
-.form-item.success {
-    --border-color: #10b981;
+.success-message {
+    background: rgb(220 252 231);
+    border: 1px solid rgb(187 247 208);
+    color: rgb(21 128 61);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
-    ion-icon[slot="end"] {
-        color: #10b981;
+    ion-icon {
+        font-size: 1.25rem;
     }
-}
-
-// Card hover effects
-.step-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
-}
-
-// Typography enhancements
-h1,
-h2,
-h3,
-h4 {
-    letter-spacing: -0.025em;
-}
-
-.form-label {
-    line-height: 1.4;
-}
-
-// Custom scrollbar for long content
-ion-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-ion-content::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-ion-content::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-ion-content::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
 }

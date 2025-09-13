@@ -1,0 +1,489 @@
+// Login Styles - Sin @apply
+.login-content {
+    --background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+    --padding-top: 0;
+    --padding-bottom: 0;
+}
+
+.login-container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+        justify-content: flex-start;
+        padding-top: 2rem;
+    }
+}
+
+// Welcome Header
+.welcome-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    @media (max-width: 768px) {
+        margin-bottom: 2rem;
+    }
+
+    .logo-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1.5rem;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, rgb(59 130 246), rgb(37 99 235));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0.5rem 0 0 0;
+
+            @media (max-width: 768px) {
+                font-size: 2rem;
+            }
+        }
+    }
+
+    .welcome-icon {
+        font-size: 4rem;
+        color: rgb(59 130 246);
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.125rem;
+        color: rgb(107 114 128);
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
+
+        @media (max-width: 768px) {
+            font-size: 1rem;
+        }
+    }
+}
+
+// Login Card
+.login-card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    @media (max-width: 768px) {
+        padding: 2rem;
+        border-radius: 1rem;
+    }
+}
+
+// Loading State
+.loading-container {
+    text-align: center;
+    padding: 2rem 1rem;
+
+    ion-spinner {
+        width: 3rem;
+        height: 3rem;
+        --color: rgb(59 130 246);
+        margin-bottom: 1.5rem;
+    }
+
+    p {
+        color: rgb(107 114 128);
+        font-size: 1rem;
+        margin: 0;
+    }
+}
+
+// Form Header
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: rgb(31 41 55);
+        margin: 0 0 0.75rem 0;
+    }
+
+    p {
+        font-size: 0.875rem;
+        color: rgb(107 114 128);
+        line-height: 1.5;
+        margin: 0;
+
+        .register-link {
+            color: rgb(59 130 246);
+            text-decoration: none;
+            font-weight: 600;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.login-form {
+    margin-bottom: 1.5rem;
+}
+
+// Form Fields
+.form-field {
+    margin-bottom: 1.5rem;
+
+    .form-item {
+        --background: rgb(249 250 251);
+        --border-color: rgb(229 231 235);
+        --border-width: 2px;
+        --border-radius: 0.75rem;
+        --padding-start: 1rem;
+        --padding-end: 1rem;
+        --min-height: 3.5rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            --border-color: rgb(209 213 219);
+        }
+
+        &.ion-focused {
+            --border-color: rgb(59 130 246);
+            --background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        &.item-has-error {
+            --border-color: rgb(239 68 68);
+            --background: rgb(254 242 242);
+
+            &.ion-focused {
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            }
+        }
+    }
+
+    ion-label {
+        font-weight: 600;
+        color: rgb(55 65 81);
+        margin-bottom: 0.5rem;
+    }
+
+    ion-input {
+        --color: rgb(17 24 39);
+        font-size: 1rem;
+    }
+
+    .field-icon {
+        color: rgb(156 163 175);
+        font-size: 1.25rem;
+    }
+
+    // Password Input Container
+    .password-input-container {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .password-native-input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 1rem;
+        color: rgb(17 24 39);
+
+        &::placeholder {
+            color: rgb(156 163 175);
+        }
+    }
+
+    .password-toggle {
+        --color: rgb(107 114 128);
+        --padding-start: 0.5rem;
+        --padding-end: 0.5rem;
+        margin: 0;
+
+        &:hover {
+            --color: rgb(59 130 246);
+        }
+    }
+}
+
+.error-message {
+    color: rgb(239 68 68);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+        content: '⚠';
+        font-size: 0.75rem;
+    }
+}
+
+// Form Options
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .remember-me {
+        --background: transparent;
+        --padding-start: 0;
+        --padding-end: 0;
+        --inner-padding-end: 0;
+        width: auto;
+        min-height: auto;
+
+        ion-checkbox {
+            --size: 1.125rem;
+            --border-color: rgb(209 213 219);
+            --checkmark-color: white;
+            --background-checked: rgb(59 130 246);
+            margin-right: 0.75rem;
+        }
+
+        ion-label {
+            font-size: 0.875rem;
+            color: rgb(55 65 81);
+            font-weight: 500;
+        }
+    }
+
+    .forgot-link {
+        color: rgb(59 130 246);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// Error Alert
+.error-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgb(254 242 242);
+    border: 1px solid rgb(252 165 165);
+    color: rgb(185 28 28);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+
+    ion-icon {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+}
+
+// Login Button
+.btn-login {
+    --background: rgb(59 130 246);
+    --color: white;
+    --border-radius: 0.75rem;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    font-weight: 600;
+    text-transform: none;
+    height: 3rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+        --background: rgb(37 99 235);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+
+    &:disabled {
+        --background: rgb(156 163 175);
+        --color: rgb(209 213 219);
+    }
+}
+
+// Divider
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 2rem 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgb(229 231 235);
+    }
+
+    span {
+        background: white;
+        color: rgb(107 114 128);
+        font-size: 0.875rem;
+        padding: 0 1rem;
+        position: relative;
+    }
+}
+
+// Demo Accounts
+.demo-accounts {
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: rgb(31 41 55);
+        margin: 0 0 0.5rem 0;
+    }
+
+    p {
+        font-size: 0.875rem;
+        color: rgb(107 114 128);
+        margin: 0 0 1.5rem 0;
+    }
+
+    .demo-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .btn-demo {
+            --border-radius: 0.75rem;
+            --padding-start: 1.5rem;
+            --padding-end: 1.5rem;
+            font-weight: 500;
+            text-transform: none;
+            height: 2.75rem;
+
+            &.client {
+                --color: rgb(59 130 246);
+                --border-color: rgb(59 130 246);
+
+                &:hover:not(:disabled) {
+                    --background: rgb(239 246 255);
+                }
+            }
+
+            &.freelancer {
+                --color: rgb(16 185 129);
+                --border-color: rgb(16 185 129);
+
+                &:hover:not(:disabled) {
+                    --background: rgb(236 253 245);
+                }
+            }
+
+            &:disabled {
+                --color: rgb(156 163 175);
+                --border-color: rgb(209 213 219);
+            }
+        }
+    }
+}
+
+// Register Section
+.register-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+
+    p {
+        color: rgb(107 114 128);
+        font-size: 0.875rem;
+        margin: 0 0 1rem 0;
+    }
+
+    .btn-register {
+        --color: rgb(59 130 246);
+        font-size: 0.875rem;
+        text-transform: none;
+        font-weight: 600;
+
+        &:hover {
+            --color: rgb(37 99 235);
+        }
+    }
+}
+
+// Animations
+@keyframes bounce {
+
+    0%,
+    20%,
+    53%,
+    80%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    40%,
+    43% {
+        transform: translate3d(0, -10px, 0);
+    }
+
+    70% {
+        transform: translate3d(0, -5px, 0);
+    }
+
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.5rem;
+        margin: 0;
+    }
+
+    .welcome-header .logo-section h1 {
+        font-size: 1.75rem;
+    }
+
+    .welcome-header .welcome-icon {
+        font-size: 3rem;
+    }
+
+    .demo-buttons {
+        .btn-demo {
+            height: 2.5rem;
+            font-size: 0.875rem;
+        }
+    }
+}

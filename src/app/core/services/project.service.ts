@@ -456,4 +456,51 @@ export class ProjectService {
             };
         }
     }
+
+    // Agregar este método temporal al ProjectService mientras se crea el índice
+
+    // Get projects by client (versión temporal sin orderBy para evitar el índice)
+    async getProjectsByClientTemp(clientId: string): Promise<ApiResponse<Project[]>> {
+        try {
+            console.log('Using temporary method without index requirement');
+
+            const projectsQuery = query(
+                collection(this.firestore, this.COLLECTION_NAME),
+                where('clientId', '==', clientId)
+                // Temporalmente removemos orderBy para evitar el índice
+            );
+
+            const querySnapshot = await getDocs(projectsQuery);
+            let projects: Project[] = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data['createdAt']?.toDate() || new Date(),
+                    updatedAt: data['updatedAt']?.toDate() || new Date(),
+                    applicationDeadline: data['applicationDeadline']?.toDate(),
+                    startDate: data['startDate']?.toDate(),
+                    endDate: data['endDate']?.toDate()
+                } as Project;
+            });
+
+            // Ordenamos manualmente en el cliente
+            projects = projects.sort((a, b) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+
+            console.log(`Found ${projects.length} projects for client ${clientId}`);
+
+            return {
+                success: true,
+                data: projects
+            };
+        } catch (error: any) {
+            console.error('Error in getProjectsByClientTemp:', error);
+            return {
+                success: false,
+                error: error.message || 'Failed to get client projects'
+            };
+        }
+    }
 }

@@ -101,38 +101,6 @@ export class UserService {
         }
     }
 
-    async getClientProfile(userId: string): Promise<ApiResponse<ClientProfile>> {
-        try {
-            const profileRef = doc(this.firestore, this.CLIENT_PROFILES_COLLECTION, userId);
-            const profileSnap = await getDoc(profileRef);
-
-            if (!profileSnap.exists()) {
-                return {
-                    success: false,
-                    error: 'Client profile not found'
-                };
-            }
-
-            const profileData = profileSnap.data();
-            const profile: ClientProfile = {
-                id: profileSnap.id,
-                ...profileData,
-                createdAt: profileData['createdAt']?.toDate() || new Date(),
-                updatedAt: profileData['updatedAt']?.toDate() || new Date()
-            } as ClientProfile;
-
-            return {
-                success: true,
-                data: profile
-            };
-        } catch (error: any) {
-            return {
-                success: false,
-                error: error.message || 'Failed to get client profile'
-            };
-        }
-    }
-
     // Freelancer Profile Management
     async createFreelancerProfile(profileData: Omit<FreelancerProfile, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'averageRating' | 'totalEarnings' | 'completedProjects' | 'successRate' | 'responseTime' | 'verificationStatus'>): Promise<ApiResponse<FreelancerProfile>> {
         try {
@@ -220,38 +188,6 @@ export class UserService {
         }
     }
 
-    async getFreelancerProfile(userId: string): Promise<ApiResponse<FreelancerProfile>> {
-        try {
-            const profileRef = doc(this.firestore, this.FREELANCER_PROFILES_COLLECTION, userId);
-            const profileSnap = await getDoc(profileRef);
-
-            if (!profileSnap.exists()) {
-                return {
-                    success: false,
-                    error: 'Freelancer profile not found'
-                };
-            }
-
-            const profileData = profileSnap.data();
-            const profile: FreelancerProfile = {
-                id: profileSnap.id,
-                ...profileData,
-                createdAt: profileData['createdAt']?.toDate() || new Date(),
-                updatedAt: profileData['updatedAt']?.toDate() || new Date()
-            } as FreelancerProfile;
-
-            return {
-                success: true,
-                data: profile
-            };
-        } catch (error: any) {
-            return {
-                success: false,
-                error: error.message || 'Failed to get freelancer profile'
-            };
-        }
-    }
-
     // Search freelancers
     async searchFreelancers(skills?: string[], limitCount: number = 20): Promise<ApiResponse<FreelancerProfile[]>> {
         try {
@@ -327,28 +263,6 @@ export class UserService {
                 error: error.message || 'Failed to get top freelancers'
             };
         }
-    }
-
-    // Profile completion checks
-    isClientProfileComplete(profile: ClientProfile): boolean {
-        return !!(
-            profile.companyName &&
-            profile.industry &&
-            profile.location &&
-            profile.description
-        );
-    }
-
-    isFreelancerProfileComplete(profile: FreelancerProfile): boolean {
-        return !!(
-            profile.firstName &&
-            profile.lastName &&
-            profile.title &&
-            profile.bio &&
-            profile.skills?.length > 0 &&
-            profile.hourlyRate &&
-            profile.location
-        );
     }
 
     // Get profile completion percentage
@@ -687,5 +601,94 @@ export class UserService {
                 error: error.message || 'Failed to get user profile'
             };
         }
+    }
+
+    async getClientProfile(userId: string): Promise<ApiResponse<ClientProfile>> {
+        try {
+            const profileRef = doc(this.firestore, this.CLIENT_PROFILES_COLLECTION, userId);
+            const profileSnap = await getDoc(profileRef);
+
+            if (!profileSnap.exists()) {
+                return {
+                    success: false,
+                    error: 'Client profile not found'
+                };
+            }
+
+            const profileData = profileSnap.data();
+            const profile: ClientProfile = {
+                id: profileSnap.id,
+                ...profileData,
+                createdAt: profileData['createdAt']?.toDate() || new Date(),
+                updatedAt: profileData['updatedAt']?.toDate() || new Date()
+            } as ClientProfile;
+
+            return {
+                success: true,
+                data: profile
+            };
+        } catch (error: any) {
+            console.error('Error fetching client profile:', error);
+            return {
+                success: false,
+                error: error.message || 'Failed to get client profile'
+            };
+        }
+    }
+
+    // Si hay un método getFreelancerProfile, reemplazarlo por:
+    async getFreelancerProfile(userId: string): Promise<ApiResponse<FreelancerProfile>> {
+        try {
+            const profileRef = doc(this.firestore, this.FREELANCER_PROFILES_COLLECTION, userId);
+            const profileSnap = await getDoc(profileRef);
+
+            if (!profileSnap.exists()) {
+                return {
+                    success: false,
+                    error: 'Freelancer profile not found'
+                };
+            }
+
+            const profileData = profileSnap.data();
+            const profile: FreelancerProfile = {
+                id: profileSnap.id,
+                ...profileData,
+                createdAt: profileData['createdAt']?.toDate() || new Date(),
+                updatedAt: profileData['updatedAt']?.toDate() || new Date()
+            } as FreelancerProfile;
+
+            return {
+                success: true,
+                data: profile
+            };
+        } catch (error: any) {
+            console.error('Error fetching freelancer profile:', error);
+            return {
+                success: false,
+                error: error.message || 'Failed to get freelancer profile'
+            };
+        }
+    }
+
+    // AGREGAR estos métodos de validación si no existen:
+    isClientProfileComplete(profile: ClientProfile): boolean {
+        return !!(
+            profile.companyName &&
+            profile.industry &&
+            profile.location &&
+            profile.description
+        );
+    }
+
+    isFreelancerProfileComplete(profile: FreelancerProfile): boolean {
+        return !!(
+            profile.firstName &&
+            profile.lastName &&
+            profile.title &&
+            profile.bio &&
+            profile.skills &&
+            profile.skills.length > 0 &&
+            profile.location
+        );
     }
 }

@@ -1,55 +1,45 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+// src/app/features/dashboard/client-dashboard/client-dashboard.component.ts
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-
-// Ionic Components
 import {
   IonContent,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
   IonButton,
   IonIcon,
-  NavController,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonItem,
+  IonLabel,
+  IonBadge,
+  IonList,
+  IonSpinner,
   ToastController
 } from '@ionic/angular/standalone';
-
-// Ionicons
 import { addIcons } from 'ionicons';
 import {
-  addOutline,
-  addCircleOutline,
-  peopleOutline,
-  briefcaseOutline,
-  pulseOutline,
-  cardOutline,
+  businessOutline,
   folderOutline,
-  notificationsOutline,
-  flashOutline,
+  peopleOutline,
+  statsChartOutline,
+  addOutline,
   eyeOutline,
   chatbubbleOutline,
-  chevronForwardOutline,
-  trendingUpOutline,
   timeOutline,
-  starOutline,
   checkmarkCircleOutline,
-  documentOutline,
-  mailOutline,
-  barChartOutline
+  pauseCircleOutline
 } from 'ionicons/icons';
 
-// Shared Components
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { LoadingComponent } from '../../../shared/components/loading/loading.component';
-
-// Core Services and Interfaces
 import { AuthService } from '../../../core/services/auth.service';
 import { ProjectService } from '../../../core/services/project.service';
-import {
-  User,
-  Project,
-  DashboardStats,
-  RecentActivity
-} from '../../../core/interfaces';
+import { User, Project, ProjectStatus } from '../../../core/interfaces';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-client-dashboard',
@@ -57,274 +47,214 @@ import {
   imports: [
     CommonModule,
     IonContent,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
     IonButton,
     IonIcon,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonItem,
+    IonLabel,
+    IonBadge,
+    IonList,
+    IonSpinner,
     HeaderComponent,
     LoadingComponent
   ],
   templateUrl: './client-dashboard.component.html',
-  styleUrls: ['./client-dashboard.component.scss']
+  styleUrl: './client-dashboard.component.scss'
 })
-export class ClientDashboardComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class ClientDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private projectService = inject(ProjectService);
-  private navController = inject(NavController);
+  private router = inject(Router);
   private toastController = inject(ToastController);
 
-  // Observables
   currentUser$: Observable<User | null> = this.authService.currentUser$;
   private isLoadingSubject = new BehaviorSubject<boolean>(true);
   isLoading$ = this.isLoadingSubject.asObservable();
 
-  // Component State
-  currentUser: User | null = null;
-  isLoading = true;
-  unreadMessages = 0;
-
-  // Dashboard Data - Solo datos reales de Firestore
-  dashboardStats: DashboardStats = {
+  stats = {
     totalProjects: 0,
+    draftProjects: 0,
+    publishedProjects: 0,
     activeProjects: 0,
     completedProjects: 0,
-    totalEarnings: 0,
-    averageRating: 0,
-    responseTime: 0,
-    successRate: 0,
-    monthlyEarnings: [],
-    recentActivities: []
-  };
-
-  // Extended stats para mostrar en UI
-  extendedStats = {
-    collaboratingFreelancers: 0,
-    totalBudget: 0,
-    newProjectsThisMonth: 0,
-    avgCompletionDays: 0,
-    avgFreelancerRating: 0,
-    completedProjectsPercent: 0
+    totalFreelancers: 0
   };
 
   recentProjects: Project[] = [];
-  recentActivity: RecentActivity[] = [];
+  allProjects: Project[] = [];
 
   constructor() {
-    this.registerIcons();
-  }
-
-  ngOnInit(): void {
-    this.initializeComponent();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private registerIcons(): void {
     addIcons({
-      addOutline,
-      addCircleOutline,
-      peopleOutline,
-      briefcaseOutline,
-      pulseOutline,
-      cardOutline,
+      businessOutline,
       folderOutline,
-      notificationsOutline,
-      flashOutline,
+      peopleOutline,
+      statsChartOutline,
+      addOutline,
       eyeOutline,
       chatbubbleOutline,
-      chevronForwardOutline,
-      trendingUpOutline,
       timeOutline,
-      starOutline,
       checkmarkCircleOutline,
-      documentOutline,
-      mailOutline,
-      barChartOutline
+      pauseCircleOutline
     });
   }
 
-  private initializeComponent(): void {
-    // Subscribe to current user
-    this.currentUser$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        this.currentUser = user;
-        if (user) {
-          this.loadDashboardData();
-        }
-      });
+  ngOnInit() {
+    this.loadDashboardData();
   }
 
   private async loadDashboardData(): Promise<void> {
     try {
-      this.isLoadingSubject.next(true);
+      const currentUser = this.authService.currentUser;
+      if (!currentUser) {
+        console.error('No authenticated user found');
+        await this.showErrorToast('Usuario no autenticado');
+        this.router.navigate(['/auth/login']);
+        return;
+      }
 
-      // Cargar solo datos reales de Firestore
-      await this.loadUserProjects();
+      // Verify user is a client
+      if (!this.authService.isClient) {
+        console.error('User is not a client');
+        await this.showErrorToast('Acceso denegado: Solo clientes pueden acceder a esta página');
+        this.router.navigate(['/dashboard']);
+        return;
+      }
 
+      console.log('Loading projects for client:', currentUser.uid);
+
+      // Load user's projects (using temporary method to avoid index requirement)
+      let projectsResponse;
+      try {
+        // Try the regular method first
+        projectsResponse = await this.projectService.getProjectsByClient(currentUser.uid);
+      } catch (indexError) {
+        console.log('Index required, falling back to temporary method');
+        // If index error, use temporary method
+        projectsResponse = await (this.projectService as any).getProjectsByClientTemp?.(currentUser.uid) ||
+          { success: false, error: 'Temporary method not available' };
+      }
+
+      if (projectsResponse.success && projectsResponse.data) {
+        this.allProjects = projectsResponse.data;
+        console.log('Projects loaded successfully:', this.allProjects.length, 'projects');
+
+        // Calculate stats
+        this.calculateStats(this.allProjects);
+
+        // Get recent projects (last 5)
+        this.recentProjects = this.allProjects.slice(0, 5);
+
+        console.log('Dashboard stats:', this.stats);
+      } else {
+        console.error('Error loading projects:', projectsResponse.error);
+        await this.showErrorToast(projectsResponse.error || 'Error al cargar proyectos');
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       await this.showErrorToast('Error al cargar el dashboard');
     } finally {
       this.isLoadingSubject.next(false);
-      this.isLoading = false;
     }
   }
 
-  private async loadUserProjects(): Promise<void> {
-    try {
-      const currentUser = this.authService.currentUser;
-      if (!currentUser) return;
+  private calculateStats(projects: Project[]) {
+    this.stats = {
+      totalProjects: projects.length,
+      draftProjects: projects.filter(p => p.status === ProjectStatus.DRAFT).length,
+      publishedProjects: projects.filter(p => p.status === ProjectStatus.PUBLISHED).length,
+      activeProjects: projects.filter(p => p.status === ProjectStatus.IN_PROGRESS).length,
+      completedProjects: projects.filter(p => p.status === ProjectStatus.COMPLETED).length,
+      totalFreelancers: new Set(projects.filter(p => p.assignedFreelancerId).map(p => p.assignedFreelancerId)).size
+    };
+  }
 
-      // Obtener proyectos del usuario desde Firestore
-      const response = await this.projectService.getProjectsByClient(currentUser.uid);
+  createProject(): void {
+    this.router.navigate(['/projects/create']);
+  }
 
-      if (response.success && response.data) {
-        this.recentProjects = response.data.slice(0, 5);
-        this.calculateStatsFromProjects(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading user projects:', error);
+  viewProjects(): void {
+    this.router.navigate(['/projects']);
+  }
+
+  viewMessages(): void {
+    this.router.navigate(['/messages']);
+  }
+
+  viewProject(projectId: string): void {
+    this.router.navigate(['/projects', projectId]);
+  }
+
+  viewAllProjects(): void {
+    this.router.navigate(['/projects']);
+  }
+
+  editProject(projectId: string): void {
+    this.router.navigate(['/projects', projectId, 'edit']);
+  }
+
+  getStatusColor(status: ProjectStatus): string {
+    const colors: { [key in ProjectStatus]: string } = {
+      [ProjectStatus.DRAFT]: 'medium',
+      [ProjectStatus.PUBLISHED]: 'primary',
+      [ProjectStatus.IN_PROGRESS]: 'warning',
+      [ProjectStatus.UNDER_REVIEW]: 'tertiary',
+      [ProjectStatus.COMPLETED]: 'success',
+      [ProjectStatus.CANCELLED]: 'danger',
+      [ProjectStatus.PAUSED]: 'dark'
+    };
+    return colors[status] || 'medium';
+  }
+
+  getStatusText(status: ProjectStatus): string {
+    const labels: { [key in ProjectStatus]: string } = {
+      [ProjectStatus.DRAFT]: 'Borrador',
+      [ProjectStatus.PUBLISHED]: 'Publicado',
+      [ProjectStatus.IN_PROGRESS]: 'En Progreso',
+      [ProjectStatus.UNDER_REVIEW]: 'En Revisión',
+      [ProjectStatus.COMPLETED]: 'Completado',
+      [ProjectStatus.CANCELLED]: 'Cancelado',
+      [ProjectStatus.PAUSED]: 'Pausado'
+    };
+    return labels[status] || status;
+  }
+
+  formatDate(date: Date | undefined): string {
+    if (!date) return 'No especificada';
+    return new Date(date).toLocaleDateString('es-CL');
+  }
+
+  getBudgetText(project: Project): string {
+    const { budget } = project;
+    switch (budget.type) {
+      case 'fixed':
+        return `$${budget.amount?.toLocaleString()} ${budget.currency}`;
+      case 'hourly':
+        return `$${budget.amount?.toLocaleString()}/hora ${budget.currency}`;
+      case 'range':
+        return `$${budget.minAmount?.toLocaleString()} - $${budget.maxAmount?.toLocaleString()} ${budget.currency}`;
+      default:
+        return 'No especificado';
     }
   }
 
-  private calculateStatsFromProjects(projects: Project[]): void {
-    const totalProjects = projects.length;
-    const activeProjects = projects.filter(p => p.status.toString() === 'in_progress').length;
-    const completedProjects = projects.filter(p => p.status.toString() === 'completed').length;
-
-    // Calcular presupuesto total de proyectos reales
-    const totalBudget = projects.reduce((sum, project) => {
-      const amount = project.budget.amount || 0;
-      return sum + amount;
-    }, 0);
-
-    // Actualizar estadísticas del dashboard
-    this.dashboardStats = {
-      totalProjects,
-      activeProjects,
-      completedProjects,
-      totalEarnings: totalBudget * 0.1, // Asumiendo 10% de comisión
-      averageRating: 4.8,
-      responseTime: 2,
-      successRate: 95,
-      monthlyEarnings: [],
-      recentActivities: []
-    };
-
-    // Estadísticas extendidas basadas en datos reales
-    this.extendedStats = {
-      collaboratingFreelancers: Math.min(activeProjects * 2, 8),
-      totalBudget,
-      newProjectsThisMonth: Math.min(totalProjects, 3),
-      avgCompletionDays: 28,
-      avgFreelancerRating: 4.8,
-      completedProjectsPercent: totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0
-    };
-  }
-
-  // Métodos de navegación
-  async createNewProject(): Promise<void> {
-    await this.navController.navigateForward('/projects/create');
-  }
-
-  async browseFreelancers(): Promise<void> {
-    await this.navController.navigateForward('/freelancers');
-  }
-
-  async viewAllProjects(): Promise<void> {
-    await this.navController.navigateForward('/projects');
-  }
-
-  async viewProject(projectId: string): Promise<void> {
-    await this.navController.navigateForward(`/projects/${projectId}`);
-  }
-
-  async viewProposals(projectId: string): Promise<void> {
-    await this.navController.navigateForward(`/projects/${projectId}/proposals`);
-  }
-
-  async openProjectChat(projectId: string): Promise<void> {
-    await this.navController.navigateForward(`/chat/project/${projectId}`);
-  }
-
-  async viewAllActivity(): Promise<void> {
-    await this.navController.navigateForward('/activity');
-  }
-
-  async viewMessages(): Promise<void> {
-    await this.navController.navigateForward('/messages');
-  }
-
-  async viewReports(): Promise<void> {
-    await this.navController.navigateForward('/reports');
-  }
-
-  // Utility Methods
-  getStatusLabel(status: string): string {
-    const statusLabels: { [key: string]: string } = {
-      'draft': 'Borrador',
-      'published': 'Publicado',
-      'in_progress': 'En Progreso',
-      'under_review': 'En Revisión',
-      'completed': 'Completado',
-      'cancelled': 'Cancelado',
-      'paused': 'Pausado'
-    };
-    return statusLabels[status] || status;
-  }
-
-  getActivityIcon(activityType: string): string {
-    const iconMap: { [key: string]: string } = {
-      'proposal': 'document-text-outline',
-      'message': 'mail-outline',
-      'project': 'briefcase-outline',
-      'payment': 'card-outline'
-    };
-    return iconMap[activityType] || 'information-circle-outline';
-  }
-
-  // Track By Functions para optimización *ngFor
-  trackByProjectId(index: number, project: Project): string {
-    return project.id;
-  }
-
-  trackByActivityId(index: number, activity: RecentActivity): string {
-    return activity.id;
-  }
-
-  // Manejo de errores
-  private async showErrorToast(message: string): Promise<void> {
+  private async showErrorToast(message: string) {
     const toast = await this.toastController.create({
       message,
       duration: 3000,
-      position: 'top',
       color: 'danger',
-      buttons: [
-        {
-          text: 'Cerrar',
-          role: 'cancel'
-        }
-      ]
+      position: 'top'
     });
     await toast.present();
   }
 
-  private async showSuccessToast(message: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      position: 'top',
-      color: 'success'
-    });
-    await toast.present();
-  }
-
-  // Refresh data
-  async refreshDashboard(): Promise<void> {
+  async refreshData() {
+    this.isLoadingSubject.next(true);
     await this.loadDashboardData();
-    await this.showSuccessToast('Dashboard actualizado');
   }
 }

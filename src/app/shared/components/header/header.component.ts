@@ -2,6 +2,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import {
   IonHeader,
   IonToolbar,
@@ -14,7 +15,8 @@ import {
   IonPopover,
   IonList,
   IonItem,
-  IonMenuButton
+  IonMenuButton,
+  IonBackButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -22,7 +24,8 @@ import {
   settingsOutline,
   logOutOutline,
   notificationsOutline,
-  menuOutline
+  menuOutline,
+  arrowBackOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/interfaces';
@@ -44,12 +47,20 @@ import { Observable } from 'rxjs';
     IonPopover,
     IonList,
     IonItem,
-    IonMenuButton
+    IonMenuButton,
+    IonBackButton
   ],
   template: `
     <ion-header class="bg-white shadow-sm">
       <ion-toolbar class="px-4">
-        @if (showMenuButton) {
+        <!-- Back Button -->
+        @if (showBackButton) {
+          <ion-buttons slot="start">
+            <ion-button (click)="goBack()" fill="clear">
+              <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        } @else if (showMenuButton) {
           <ion-buttons slot="start">
             <ion-menu-button>
               <ion-icon name="menu-outline"></ion-icon>
@@ -63,36 +74,44 @@ import { Observable } from 'rxjs';
 
         <ion-buttons slot="end">
           <!-- Notifications -->
-          <ion-button fill="clear" (click)="goToNotifications()">
-            <ion-icon name="notifications-outline" size="large"></ion-icon>
+          <ion-button fill="clear" id="notifications-trigger">
+            <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
           </ion-button>
-
+          
           <!-- User Menu -->
           @if (currentUser$ | async; as user) {
-            <ion-button id="user-popover" fill="clear" class="flex items-center space-x-2">
-              <ion-avatar class="w-8 h-8">
-                @if (user.photoURL) {
-                  <img [src]="user.photoURL" [alt]="user.displayName">
-                } @else {
-                  <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-medium">
-                    {{ getInitials(user.displayName || user.email) }}
-                  </div>
-                }
-              </ion-avatar>
-              <span class="hidden md:block text-sm font-medium">{{ user.displayName || user.email }}</span>
+            <ion-button fill="clear" id="user-menu-trigger" class="ml-2">
+              @if (user.photoURL) {
+                <ion-avatar slot="icon-only" class="w-8 h-8">
+                  <img [src]="user.photoURL" [alt]="user.displayName || 'Usuario'">
+                </ion-avatar>
+              } @else {
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  {{ getInitials(user.displayName || user.email || 'U') }}
+                </div>
+              }
             </ion-button>
 
-            <ion-popover trigger="user-popover" [dismissOnSelect]="true">
+            <ion-popover trigger="user-menu-trigger" triggerAction="click">
               <ng-template>
-                <ion-list>
+                <ion-list class="min-w-48">
+                  <ion-item class="border-b border-gray-100 pb-2 mb-2">
+                    <div>
+                      <h3 class="font-semibold">{{ user.displayName || 'Usuario' }}</h3>
+                      <p class="text-sm text-gray-500">{{ user.email }}</p>
+                    </div>
+                  </ion-item>
+                  
                   <ion-item button (click)="goToProfile()">
                     <ion-icon name="person-outline" slot="start"></ion-icon>
                     <ion-label>Mi Perfil</ion-label>
                   </ion-item>
+                  
                   <ion-item button (click)="goToSettings()">
                     <ion-icon name="settings-outline" slot="start"></ion-icon>
                     <ion-label>Configuración</ion-label>
                   </ion-item>
+                  
                   <ion-item button (click)="logout()" color="danger">
                     <ion-icon name="log-out-outline" slot="start"></ion-icon>
                     <ion-label>Cerrar Sesión</ion-label>
@@ -117,14 +136,24 @@ import { Observable } from 'rxjs';
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
+    
+    ion-button {
+      --color: #374151;
+    }
+    
+    ion-button:hover {
+      --color: #3b82f6;
+    }
   `]
 })
 export class HeaderComponent {
   @Input() title = 'FreelancePro';
   @Input() showMenuButton = false;
+  @Input() showBackButton = false;
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  private location = inject(Location);
 
   currentUser$: Observable<User | null> = this.authService.currentUser$;
 
@@ -134,7 +163,8 @@ export class HeaderComponent {
       settingsOutline,
       logOutOutline,
       notificationsOutline,
-      menuOutline
+      menuOutline,
+      arrowBackOutline
     });
   }
 
@@ -145,6 +175,10 @@ export class HeaderComponent {
       .join('')
       .toUpperCase()
       .substring(0, 2);
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   goToProfile() {
@@ -163,4 +197,3 @@ export class HeaderComponent {
     await this.authService.logout();
   }
 }
-

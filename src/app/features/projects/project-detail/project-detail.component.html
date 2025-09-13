@@ -1,501 +1,298 @@
 <!-- src/app/features/projects/project-detail/project-detail.component.html -->
-<app-header [title]="project?.title || 'Detalle del Proyecto'"></app-header>
+<app-header [title]="project?.title || 'Detalle del Proyecto'" [showBackButton]="true"></app-header>
 
 <ion-content class="ion-padding">
+  <!-- Loading State -->
   @if (isLoading) {
-  <app-loading message="Cargando proyecto..."></app-loading>
+  <div class="flex justify-center items-center min-h-96">
+    <ion-spinner name="crescent" class="text-4xl"></ion-spinner>
+  </div>
   } @else if (project) {
-  <!-- Pull to refresh -->
-  <ion-refresher slot="fixed" (ionRefresh)="refreshData($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-
-  <div class="max-w-6xl mx-auto">
-
-    <!-- Project Header -->
-    <div class="project-header mb-6">
-      <div class="flex items-start justify-between mb-4">
+  <!-- Project Header -->
+  <ion-card class="mb-4">
+    <ion-card-header>
+      <div class="flex justify-between items-start">
         <div class="flex-1">
-          <div class="flex items-center mb-2">
-            <ion-button fill="clear" size="small" (click)="goBack()" class="mr-2">
-              <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ion-badge [color]="getStatusColor(project.status)" class="mr-3">
-              {{ getStatusText(project.status) }}
+          <ion-card-title class="text-xl font-bold mb-2">{{ project.title }}</ion-card-title>
+          <div class="flex flex-wrap gap-2 items-center">
+            <ion-badge [color]="getStatusColor(project.status)">
+              {{ getStatusLabel(project.status) }}
             </ion-badge>
-            <ion-chip color="primary" outline="true">
-              <ion-icon name="eye-outline"></ion-icon>
-              <ion-label>{{ project.viewCount }} vistas</ion-label>
-            </ion-chip>
-          </div>
-
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{{ project.title }}</h1>
-
-          <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-            <div class="flex items-center">
-              <ion-icon name="calendar-outline" class="mr-1"></ion-icon>
-              <span>Creado {{ formatRelativeTime(project.createdAt) }}</span>
-            </div>
-            <div class="flex items-center">
-              <ion-icon name="people-outline" class="mr-1"></ion-icon>
-              <span>{{ project.proposalCount }} propuesta{{ project.proposalCount !== 1 ? 's' : '' }}</span>
-            </div>
-            @if (project.applicationDeadline) {
-            <div class="flex items-center">
-              <ion-icon name="time-outline" class="mr-1"></ion-icon>
-              <span>Fecha límite: {{ formatDate(project.applicationDeadline) }}</span>
-            </div>
+            @if (project.isFeatured) {
+            <ion-badge color="warning">Destacado</ion-badge>
             }
-          </div>
-
-          <!-- Quick Stats -->
-          <div class="flex flex-wrap gap-4">
-            <div class="stat-item">
-              <ion-icon name="wallet-outline" class="text-success-600"></ion-icon>
-              <span class="font-semibold">{{ formatBudget() }}</span>
-            </div>
-            <div class="stat-item">
-              <ion-icon name="time-outline" class="text-primary-600"></ion-icon>
-              <span class="font-semibold">{{ formatTimeline() }}</span>
-            </div>
-            <div class="stat-item">
-              <ion-icon name="location-outline" class="text-warning-600"></ion-icon>
-              <span class="font-semibold">{{ project.visibility === 'public' ? 'Público' : 'Privado' }}</span>
-            </div>
+            <ion-chip>
+              <ion-icon name="business-outline"></ion-icon>
+              <ion-label>{{ project.category }}</ion-label>
+            </ion-chip>
           </div>
         </div>
 
-        <!-- Action Button -->
-        @if (canEditProject()) {
-        <ion-button (click)="showActionSheet = true" fill="outline">
-          <ion-icon name="ellipsis-horizontal-outline" slot="icon-only"></ion-icon>
-        </ion-button>
+        <!-- Action Buttons (Only for project owner) -->
+        @if (isProjectOwner) {
+        <div class="flex gap-2 ml-4">
+          @if (canEditProject) {
+          <ion-button fill="outline" size="small" (click)="editProject()" class="text-sm">
+            <ion-icon name="edit" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+          }
+
+          <ion-button fill="outline" color="danger" size="small" (click)="confirmDeleteProject()"
+            [disabled]="isDeleting" class="text-sm">
+            <ion-icon name="trash" slot="start"></ion-icon>
+            @if (isDeleting) {
+            <ion-spinner name="lines-small"></ion-spinner>
+            } @else {
+            Eliminar
+            }
+          </ion-button>
+        </div>
         }
       </div>
-    </div>
+    </ion-card-header>
 
-    <!-- Segment Navigation -->
-    <ion-segment [(ngModel)]="currentSegment" (ionChange)="onSegmentChange($event)" class="mb-6">
-      <ion-segment-button value="overview">
-        <ion-label>Descripción</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="proposals">
-        <ion-label>Propuestas ({{ proposals.length }})</ion-label>
-      </ion-segment-button>
-      @if (project.milestones?.length > 0) {
-      <ion-segment-button value="milestones">
-        <ion-label>Hitos</ion-label>
-      </ion-segment-button>
-      }
-      <ion-segment-button value="activity">
-        <ion-label>Actividad</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-
-    <!-- Overview Tab -->
-    @if (currentSegment === 'overview') {
-    <div class="overview-content">
-
-      <!-- Project Description -->
-      <ion-card class="mb-6">
-        <ion-card-header>
-          <ion-card-title>Descripción del Proyecto</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ project.description }}</p>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- Project Details Grid -->
-      <ion-grid class="mb-6">
+    <ion-card-content>
+      <!-- Key Project Info -->
+      <ion-grid class="p-0">
         <ion-row>
-          <!-- Category & Skills -->
-          <ion-col size="12" size-md="6">
-            <ion-card>
-              <ion-card-header>
-                <ion-card-title class="text-lg">Categoría y Habilidades</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                <div class="mb-4">
-                  <h4 class="font-semibold text-gray-700 mb-2">Categoría</h4>
-                  <ion-chip color="primary">
-                    <ion-label>{{ project.category }}</ion-label>
-                  </ion-chip>
-                  <ion-chip color="secondary" class="ml-2">
-                    <ion-label>{{ project.subcategory }}</ion-label>
-                  </ion-chip>
-                </div>
-
-                <div class="mb-4">
-                  <h4 class="font-semibold text-gray-700 mb-2">Experiencia Requerida</h4>
-                  <ion-chip
-                    [color]="project.preferredExperience === 'expert' ? 'warning' : project.preferredExperience === 'intermediate' ? 'primary' : 'success'">
-                    <ion-label>{{ project.preferredExperience }}</ion-label>
-                  </ion-chip>
-                </div>
-
-                @if (project.requiredSkills?.length > 0) {
-                <div>
-                  <h4 class="font-semibold text-gray-700 mb-2">Habilidades Requeridas</h4>
-                  <div class="flex flex-wrap gap-2">
-                    @for (skill of project.requiredSkills; track skill) {
-                    <ion-chip outline="true">
-                      <ion-label>{{ skill }}</ion-label>
-                    </ion-chip>
-                    }
-                  </div>
-                </div>
-                }
-              </ion-card-content>
-            </ion-card>
+          <ion-col size="12" size-md="4">
+            <div class="flex items-center gap-2 mb-2">
+              <ion-icon name="cash" class="text-green-600"></ion-icon>
+              <span class="font-semibold">{{ getBudgetText() }}</span>
+            </div>
           </ion-col>
-
-          <!-- Budget & Timeline Details -->
-          <ion-col size="12" size-md="6">
-            <ion-card>
-              <ion-card-header>
-                <ion-card-title class="text-lg">Presupuesto y Cronograma</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                <div class="space-y-4">
-                  <div class="budget-info">
-                    <h4 class="font-semibold text-gray-700 mb-2">Presupuesto</h4>
-                    <div class="text-2xl font-bold text-success-600">{{ formatBudget() }}</div>
-                    <p class="text-sm text-gray-600">Tipo: {{ project.budget.type }}</p>
-                  </div>
-
-                  <div class="timeline-info">
-                    <h4 class="font-semibold text-gray-700 mb-2">Cronograma</h4>
-                    <div class="text-xl font-semibold text-primary-600">{{ formatTimeline() }}</div>
-                    @if (project.timeline.isFlexible) {
-                    <p class="text-sm text-gray-600">Cronograma flexible</p>
-                    }
-                  </div>
-
-                  @if (project.applicationDeadline) {
-                  <div class="deadline-info">
-                    <h4 class="font-semibold text-gray-700 mb-2">Fecha límite</h4>
-                    <div class="text-lg font-medium text-warning-600">
-                      {{ formatDate(project.applicationDeadline) }}
-                    </div>
-                  </div>
-                  }
-                </div>
-              </ion-card-content>
-            </ion-card>
+          <ion-col size="12" size-md="4">
+            <div class="flex items-center gap-2 mb-2">
+              <ion-icon name="time-outline" class="text-blue-600"></ion-icon>
+              <span>{{ getTimelineText() }}</span>
+            </div>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <div class="flex items-center gap-2 mb-2">
+              <ion-icon name="person" class="text-purple-600"></ion-icon>
+              <span>{{ project.proposalCount }} propuestas</span>
+            </div>
           </ion-col>
         </ion-row>
       </ion-grid>
 
-      <!-- Attachments -->
-      @if (project.attachments?.length > 0) {
-      <ion-card class="mb-6">
-        <ion-card-header>
-          <ion-card-title>Archivos Adjuntos</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-list>
-            @for (attachment of project.attachments; track attachment.id) {
-            <ion-item button>
-              <ion-icon name="document-text-outline" slot="start"></ion-icon>
-              <ion-label>
-                <h3>{{ attachment.name }}</h3>
-                <p>{{ (attachment.size / 1024 / 1024).toFixed(2) }} MB</p>
-              </ion-label>
-              <ion-icon name="link-outline" slot="end"></ion-icon>
-            </ion-item>
-            }
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
-      }
-    </div>
-    }
-
-    <!-- Proposals Tab -->
-    @if (currentSegment === 'proposals') {
-    <div class="proposals-content">
-      @if (isLoadingProposals) {
-      <div class="text-center py-8">
-        <ion-spinner></ion-spinner>
-        <p class="text-gray-500 mt-2">Cargando propuestas...</p>
-      </div>
-      } @else if (proposals.length === 0) {
-      <!-- Empty State -->
-      <ion-card class="text-center py-12">
-        <ion-card-content>
-          <div class="mb-4">
-            <ion-icon name="document-text-outline" class="text-6xl text-gray-300"></ion-icon>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay propuestas aún</h3>
-          <p class="text-gray-500 mb-4">
-            Una vez que los freelancers envíen propuestas para tu proyecto, aparecerán aquí.
-          </p>
-          @if (project.status === 'draft') {
-          <ion-button (click)="changeProjectStatus('published')" color="primary">
-            Publicar Proyecto
-          </ion-button>
+      <!-- Status Change Buttons (Only for project owner) -->
+      @if (isProjectOwner && project.status === 'draft') {
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <ion-button (click)="changeProjectStatus(ProjectStatus.PUBLISHED)" color="primary"
+          [disabled]="isUpdatingStatus">
+          @if (isUpdatingStatus) {
+          <ion-spinner name="lines-small" slot="start"></ion-spinner>
           }
-        </ion-card-content>
-      </ion-card>
-      } @else {
-      <!-- Proposals List -->
-      <div class="space-y-4">
-        @for (proposal of proposals; track proposal.id) {
-        <ion-card class="proposal-card">
-          <ion-card-content>
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center">
-                <ion-avatar class="mr-3">
-                  <img src="https://via.placeholder.com/40" alt="Freelancer">
-                </ion-avatar>
-                <div>
-                  <h3 class="font-semibold text-lg">Nombre del Freelancer</h3>
-                  <div class="flex items-center text-sm text-gray-600">
-                    <ion-icon name="star-outline" class="mr-1 text-yellow-500"></ion-icon>
-                    <span>4.8 (24 reseñas)</span>
-                    <span class="mx-2">•</span>
-                    <span>{{ formatRelativeTime(proposal.submittedAt) }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <ion-badge [color]="getProposalStatusColor(proposal.status)">
-                  {{ getProposalStatusText(proposal.status) }}
-                </ion-badge>
-                @if (proposal.status === 'submitted') {
-                <ion-button size="small" fill="clear" (click)="viewProposal(proposal.id)">
-                  Ver Detalles
-                </ion-button>
-                }
-              </div>
-            </div>
-
-            <!-- Proposal Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div class="proposal-stat">
-                <div class="text-sm text-gray-600">Propuesta</div>
-                <div class="text-lg font-semibold text-success-600">
-                  ${{ proposal.proposedBudget.amount }} {{ proposal.proposedBudget.currency }}
-                </div>
-              </div>
-              <div class="proposal-stat">
-                <div class="text-sm text-gray-600">Tiempo</div>
-                <div class="text-lg font-semibold text-primary-600">
-                  {{ proposal.proposedTimeline.duration }} {{ proposal.proposedTimeline.unit }}
-                </div>
-              </div>
-              <div class="proposal-stat">
-                <div class="text-sm text-gray-600">Hitos</div>
-                <div class="text-lg font-semibold text-gray-700">
-                  {{ proposal.milestones?.length || 0 }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Cover Letter Preview -->
-            <div class="mb-4">
-              <p class="text-gray-700 line-clamp-3">{{ proposal.coverLetter }}</p>
-            </div>
-
-            <!-- Action Buttons -->
-            @if (proposal.status === 'submitted' && canEditProject()) {
-            <div class="flex gap-2 flex-wrap">
-              <ion-button size="small" (click)="acceptProposal(proposal.id)" color="success">
-                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-                Aceptar
-              </ion-button>
-              <ion-button size="small" (click)="shortlistProposal(proposal.id)" fill="outline">
-                <ion-icon name="star-outline" slot="start"></ion-icon>
-                Lista Corta
-              </ion-button>
-              <ion-button size="small" (click)="chatWithFreelancer(proposal.freelancerId)" fill="outline">
-                <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-                Mensaje
-              </ion-button>
-              <ion-button size="small" (click)="rejectProposal(proposal.id)" color="danger" fill="outline">
-                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
-                Rechazar
-              </ion-button>
-            </div>
-            }
-          </ion-card-content>
-        </ion-card>
-        }
+          Publicar Proyecto
+        </ion-button>
       </div>
       }
-    </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Navigation Segments -->
+  <ion-segment [(ngModel)]="currentSegment" (ionChange)="onSegmentChange($event)" class="mb-4">
+    <ion-segment-button value="details">
+      <ion-label>Detalles</ion-label>
+    </ion-segment-button>
+    @if (project.milestones && project.milestones.length > 0) {
+    <ion-segment-button value="milestones">
+      <ion-label>Hitos</ion-label>
+    </ion-segment-button>
     }
+    <ion-segment-button value="attachments">
+      <ion-label>Archivos</ion-label>
+    </ion-segment-button>
+  </ion-segment>
 
-    <!-- Milestones Tab -->
-    @if (currentSegment === 'milestones' && project.milestones?.length > 0) {
-    <div class="milestones-content">
-      <div class="space-y-4">
-        @for (milestone of project.milestones; track milestone.id; let i = $index) {
-        <ion-card class="milestone-card">
-          <ion-card-content>
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex-1">
-                <div class="flex items-center mb-2">
-                  <span class="milestone-number">{{ i + 1 }}</span>
-                  <h3 class="text-lg font-semibold ml-3">{{ milestone.title }}</h3>
-                </div>
-                <p class="text-gray-600 mb-3">{{ milestone.description }}</p>
+  <!-- Content Sections -->
+  @if (currentSegment === 'details') {
+  <!-- Project Details -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Descripción del Proyecto</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p class="mb-4 leading-relaxed">{{ project.description }}</p>
 
-                <!-- Milestone Details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  @if (milestone.amount) {
-                  <div>
-                    <div class="text-sm text-gray-600">Monto</div>
-                    <div class="text-lg font-semibold text-success-600">${{ milestone.amount }}</div>
-                  </div>
-                  }
-                  @if (milestone.dueDate) {
-                  <div>
-                    <div class="text-sm text-gray-600">Fecha límite</div>
-                    <div class="text-lg font-medium">{{ formatDate(milestone.dueDate) }}</div>
-                  </div>
-                  }
-                </div>
-
-                <!-- Deliverables -->
-                @if (milestone.deliverables?.length > 0) {
-                <div class="mb-4">
-                  <h4 class="font-medium text-gray-700 mb-2">Entregables:</h4>
-                  <ul class="list-disc list-inside space-y-1">
-                    @for (deliverable of milestone.deliverables; track deliverable) {
-                    <li class="text-gray-600">{{ deliverable }}</li>
-                    }
-                  </ul>
-                </div>
-                }
-              </div>
-
-              <ion-badge
-                [color]="milestone.status === 'completed' ? 'success' : milestone.status === 'in_progress' ? 'warning' : 'medium'">
-                {{ milestone.status }}
-              </ion-badge>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="mt-4">
-              <div class="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Progreso</span>
-                <span>{{ milestone.status === 'completed' ? '100' : milestone.status === 'in_progress' ? '50' : '0'
-                  }}%</span>
-              </div>
-              <ion-progress-bar
-                [value]="milestone.status === 'completed' ? 1 : milestone.status === 'in_progress' ? 0.5 : 0"
-                [color]="milestone.status === 'completed' ? 'success' : milestone.status === 'in_progress' ? 'warning' : 'medium'"></ion-progress-bar>
-            </div>
-          </ion-card-content>
-        </ion-card>
-        }
+      <!-- Required Skills -->
+      @if (project.requiredSkills && project.requiredSkills.length > 0) {
+      <div class="mb-4">
+        <h3 class="font-semibold mb-2">Habilidades Requeridas:</h3>
+        <div class="flex flex-wrap gap-2">
+          @for (skill of project.requiredSkills; track skill) {
+          <ion-chip color="tertiary">
+            <ion-label>{{ skill }}</ion-label>
+          </ion-chip>
+          }
+        </div>
       </div>
-    </div>
-    }
+      }
 
-    <!-- Activity Tab -->
-    @if (currentSegment === 'activity') {
-    <div class="activity-content">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Actividad del Proyecto</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <!-- Activity Timeline -->
-          <div class="activity-timeline">
-            <div class="activity-item">
-              <div class="activity-icon bg-success-100">
-                <ion-icon name="checkmark-circle-outline" class="text-success-600"></ion-icon>
-              </div>
-              <div class="activity-content">
-                <h4 class="font-semibold">Proyecto creado</h4>
-                <p class="text-gray-600">{{ formatDate(project.createdAt) }}</p>
-              </div>
-            </div>
-
-            @if (project.status === 'published') {
-            <div class="activity-item">
-              <div class="activity-icon bg-primary-100">
-                <ion-icon name="flag-outline" class="text-primary-600"></ion-icon>
-              </div>
-              <div class="activity-content">
-                <h4 class="font-semibold">Proyecto publicado</h4>
-                <p class="text-gray-600">Disponible para recibir propuestas</p>
-              </div>
-            </div>
-            }
-
-            @if (project.proposalCount > 0) {
-            <div class="activity-item">
-              <div class="activity-icon bg-warning-100">
-                <ion-icon name="document-text-outline" class="text-warning-600"></ion-icon>
-              </div>
-              <div class="activity-content">
-                <h4 class="font-semibold">{{ project.proposalCount }} propuesta{{ project.proposalCount > 1 ? 's' : ''
-                  }} recibida{{ project.proposalCount > 1 ? 's' : '' }}</h4>
-                <p class="text-gray-600">Los freelancers están enviando propuestas</p>
-              </div>
-            </div>
-            }
-
-            <!-- Placeholder for more activity items -->
-            <div class="activity-item">
-              <div class="activity-icon bg-gray-100">
-                <ion-icon name="time-outline" class="text-gray-600"></ion-icon>
-              </div>
-              <div class="activity-content">
-                <h4 class="font-semibold">Última actualización</h4>
-                <p class="text-gray-600">{{ formatDate(project.updatedAt) }}</p>
-              </div>
-            </div>
-          </div>
-        </ion-card-content>
-      </ion-card>
-    </div>
-    }
-  </div>
-
-  <!-- Floating Action Button -->
-  @if (canEditProject()) {
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="showActionSheet = true">
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+      <!-- Project Timeline -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div>
+          <h4 class="font-semibold text-gray-700">Fecha de Inicio:</h4>
+          <p>{{ formatDate(project.startDate) }}</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Fecha de Finalización:</h4>
+          <p>{{ formatDate(project.endDate) }}</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Fecha Límite de Postulación:</h4>
+          <p>{{ formatDate(project.applicationDeadline) }}</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Experiencia Preferida:</h4>
+          <p>{{ project.preferredExperience }}</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
   }
+
+  @if (currentSegment === 'milestones' && project.milestones && project.milestones.length > 0) {
+  <!-- Milestones Section -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Hitos del Proyecto</ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="p-0">
+      <ion-list>
+        @for (milestone of project.milestones; track milestone.id; let i = $index) {
+        <ion-item>
+          <div class="w-full">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold">{{ milestone.title }}</h3>
+              <div class="flex items-center gap-2">
+                <ion-badge [color]="getMilestoneStatusColor(milestone.status)">
+                  {{ milestone.status }}
+                </ion-badge>
+                <span class="font-semibold text-green-600">
+                  ${{ milestone.amount.toLocaleString() }}
+                </span>
+              </div>
+            </div>
+
+            <p class="text-gray-600 mb-2">{{ milestone.description }}</p>
+
+            @if (milestone.dueDate) {
+            <div class="flex items-center gap-1 text-sm text-gray-500 mb-2">
+              <ion-icon name="calendar"></ion-icon>
+              <span>Fecha límite: {{ formatDate(milestone.dueDate) }}</span>
+            </div>
+            }
+
+            @if (milestone.deliverables && milestone.deliverables.length > 0) {
+            <div>
+              <h4 class="font-medium text-sm mb-1">Entregables:</h4>
+              <ul class="text-sm text-gray-600 list-disc list-inside">
+                @for (deliverable of milestone.deliverables; track deliverable) {
+                <li>{{ deliverable }}</li>
+                }
+              </ul>
+            </div>
+            }
+          </div>
+        </ion-item>
+        @if (i < project.milestones!.length - 1) { <ion-item-divider></ion-item-divider>
+          }
+          }
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+  }
+
+  @if (currentSegment === 'attachments') {
+  <!-- Attachments Section -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Archivos Adjuntos</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      @if (project.attachments && project.attachments.length > 0) {
+      <ion-list>
+        @for (attachment of project.attachments; track attachment.id) {
+        <ion-item button>
+          <ion-icon name="document" slot="start"></ion-icon>
+          <div>
+            <h3>{{ attachment.name }}</h3>
+            <p class="text-sm text-gray-500">
+              {{ (attachment.size / 1024 / 1024).toFixed(2) }} MB
+            </p>
+          </div>
+        </ion-item>
+        }
+      </ion-list>
+      } @else {
+      <div class="text-center py-8 text-gray-500">
+        <ion-icon name="document" class="text-4xl mb-2"></ion-icon>
+        <p>No hay archivos adjuntos</p>
+      </div>
+      }
+    </ion-card-content>
+  </ion-card>
+  }
+
+  <!-- Project Statistics -->
+  <ion-card class="mt-4">
+    <ion-card-header>
+      <ion-card-title>Estadísticas del Proyecto</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="p-0">
+        <ion-row>
+          <ion-col size="6" size-md="3">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600">{{ project.viewCount }}</div>
+              <div class="text-sm text-gray-500">Visualizaciones</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600">{{ project.proposalCount }}</div>
+              <div class="text-sm text-gray-500">Propuestas</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-purple-600">
+                {{ formatDate(project.createdAt) }}
+              </div>
+              <div class="text-sm text-gray-500">Fecha de Creación</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-orange-600">
+                {{ project.visibility }}
+              </div>
+              <div class="text-sm text-gray-500">Visibilidad</div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
   } @else {
   <!-- Error State -->
-  <div class="text-center py-12">
-    <ion-icon name="alert-circle-outline" class="text-6xl text-gray-400 mb-4"></ion-icon>
-    <h2 class="text-xl font-semibold text-gray-600 mb-2">Proyecto no encontrado</h2>
-    <p class="text-gray-500 mb-4">El proyecto que buscas no existe o no tienes permisos para verlo.</p>
-    <ion-button (click)="goBack()" fill="outline">
-      Volver a Proyectos
-    </ion-button>
+  <div class="text-center py-8">
+    <ion-icon name="alert-circle" class="text-6xl text-red-500 mb-4"></ion-icon>
+    <h2 class="text-xl font-bold mb-2">Proyecto no encontrado</h2>
+    <p class="text-gray-500">El proyecto que buscas no existe o no tienes permisos para verlo.</p>
   </div>
   }
+
+  <!-- Alert Components -->
+  <ion-alert trigger="delete-project-alert" header="Confirmar eliminación"
+    message="¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer."
+    [buttons]="deleteAlertButtons">
+  </ion-alert>
+
+  <ion-alert trigger="status-change-alert" header="Cambiar estado del proyecto"
+    message="¿Confirmas el cambio de estado?" [buttons]="statusChangeAlertButtons">
+  </ion-alert>
 </ion-content>
-
-<!-- Action Sheet -->
-<ion-action-sheet [isOpen]="showActionSheet" header="Acciones del Proyecto" [buttons]="actionSheetButtons"
-  (didDismiss)="showActionSheet = false"></ion-action-sheet>
-
-<!-- Delete Confirmation Alert -->
-<ion-alert [isOpen]="showDeleteAlert" header="¿Eliminar proyecto?"
-  message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este proyecto?"
-  [buttons]="deleteAlertButtons"></ion-alert>
-
-<!-- Status Change Alert -->
-<ion-alert [isOpen]="showStatusChangeAlert" header="Cambiar Estado" message="Selecciona el nuevo estado del proyecto"
-  [buttons]="statusChangeAlertButtons"></ion-alert>
-
-<!-- Success Toast -->
-<ion-toast [isOpen]="showSuccessToast" [message]="toastMessage" duration="3000" color="success" position="top"
-  (didDismiss)="showSuccessToast = false"></ion-toast>
-
-<!-- Error Toast -->
-<ion-toast [isOpen]="showErrorToast" [message]="toastMessage" duration="4000" color="danger" position="top"
-  (didDismiss)="showErrorToast = false"></ion-toast>

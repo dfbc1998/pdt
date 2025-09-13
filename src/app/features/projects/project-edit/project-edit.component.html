@@ -1,3 +1,397 @@
-<p>
-  project-edit works!
-</p>
+<!-- src/app/features/projects/project-edit/project-edit.component.html -->
+<app-header [title]="project && project.title ? 'Editar: ' + project.title : 'Editar Proyecto'"
+  [showBackButton]="true"></app-header>
+
+<ion-content class="ion-padding">
+  <!-- Loading State -->
+  @if (isLoading) {
+  <div class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  } @else if (project && projectForm) {
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Basic Information -->
+    <ion-card class="mb-4">
+      <ion-card-header>
+        <ion-card-title>Información Básica</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="p-0">
+          <ion-row>
+            <ion-col size="12">
+              <ion-item>
+                <ion-label position="stacked">Título del Proyecto *</ion-label>
+                <ion-input formControlName="title" placeholder="Ej: Desarrollo de aplicación web para e-commerce"
+                  [class.ion-invalid]="projectForm.get('title')?.invalid && projectForm.get('title')?.touched">
+                </ion-input>
+              </ion-item>
+              @if (projectForm.get('title')?.errors && projectForm.get('title')?.touched) {
+              <ion-text color="danger" class="error-message">
+                El título es requerido y debe tener al menos 10 caracteres
+              </ion-text>
+              }
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Categoría *</ion-label>
+                <ion-select formControlName="category" placeholder="Selecciona una categoría">
+                  @for (category of categories; track category) {
+                  <ion-select-option [value]="category">{{ category }}</ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Subcategoría</ion-label>
+                <ion-input formControlName="subcategory" placeholder="Ej: E-commerce, CRM, Blog">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12">
+              <ion-item>
+                <ion-label position="stacked">Descripción del Proyecto *</ion-label>
+                <ion-textarea formControlName="description"
+                  placeholder="Describe detalladamente tu proyecto, objetivos, funcionalidades esperadas..." rows="6"
+                  [class.ion-invalid]="projectForm.get('description')?.invalid && projectForm.get('description')?.touched">
+                </ion-textarea>
+              </ion-item>
+              @if (projectForm.get('description')?.errors && projectForm.get('description')?.touched) {
+              <ion-note color="danger" class="error-message">
+                La descripción es requerida y debe tener al menos 50 caracteres
+              </ion-note>
+              }
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Budget Configuration -->
+    <ion-card class="mb-4">
+      <ion-card-header>
+        <ion-card-title>Presupuesto</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="p-0">
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Tipo de Presupuesto *</ion-label>
+                <ion-select formControlName="budgetType" placeholder="Selecciona el tipo">
+                  @for (type of budgetTypes; track type) {
+                  <ion-select-option [value]="type">
+                    {{ type === 'fixed' ? 'Precio Fijo' :
+                    type === 'hourly' ? 'Por Hora' : 'Rango' }}
+                  </ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Moneda</ion-label>
+                <ion-select formControlName="currency">
+                  <ion-select-option value="CLP">Peso Chileno (CLP)</ion-select-option>
+                  <ion-select-option value="USD">Dólar (USD)</ion-select-option>
+                  <ion-select-option value="EUR">Euro (EUR)</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            @if (projectForm.get('budgetType')?.value === 'fixed' || projectForm.get('budgetType')?.value === 'hourly')
+            {
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">
+                  {{ projectForm.get('budgetType')?.value === 'hourly' ? 'Tarifa por hora' : 'Monto Total' }} *
+                </ion-label>
+                <ion-input type="number" formControlName="budgetAmount" placeholder="0" min="1"
+                  [class.ion-invalid]="projectForm.get('budgetAmount')?.invalid && projectForm.get('budgetAmount')?.touched">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+            }
+
+            @if (projectForm.get('budgetType')?.value === 'range') {
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Monto Mínimo *</ion-label>
+                <ion-input type="number" formControlName="budgetMinAmount" placeholder="0" min="1"
+                  [class.ion-invalid]="projectForm.get('budgetMinAmount')?.invalid && projectForm.get('budgetMinAmount')?.touched">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Monto Máximo *</ion-label>
+                <ion-input type="number" formControlName="budgetMaxAmount" placeholder="0" min="1"
+                  [class.ion-invalid]="projectForm.get('budgetMaxAmount')?.invalid && projectForm.get('budgetMaxAmount')?.touched">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+            }
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Timeline Configuration -->
+    <ion-card class="mb-4">
+      <ion-card-header>
+        <ion-card-title>Cronograma</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="p-0">
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Tipo de Cronograma *</ion-label>
+                <ion-select formControlName="timelineType" placeholder="Selecciona el tipo">
+                  @for (type of timelineTypes; track type) {
+                  <ion-select-option [value]="type">
+                    {{ type === 'days' ? 'Días' :
+                    type === 'weeks' ? 'Semanas' :
+                    type === 'months' ? 'Meses' : 'Flexible' }}
+                  </ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            @if (projectForm.get('timelineType')?.value !== 'flexible') {
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Duración *</ion-label>
+                <ion-input type="number" formControlName="timelineDuration" placeholder="0" min="1"
+                  [class.ion-invalid]="projectForm.get('timelineDuration')?.invalid && projectForm.get('timelineDuration')?.touched">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+            }
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Fecha de Inicio</ion-label>
+                <ion-input type="date" formControlName="timelineStartDate"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Fecha de Finalización</ion-label>
+                <ion-input type="date" formControlName="timelineEndDate"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12">
+              <ion-item>
+                <ion-checkbox formControlName="timelineIsFlexible"></ion-checkbox>
+                <ion-label class="ml-2">Fechas flexibles</ion-label>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Skills and Experience -->
+    <ion-card class="mb-4">
+      <ion-card-header>
+        <ion-card-title>Habilidades y Experiencia</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="p-0">
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Nivel de Experiencia Preferido *</ion-label>
+                <ion-select formControlName="preferredExperience" placeholder="Selecciona el nivel">
+                  @for (level of experienceLevels; track level) {
+                  <ion-select-option [value]="level">
+                    {{ level === 'entry' ? 'Principiante' :
+                    level === 'intermediate' ? 'Intermedio' : 'Experto' }}
+                  </ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Fecha Límite para Postular</ion-label>
+                <ion-input type="date" formControlName="applicationDeadline"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12">
+              <div class="skills-container">
+                <ion-label class="block font-medium mb-2">Habilidades Requeridas</ion-label>
+
+                <!-- Add new skill -->
+                <div class="skill-input-container">
+                  <ion-input [value]="newSkill" (ionInput)="onSkillInputChange($event)"
+                    placeholder="Agregar nueva habilidad">
+                  </ion-input>
+                  <ion-button (click)="addSkill()" fill="outline" size="small">
+                    <ion-icon name="add" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </div>
+
+                <!-- Selected skills -->
+                <div class="selected-skills">
+                  @for (skill of projectForm.get('requiredSkills')?.value; track skill) {
+                  <ion-chip color="primary">
+                    <ion-label>{{ skill }}</ion-label>
+                    <ion-icon name="close" (click)="removeSkill(skill)"></ion-icon>
+                  </ion-chip>
+                  }
+                </div>
+
+                <!-- Available skills -->
+                <div class="available-skills">
+                  <span class="skills-label">Habilidades Sugeridas:</span>
+                  <div class="skills-grid">
+                    @for (skill of availableSkills.slice(0, 15); track skill) {
+                    @if (!projectForm.get('requiredSkills')?.value?.includes(skill)) {
+                    <ion-chip color="light" button="true" (click)="addSkillFromAvailable(skill)">
+                      <ion-label>{{ skill }}</ion-label>
+                      <ion-icon name="add"></ion-icon>
+                    </ion-chip>
+                    }
+                    }
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Project Settings -->
+    <ion-card class="mb-4">
+      <ion-card-header>
+        <ion-card-title>Configuración del Proyecto</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Visibilidad del Proyecto</ion-label>
+          <ion-select formControlName="visibility">
+            @for (visibility of visibilityOptions; track visibility) {
+            <ion-select-option [value]="visibility">
+              {{ visibility === 'public' ? 'Público' :
+              visibility === 'private' ? 'Privado' : 'Solo por Invitación' }}
+            </ion-select-option>
+            }
+          </ion-select>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Milestones -->
+    <ion-card class="milestones-container">
+      <ion-card-header>
+        <div class="flex justify-between items-center">
+          <ion-card-title>Hitos del Proyecto</ion-card-title>
+          <ion-button (click)="addMilestone()" fill="outline" size="small" class="add-milestone-button">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Agregar Hito
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        @if (milestonesArray.length === 0) {
+        <div class="no-milestones">
+          <ion-icon name="document"></ion-icon>
+          <p>No hay hitos definidos. Los hitos ayudan a dividir el trabajo en etapas.</p>
+        </div>
+        } @else {
+        <div formArrayName="milestones">
+          @for (milestone of milestonesArray.controls; track $index; let i = $index) {
+          <ion-card [formGroupName]="i" class="milestone-card">
+            <ion-card-header>
+              <div class="milestone-header">
+                <ion-card-title>Hito {{ i + 1 }}</ion-card-title>
+                <ion-button (click)="removeMilestone(i)" fill="clear" color="danger" size="small" class="remove-button">
+                  <ion-icon name="remove" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid class="p-0">
+                <ion-row>
+                  <ion-col size="12" size-md="8">
+                    <ion-item>
+                      <ion-label position="stacked">Título del Hito *</ion-label>
+                      <ion-input formControlName="title" placeholder="Ej: Diseño de la interfaz de usuario">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-label position="stacked">Monto *</ion-label>
+                      <ion-input type="number" formControlName="amount" placeholder="0" min="1">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+
+                  <ion-col size="12">
+                    <ion-item>
+                      <ion-label position="stacked">Descripción *</ion-label>
+                      <ion-textarea formControlName="description"
+                        placeholder="Describe qué se debe entregar en este hito" rows="3">
+                      </ion-textarea>
+                    </ion-item>
+                  </ion-col>
+
+                  <ion-col size="12" size-md="6">
+                    <ion-item>
+                      <ion-label position="stacked">Fecha de Vencimiento</ion-label>
+                      <ion-input type="date" formControlName="dueDate"></ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+          }
+        </div>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <ion-button (click)="cancel()" fill="outline" color="medium" [disabled]="isSaving" class="cancel-button">
+        <ion-icon name="close" slot="start"></ion-icon>
+        Cancelar
+      </ion-button>
+
+      <ion-button type="submit" [disabled]="projectForm.invalid || isSaving" color="primary" class="save-button">
+        @if (isSaving) {
+        <ion-spinner name="lines-small" slot="start"></ion-spinner>
+        Guardando...
+        } @else {
+        <ion-icon name="save" slot="start"></ion-icon>
+        Guardar Cambios
+        }
+      </ion-button>
+    </div>
+  </form>
+  } @else {
+  <!-- Error State -->
+  <div class="error-state">
+    <ion-icon name="alert-circle"></ion-icon>
+    <h2>Proyecto no encontrado</h2>
+    <p>El proyecto que intentas editar no existe o no tienes permisos.</p>
+  </div>
+  }
+</ion-content>

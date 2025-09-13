@@ -1,236 +1,235 @@
-<app-header [title]="'Mi Dashboard'"></app-header>
+<!-- src/app/features/dashboard/client-dashboard/client-dashboard.component.html -->
+<app-header title="Dashboard Cliente"></app-header>
 
-<ion-content class="dashboard-content">
+<ion-content class="ion-padding">
   <div class="dashboard-container">
-
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="loading-container">
-      <app-loading [message]="'Cargando tu dashboard...'"></app-loading>
+    @if (isLoading$ | async) {
+    <app-loading message="Cargando dashboard..."></app-loading>
+    } @else {
+    <!-- Welcome Section -->
+    @if (currentUser$ | async; as user) {
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        ¡Bienvenido de nuevo, {{ user.displayName || 'Cliente' }}!
+      </h1>
+      <p class="welcome-subtitle">
+        Gestiona tus proyectos y encuentra el mejor talento freelance
+      </p>
     </div>
+    }
 
-    <!-- Dashboard Content -->
-    <div *ngIf="!isLoading" class="dashboard-wrapper">
-
-      <!-- Welcome Section -->
-      <div class="welcome-section">
-        <div class="welcome-content">
-          <h1 class="welcome-title">
-            ¡Hola, {{ currentUser?.displayName || 'Cliente' }}! 👋
-          </h1>
-          <p class="welcome-subtitle">
-            Aquí tienes un resumen de tu actividad en FreelancePro
-          </p>
-        </div>
-        <div class="welcome-actions">
-          <ion-button fill="solid" color="primary" class="action-btn primary-btn" (click)="createNewProject()">
+    <!-- Quick Actions -->
+    <ion-card class="quick-actions-card">
+      <ion-card-header>
+        <ion-card-title>Acciones Rápidas</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="actions-grid">
+          <ion-button (click)="createProject()" expand="block" color="primary" class="action-button">
             <ion-icon name="add-outline" slot="start"></ion-icon>
-            Nuevo Proyecto
+            Crear Proyecto
           </ion-button>
-          <ion-button fill="outline" color="primary" class="action-btn outline-btn" (click)="browseFreelancers()">
-            <ion-icon name="people-outline" slot="start"></ion-icon>
-            Ver Freelancers
+
+          <ion-button (click)="viewProjects()" expand="block" fill="outline" class="action-button">
+            <ion-icon name="folder-outline" slot="start"></ion-icon>
+            Ver Proyectos
+          </ion-button>
+
+          <ion-button (click)="viewMessages()" expand="block" fill="outline" class="action-button">
+            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+            Mensajes
           </ion-button>
         </div>
-      </div>
+      </ion-card-content>
+    </ion-card>
 
-      <!-- Stats Cards Grid -->
-      <div class="stats-grid">
-        <div class="stat-card projects-card">
-          <div class="stat-icon-container projects-icon">
-            <ion-icon name="briefcase-outline"></ion-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ dashboardStats.totalProjects }}</div>
-            <div class="stat-label">Proyectos Totales</div>
-            <div class="stat-change positive">
-              <ion-icon name="trending-up-outline"></ion-icon>
-              +{{ extendedStats.newProjectsThisMonth }} este mes
-            </div>
-          </div>
-        </div>
+    <!-- Statistics Cards -->
+    <div class="stats-section">
+      <h2 class="section-title">Resumen de Proyectos</h2>
 
-        <div class="stat-card active-card">
-          <div class="stat-icon-container active-icon">
-            <ion-icon name="pulse-outline"></ion-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ dashboardStats.activeProjects }}</div>
-            <div class="stat-label">Proyectos Activos</div>
-            <div class="stat-change">
-              <ion-icon name="time-outline"></ion-icon>
-              {{ extendedStats.avgCompletionDays }} días promedio
-            </div>
-          </div>
-        </div>
-
-        <div class="stat-card freelancers-card">
-          <div class="stat-icon-container freelancers-icon">
-            <ion-icon name="people-outline"></ion-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ extendedStats.collaboratingFreelancers }}</div>
-            <div class="stat-label">Freelancers Colaborando</div>
-            <div class="stat-change">
-              <ion-icon name="star-outline"></ion-icon>
-              {{ extendedStats.avgFreelancerRating }}/5 rating promedio
-            </div>
-          </div>
-        </div>
-
-        <div class="stat-card budget-card">
-          <div class="stat-icon-container budget-icon">
-            <ion-icon name="card-outline"></ion-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">${{ extendedStats.totalBudget | number:'1.0-0' }}</div>
-            <div class="stat-label">Presupuesto Total</div>
-            <div class="stat-change positive">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              {{ extendedStats.completedProjectsPercent }}% completado
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Content Grid -->
-      <div class="main-content-grid">
-
-        <!-- Recent Projects Section -->
-        <div class="section-card recent-projects">
-          <div class="section-header">
-            <div class="section-title">
-              <ion-icon name="folder-outline"></ion-icon>
-              Proyectos Recientes
-            </div>
-            <ion-button fill="clear" color="primary" class="see-all-btn" (click)="viewAllProjects()">
-              Ver todos
-              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
-            </ion-button>
-          </div>
-
-          <div class="projects-list">
-            <div *ngFor="let project of recentProjects; trackBy: trackByProjectId" class="project-item"
-              (click)="viewProject(project.id)">
-
-              <div class="project-info">
-                <div class="project-title">{{ project.title }}</div>
-                <div class="project-meta">
-                  <span class="project-date">{{ project.createdAt | date:'dd MMM yyyy' }}</span>
-                  <span class="project-proposals">{{ project.proposalCount }} propuestas</span>
+      <ion-grid class="stats-grid">
+        <ion-row>
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card total-projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="business-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.totalProjects }}</div>
+                    <div class="stat-label">Total Proyectos</div>
+                  </div>
                 </div>
-              </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-              <div class="project-status">
-                <div class="status-badge" [ngClass]="'status-' + project.status">
-                  {{ getStatusLabel(project.status.toString()) }}
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card published-projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="eye-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.publishedProjects }}</div>
+                    <div class="stat-label">Publicados</div>
+                  </div>
                 </div>
-                <div class="project-budget">${{ project.budget.amount || 0 | number:'1.0-0' }}</div>
-              </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-              <div class="project-actions">
-                <ion-button fill="clear" size="small" color="primary"
-                  (click)="$event.stopPropagation(); viewProposals(project.id)">
-                  <ion-icon name="eye-outline" slot="icon-only"></ion-icon>
-                </ion-button>
-                <ion-button fill="clear" size="small" color="primary"
-                  (click)="$event.stopPropagation(); openProjectChat(project.id)">
-                  <ion-icon name="chatbubble-outline" slot="icon-only"></ion-icon>
-                </ion-button>
-              </div>
-            </div>
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card active-projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="time-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.activeProjects }}</div>
+                    <div class="stat-label">En Progreso</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-            <!-- Empty State -->
-            <div *ngIf="recentProjects.length === 0" class="empty-state">
-              <ion-icon name="document-outline" class="empty-icon"></ion-icon>
-              <div class="empty-title">¡Crea tu primer proyecto!</div>
-              <div class="empty-text">Comienza publicando un proyecto para encontrar freelancers talentosos</div>
-              <ion-button fill="solid" color="primary" class="empty-action" (click)="createNewProject()">
-                <ion-icon name="add-outline" slot="start"></ion-icon>
-                Crear Proyecto
-              </ion-button>
-            </div>
-          </div>
-        </div>
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card completed-projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="checkmark-circle-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.completedProjects }}</div>
+                    <div class="stat-label">Completados</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-        <!-- Activity Feed -->
-        <div class="section-card activity-feed">
-          <div class="section-header">
-            <div class="section-title">
-              <ion-icon name="notifications-outline"></ion-icon>
-              Actividad Reciente
-            </div>
-            <ion-button fill="clear" color="primary" class="see-all-btn" (click)="viewAllActivity()">
-              Ver todo
-              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card draft-projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="pause-circle-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.draftProjects }}</div>
+                    <div class="stat-label">Borradores</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-          <div class="activity-list">
-            <div *ngFor="let activity of recentActivity; trackBy: trackByActivityId" class="activity-item">
-
-              <div class="activity-icon" [ngClass]="'activity-' + activity.type">
-                <ion-icon [name]="getActivityIcon(activity.type)"></ion-icon>
-              </div>
-
-              <div class="activity-content">
-                <div class="activity-title">{{ activity.description }}</div>
-                <div class="activity-description">Proyecto: {{ activity.projectId }}</div>
-                <div class="activity-time">{{ activity.date | date:'dd MMM, HH:mm' }}</div>
-              </div>
-            </div>
-
-            <!-- Empty State -->
-            <div *ngIf="recentActivity.length === 0" class="empty-state small">
-              <ion-icon name="pulse-outline" class="empty-icon"></ion-icon>
-              <div class="empty-text">No hay actividad reciente</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions Floating Section -->
-      <div class="quick-actions-section">
-        <div class="section-header">
-          <div class="section-title">
-            <ion-icon name="flash-outline"></ion-icon>
-            Acciones Rápidas
-          </div>
-        </div>
-
-        <div class="quick-actions-grid">
-          <div class="quick-action" (click)="createNewProject()">
-            <div class="quick-action-icon project-icon">
-              <ion-icon name="add-circle-outline"></ion-icon>
-            </div>
-            <div class="quick-action-text">Nuevo Proyecto</div>
-          </div>
-
-          <div class="quick-action" (click)="browseFreelancers()">
-            <div class="quick-action-icon freelancer-icon">
-              <ion-icon name="people-outline"></ion-icon>
-            </div>
-            <div class="quick-action-text">Buscar Freelancers</div>
-          </div>
-
-          <div class="quick-action" (click)="viewMessages()">
-            <div class="quick-action-icon message-icon">
-              <ion-icon name="mail-outline"></ion-icon>
-            </div>
-            <div class="quick-action-text">Mensajes</div>
-            <div class="notification-badge" *ngIf="unreadMessages > 0">
-              {{ unreadMessages }}
-            </div>
-          </div>
-
-          <div class="quick-action" (click)="viewReports()">
-            <div class="quick-action-icon report-icon">
-              <ion-icon name="bar-chart-outline"></ion-icon>
-            </div>
-            <div class="quick-action-text">Reportes</div>
-          </div>
-        </div>
-      </div>
-
+          <ion-col size="12" size-sm="6" size-md="4">
+            <ion-card class="stat-card freelancers">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.totalFreelancers }}</div>
+                    <div class="stat-label">Freelancers</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </div>
+
+    <!-- Recent Projects -->
+    <div class="recent-projects-section">
+      <div class="section-header">
+        <h2 class="section-title">Proyectos Recientes</h2>
+        @if (allProjects.length > 5) {
+        <ion-button (click)="viewAllProjects()" fill="clear" size="small" class="view-all-button">
+          Ver todos
+        </ion-button>
+        }
+      </div>
+
+      @if (recentProjects.length === 0) {
+      <ion-card class="empty-state">
+        <ion-card-content>
+          <div class="empty-content">
+            <ion-icon name="folder-outline" class="empty-icon"></ion-icon>
+            <h3>No tienes proyectos aún</h3>
+            <p>Crea tu primer proyecto para comenzar a encontrar freelancers talentosos</p>
+            <ion-button (click)="createProject()" color="primary">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              Crear Primer Proyecto
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      } @else {
+      <ion-card class="projects-card">
+        <ion-card-content class="projects-content">
+          <ion-list class="projects-list">
+            @for (project of recentProjects; track project.id) {
+            <ion-item button (click)="viewProject(project.id)" class="project-item">
+              <div class="project-content">
+                <div class="project-header">
+                  <h3 class="project-title">{{ project.title }}</h3>
+                  <div class="project-meta">
+                    <ion-badge [color]="getStatusColor(project.status)">
+                      {{ getStatusText(project.status) }}
+                    </ion-badge>
+                  </div>
+                </div>
+
+                <p class="project-description">
+                  {{ project.description.length > 120 ?
+                  (project.description | slice:0:120) + '...' :
+                  project.description }}
+                </p>
+
+                <div class="project-details">
+                  <div class="detail-item">
+                    <ion-icon name="cash" class="detail-icon"></ion-icon>
+                    <span class="detail-text">{{ getBudgetText(project) }}</span>
+                  </div>
+
+                  <div class="detail-item">
+                    <ion-icon name="calendar" class="detail-icon"></ion-icon>
+                    <span class="detail-text">{{ formatDate(project.createdAt) }}</span>
+                  </div>
+
+                  <div class="detail-item">
+                    <ion-icon name="people" class="detail-icon"></ion-icon>
+                    <span class="detail-text">{{ project.proposalCount }} propuestas</span>
+                  </div>
+                </div>
+
+                <div class="project-actions">
+                  <ion-button fill="clear" size="small" (click)="viewProject(project.id); $event.stopPropagation()">
+                    <ion-icon name="eye-outline" slot="start"></ion-icon>
+                    Ver
+                  </ion-button>
+
+                  @if (project.status === 'draft') {
+                  <ion-button fill="clear" size="small" color="tertiary"
+                    (click)="editProject(project.id); $event.stopPropagation()">
+                    <ion-icon name="create-outline" slot="start"></ion-icon>
+                    Editar
+                  </ion-button>
+                  }
+                </div>
+              </div>
+            </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+      }
+    </div>
+
+    <!-- Refresh Button -->
+    <div class="refresh-section">
+      <ion-button (click)="refreshData()" fill="outline" expand="block" class="refresh-button">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Actualizar Datos
+      </ion-button>
+    </div>
+    }
   </div>
 </ion-content>

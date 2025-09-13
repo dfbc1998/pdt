@@ -1,3 +1,108 @@
-<p>
-  user-recovery works!
-</p>
+<ion-content class="user-recovery-content">
+  <div class="user-recovery-container">
+
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <div class="logo-section">
+        <ion-icon name="refresh-outline" class="welcome-icon"></ion-icon>
+        <h1>FreelancePro</h1>
+      </div>
+      <p class="welcome-subtitle">
+        Configuremos tu cuenta para continuar. Solo necesitamos algunos datos adicionales.
+      </p>
+    </div>
+
+    <!-- Recovery Card -->
+    <div class="recovery-card">
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Configurando tu cuenta...</p>
+      </div>
+
+      <!-- Recovery Form -->
+      <div *ngIf="!isLoading">
+
+        <div class="form-header">
+          <h2>Completar Configuración</h2>
+          <p>Tu cuenta necesita información adicional para funcionar correctamente.</p>
+        </div>
+
+        <form [formGroup]="recoveryForm" (ngSubmit)="onSubmit()" class="recovery-form">
+
+          <!-- User Role Selection -->
+          <div class="form-field role-selection">
+            <ion-label>
+              <strong>¿Cómo planeas usar FreelancePro?</strong>
+            </ion-label>
+
+            <div class="role-options">
+              <div class="role-option" [class.selected]="recoveryForm.get('role')?.value === UserRole.CLIENT"
+                (click)="selectRole(UserRole.CLIENT)">
+                <div class="role-icon client-icon">
+                  <ion-icon name="business-outline"></ion-icon>
+                </div>
+                <div class="role-content">
+                  <h3>Cliente</h3>
+                  <p>Contratar freelancers para mis proyectos</p>
+                </div>
+              </div>
+
+              <div class="role-option" [class.selected]="recoveryForm.get('role')?.value === UserRole.FREELANCER"
+                (click)="selectRole(UserRole.FREELANCER)">
+                <div class="role-icon freelancer-icon">
+                  <ion-icon name="briefcase-outline"></ion-icon>
+                </div>
+                <div class="role-content">
+                  <h3>Freelancer</h3>
+                  <p>Ofrecer mis servicios profesionales</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="isFieldInvalid('role')" class="error-message">
+              {{ getFieldErrorMessage('role') }}
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="errorMessage" class="error-alert">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- Success Message -->
+          <div *ngIf="successMessage" class="success-alert">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>{{ successMessage }}</span>
+          </div>
+
+          <!-- Submit Button -->
+          <ion-button expand="block" type="submit" [disabled]="!recoveryForm.valid || isLoading" class="btn-continue">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Continuar
+          </ion-button>
+
+        </form>
+
+        <!-- Logout Option -->
+        <div class="logout-section">
+          <p>¿No es tu cuenta?</p>
+          <ion-button fill="clear" color="medium" (click)="logout()" class="btn-logout">
+            <ion-icon name="log-out-outline" slot="start"></ion-icon>
+            Cerrar Sesión
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section">
+      <p>¿Tienes problemas con tu cuenta?</p>
+      <a href="mailto:support@freelancepro.com" class="support-link">
+        Contacta a nuestro soporte técnico
+      </a>
+    </div>
+  </div>
+</ion-content>

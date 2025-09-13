@@ -1,3 +1,216 @@
-<p>
-  register works!
-</p>
+<ion-content class="register-content">
+  <div class="register-container">
+
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <div class="logo-section">
+        <ion-icon name="person-add-outline" class="welcome-icon"></ion-icon>
+        <h1>FreelancePro</h1>
+      </div>
+      <p class="welcome-subtitle">
+        Únete a nuestra comunidad de freelancers y clientes. ¡Es completamente gratis!
+      </p>
+    </div>
+
+    <!-- Register Card -->
+    <div class="register-card">
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Creando tu cuenta...</p>
+      </div>
+
+      <!-- Register Form -->
+      <div *ngIf="!isLoading">
+
+        <div class="form-header">
+          <h2>Crear Cuenta</h2>
+          <p>¿Ya tienes cuenta?
+            <a routerLink="/auth/login" class="login-link">Inicia sesión aquí</a>
+          </p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+
+          <!-- User Role Selection -->
+          <div class="form-field role-selection">
+            <ion-label>
+              <strong>¿Cómo quieres usar FreelancePro?</strong>
+            </ion-label>
+
+            <div class="role-options">
+              <div class="role-option" [class.selected]="registerForm.get('role')?.value === 'client'"
+                (click)="selectRole('client')">
+                <div class="role-icon client-icon">
+                  <ion-icon name="business-outline"></ion-icon>
+                </div>
+                <div class="role-content">
+                  <h3>Soy Cliente</h3>
+                  <p>Busco contratar freelancers para mis proyectos</p>
+                </div>
+              </div>
+
+              <div class="role-option" [class.selected]="registerForm.get('role')?.value === 'freelancer'"
+                (click)="selectRole('freelancer')">
+                <div class="role-icon freelancer-icon">
+                  <ion-icon name="briefcase-outline"></ion-icon>
+                </div>
+                <div class="role-content">
+                  <h3>Soy Freelancer</h3>
+                  <p>Ofrezco mis servicios profesionales</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="isFieldInvalid('role')" class="error-message">
+              {{ getFieldErrorMessage('role') }}
+            </div>
+          </div>
+
+          <!-- Full Name Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('displayName')" lines="none">
+              <ion-label position="stacked">
+                <strong>Nombre Completo</strong>
+              </ion-label>
+              <ion-input formControlName="displayName" type="text" placeholder="Tu nombre completo" autocomplete="name">
+              </ion-input>
+              <ion-icon name="person-outline" slot="end" class="field-icon"></ion-icon>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('displayName')" class="error-message">
+              {{ getFieldErrorMessage('displayName') }}
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('email')" lines="none">
+              <ion-label position="stacked">
+                <strong>Correo Electrónico</strong>
+              </ion-label>
+              <ion-input formControlName="email" type="email" placeholder="tu@correo.com" autocomplete="email">
+              </ion-input>
+              <ion-icon name="mail-outline" slot="end" class="field-icon"></ion-icon>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('email')" class="error-message">
+              {{ getFieldErrorMessage('email') }}
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('password')" lines="none">
+              <ion-label position="stacked">
+                <strong>Contraseña</strong>
+              </ion-label>
+              <!-- Password Input Container -->
+              <div class="password-input-container">
+                <input #passwordInput [type]="showPassword ? 'text' : 'password'"
+                  [value]="registerForm.get('password')?.value || ''" (input)="updatePasswordValue($event)"
+                  placeholder="Mínimo 6 caracteres" autocomplete="new-password" class="password-native-input">
+              </div>
+              <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()" class="password-toggle">
+                <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('password')" class="error-message">
+              {{ getFieldErrorMessage('password') }}
+            </div>
+
+            <!-- Password Strength Indicator -->
+            <div class="password-strength" *ngIf="registerForm.get('password')?.value">
+              <div class="strength-bar">
+                <div class="strength-fill" [class]="getPasswordStrengthClass()"
+                  [style.width.%]="getPasswordStrengthPercentage()">
+                </div>
+              </div>
+              <span class="strength-text" [class]="getPasswordStrengthClass()">
+                {{ getPasswordStrengthText() }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('confirmPassword')" lines="none">
+              <ion-label position="stacked">
+                <strong>Confirmar Contraseña</strong>
+              </ion-label>
+              <!-- Confirm Password Input Container -->
+              <div class="password-input-container">
+                <input #confirmPasswordInput [type]="showConfirmPassword ? 'text' : 'password'"
+                  [value]="registerForm.get('confirmPassword')?.value || ''"
+                  (input)="updateConfirmPasswordValue($event)" placeholder="Repite tu contraseña"
+                  autocomplete="new-password" class="password-native-input">
+              </div>
+              <ion-button fill="clear" slot="end" (click)="toggleConfirmPasswordVisibility()" class="password-toggle">
+                <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('confirmPassword')" class="error-message">
+              {{ getFieldErrorMessage('confirmPassword') }}
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="form-field terms-field">
+            <ion-item lines="none" class="terms-item" [class.item-has-error]="isFieldInvalid('acceptTerms')">
+              <ion-checkbox formControlName="acceptTerms" slot="start">
+              </ion-checkbox>
+              <ion-label class="terms-label">
+                Acepto los
+                <a href="#" class="terms-link" (click)="openTerms($event)">Términos y Condiciones</a>
+                y la
+                <a href="#" class="terms-link" (click)="openPrivacy($event)">Política de Privacidad</a>
+              </ion-label>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('acceptTerms')" class="error-message">
+              {{ getFieldErrorMessage('acceptTerms') }}
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="errorMessage" class="error-alert">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- Submit Button -->
+          <ion-button expand="block" type="submit" [disabled]="!registerForm.valid || isLoading" class="btn-register">
+            <ion-icon name="person-add-outline" slot="start"></ion-icon>
+            Crear Cuenta
+          </ion-button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>O únete con</span>
+        </div>
+
+        <!-- Demo Info -->
+        <div class="demo-info">
+          <p class="demo-text">
+            ¿Quieres probar la plataforma primero?
+            <a routerLink="/auth/login" class="demo-link">Usa nuestras cuentas demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Link -->
+    <div class="login-section">
+      <p>¿Ya tienes una cuenta?</p>
+      <ion-button fill="clear" color="primary" routerLink="/auth/login" class="btn-login-link">
+        Iniciar Sesión
+        <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

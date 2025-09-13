@@ -1,3 +1,134 @@
-<p>
-  login works!
-</p>
+<ion-content class="login-content">
+  <div class="login-container">
+
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <div class="logo-section">
+        <ion-icon name="briefcase-outline" class="welcome-icon"></ion-icon>
+        <h1>FreelancePro</h1>
+      </div>
+      <p class="welcome-subtitle">
+        Inicia sesión para acceder a tu cuenta y gestionar tus proyectos.
+      </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Iniciando sesión...</p>
+      </div>
+
+      <!-- Login Form -->
+      <div *ngIf="!isLoading">
+
+        <div class="form-header">
+          <h2>Iniciar Sesión</h2>
+          <p>¿Nuevo en FreelancePro?
+            <a routerLink="/auth/register" class="register-link">Regístrate aquí</a>
+          </p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+          <!-- Email Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('email')" lines="none">
+              <ion-label position="stacked">
+                <strong>Correo Electrónico</strong>
+              </ion-label>
+              <ion-input formControlName="email" type="email" placeholder="tu@correo.com" autocomplete="email">
+              </ion-input>
+              <ion-icon name="mail-outline" slot="end" class="field-icon"></ion-icon>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('email')" class="error-message">
+              {{ getFieldErrorMessage('email') }}
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-field">
+            <ion-item class="form-item" [class.item-has-error]="isFieldInvalid('password')" lines="none">
+              <ion-label position="stacked">
+                <strong>Contraseña</strong>
+              </ion-label>
+              <ion-input formControlName="password" type="showPassword ? 'text' : 'password'"
+                placeholder="Tu contraseña" autocomplete="current-password">
+              </ion-input>
+              <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()" class="password-toggle">
+                <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <div *ngIf="isFieldInvalid('password')" class="error-message">
+              {{ getFieldErrorMessage('password') }}
+            </div>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <ion-item lines="none" class="remember-me">
+              <ion-checkbox formControlName="rememberMe" slot="start">
+              </ion-checkbox>
+              <ion-label>Recordarme</ion-label>
+            </ion-item>
+
+            <a routerLink="/auth/forgot-password" class="forgot-link">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="errorMessage" class="error-alert">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- Submit Button -->
+          <ion-button expand="block" type="submit" [disabled]="!loginForm.valid || isLoading" class="btn-login">
+            <ion-icon name="log-in-outline" slot="start"></ion-icon>
+            Iniciar Sesión
+          </ion-button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>O inicia sesión con</span>
+        </div>
+
+        <!-- Demo Accounts -->
+        <div class="demo-accounts">
+          <h3>Cuentas de Demostración</h3>
+          <p>Prueba la plataforma con nuestras cuentas demo:</p>
+
+          <div class="demo-buttons">
+            <ion-button expand="block" fill="outline" (click)="loginAsDemo('client')" [disabled]="isLoading"
+              class="btn-demo client">
+              <ion-icon name="business-outline" slot="start"></ion-icon>
+              Cliente Demo
+            </ion-button>
+
+            <ion-button expand="block" fill="outline" (click)="loginAsDemo('freelancer')" [disabled]="isLoading"
+              class="btn-demo freelancer">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              Freelancer Demo
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Link -->
+    <div class="register-section">
+      <p>¿No tienes cuenta?</p>
+      <ion-button fill="clear" color="primary" routerLink="/auth/register" class="btn-register">
+        Crear cuenta gratuita
+        <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 
 // Firebase imports
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getAuth, provideAuth, setPersistence, browserLocalPersistence } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 
@@ -20,9 +20,21 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(),
 
-    // Firebase providers
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideAuth(() => getAuth()),
+    // Firebase providers with persistence configuration
+    provideFirebaseApp(() => {
+      const app = initializeApp(environment.firebaseConfig);
+      return app;
+    }),
+    provideAuth(() => {
+      const auth = getAuth();
+
+      // Configurar persistencia para mantener el login al recargar la página
+      setPersistence(auth, browserLocalPersistence).catch((error) => {
+        console.error('Error configuring Firebase Auth persistence:', error);
+      });
+
+      return auth;
+    }),
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage())
   ],
