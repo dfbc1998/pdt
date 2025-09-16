@@ -179,14 +179,22 @@ export class ProjectListComponent implements OnInit, OnDestroy {
         // Load client's projects
         response = await this.projectService.getProjectsByClient(this.currentUser!.uid);
       } else {
-        // Load all published projects for freelancers/general viewing
-        response = await this.projectService.getPublishedProjects();
+        // USAR EL MÉTODO TEMPORAL mientras se configura el índice
+        try {
+          response = await this.projectService.getPublishedProjects();
+        } catch (indexError) {
+          console.log('Index required, using temporary method');
+          // Fallback al método temporal
+          response = await (this.projectService as any).getPublishedProjectsTemp?.(20) ||
+            { success: false, error: 'Temporary method not available' };
+        }
       }
 
       if (response.success && response.data) {
         this.allProjects = response.data;
         this.filteredProjects = [...this.allProjects];
         this.updatePagination();
+        console.log(`Loaded ${this.allProjects.length} projects for freelancer view`);
       } else {
         this.handleError('Error al cargar los proyectos');
       }
@@ -448,4 +456,5 @@ export class ProjectListComponent implements OnInit, OnDestroy {
     });
     await toast.present();
   }
+
 }

@@ -503,4 +503,47 @@ export class ProjectService {
             };
         }
     }
+
+    async getPublishedProjectsTemp(limitCount: number = 20): Promise<ApiResponse<Project[]>> {
+        try {
+            console.log('Using temporary method for published projects (no index required)');
+
+            // Query sin orderBy para evitar el índice compuesto
+            const projectsQuery = query(
+                collection(this.firestore, this.COLLECTION_NAME),
+                where('status', '==', ProjectStatus.PUBLISHED),
+                limit(limitCount)
+            );
+
+            const querySnapshot = await getDocs(projectsQuery);
+            let projects: Project[] = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data['createdAt']?.toDate() || new Date(),
+                    updatedAt: data['updatedAt']?.toDate() || new Date(),
+                    applicationDeadline: data['applicationDeadline']?.toDate(),
+                    startDate: data['startDate']?.toDate(),
+                    endDate: data['endDate']?.toDate()
+                } as Project;
+            });
+
+            // Ordenar manualmente por createdAt (más reciente primero)
+            projects = projects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+            console.log(`Found ${projects.length} published projects for freelancers`);
+
+            return {
+                success: true,
+                data: projects
+            };
+        } catch (error: any) {
+            console.error('Error getting published projects (temp method):', error);
+            return {
+                success: false,
+                error: error.message || 'Failed to get published projects'
+            };
+        }
+    }
 }
