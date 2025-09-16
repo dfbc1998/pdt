@@ -2,140 +2,135 @@
 <app-header title="Mensajes" [showBackButton]="false">
 
   <ion-button slot="end" fill="clear" (click)="onRefresh()" [disabled]="isRefreshing">
-    <ion-icon name="refresh-outline"></ion-icon>
+    <ion-icon name="refresh-outline" [class.spin]="isRefreshing">
+    </ion-icon>
   </ion-button>
-
 </app-header>
 
 <ion-content class="chat-list-container">
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-container">
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchInput($event)" placeholder="Buscar conversaciones..."
+        debounce="300">
+      </ion-searchbar>
+    </div>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="filter-chips" *ngIf="hasFilterOptions()">
+    <ion-chip *ngFor="let option of filterOptions" [class.active]="currentFilter === option.value"
+      (click)="onFilterChange(option.value)" [disabled]="option.count === 0">
+      {{ option.label }}
+      <span *ngIf="option.count > 0">({{ option.count }})</span>
+    </ion-chip>
+  </div>
+
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
+  <div class="loading-state" *ngIf="isLoading">
     <ion-spinner name="crescent"></ion-spinner>
     <p class="loading-text">Cargando conversaciones...</p>
   </div>
 
-  <!-- Main Content -->
-  <div *ngIf="!isLoading">
-    <!-- Search Section -->
-    <div class="search-section">
-      <div class="search-container">
-        <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchInput($event)"
-          placeholder="Buscar conversaciones..." [debounce]="300" show-clear-button="focus">
-        </ion-searchbar>
-      </div>
+  <!-- Conversations Section -->
+  <div class="conversations-section" *ngIf="!isLoading">
+    <div class="section-header">
+      <h2>Conversaciones</h2>
+      <p class="conversations-count" *ngIf="allConversations.length > 0">
+        {{ allConversations.length }} conversación{{ allConversations.length !== 1 ? 'es' : '' }}
+      </p>
     </div>
 
-    <!-- Filter Chips -->
-    <div class="filter-chips">
-      <ion-chip *ngFor="let option of filterOptions" [class.active]="currentFilter === option.value"
-        (click)="onFilterChange(option.value)">
-        <ion-label>
-          {{option.label}}
-          <span *ngIf="option.count > 0"> ({{option.count}})</span>
-        </ion-label>
-      </ion-chip>
-    </div>
-
-    <!-- Conversations Section -->
-    <div class="conversations-section">
-      <div class="section-header">
-        <h2>Conversaciones</h2>
-        <p class="conversations-count" *ngIf="(filteredConversations$ | async)?.length">
-          {{(filteredConversations$ | async)?.length}} conversaciones
-        </p>
-      </div>
-
-      <!-- Conversations List -->
-      <div class="conversations-list" *ngIf="(filteredConversations$ | async) as conversations">
-        <div *ngFor="let conversation of conversations; trackBy: trackByConversationId" class="conversation-item"
-          (click)="onConversationClick(conversation)">
-
-          <!-- Conversation Header -->
-          <div class="conversation-header">
-            <div class="participant-info">
-              <div class="avatar">
-                {{conversation.participantInitials}}
-              </div>
-
-              <div class="participant-details">
-                <h3 class="participant-name">{{conversation.participantName}}</h3>
-                <p class="project-title">{{conversation.projectTitle}}</p>
-              </div>
-            </div>
-
-            <div class="conversation-meta">
-              <span class="timestamp">
-                {{formatTimestamp(conversation.lastActivity)}}
-              </span>
-
-              <div class="unread-badge" [class.hidden]="conversation.unreadCount === 0">
-                {{conversation.unreadCount}}
-              </div>
-            </div>
-          </div>
-
-          <!-- Last Message -->
-          <div class="last-message" *ngIf="conversation.lastMessage">
-            <p class="message-content" [class.system-message]="conversation.lastMessage.isSystemMessage">
-              {{formatLastMessage(conversation.lastMessage)}}
-            </p>
-
-            <!-- Message Attachments -->
-            <div class="message-attachments"
-              *ngIf="conversation.lastMessage.attachments && conversation.lastMessage.attachments.length > 0">
-              <ion-icon name="attach-outline"></ion-icon>
-              <span>{{conversation.lastMessage.attachments.length}} archivo(s)</span>
-            </div>
-          </div>
-
-          <!-- No Message State -->
-          <div class="last-message" *ngIf="!conversation.lastMessage">
-            <p class="message-content system-message">
-              Conversación iniciada
-            </p>
-          </div>
-
-          <!-- Conversation Status -->
-          <div class="conversation-status">
-            <div class="status-indicators">
-              <span class="status-chip" [ngClass]="getStatusChipClass(conversation.projectStatus)">
-                {{conversation.projectStatus === 'active' ? 'Activo' :
-                conversation.projectStatus === 'completed' ? 'Completado' : 'Pendiente'}}
-              </span>
-            </div>
-
-            <div class="quick-actions">
-              <ion-button size="small" fill="outline" class="outline"
-                (click)="onConversationClick(conversation); $event.stopPropagation()">
-                <ion-icon name="chevron-forward-outline"></ion-icon>
-              </ion-button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- Conversations List -->
+    <div class="conversations-list" *ngIf="filteredConversations$ | async as conversations">
 
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="(filteredConversations$ | async)?.length === 0 && !isLoading">
-
+      <div class="empty-state" *ngIf="conversations.length === 0 && !isLoading">
         <div class="empty-icon">
           <ion-icon name="chatbubbles-outline"></ion-icon>
         </div>
-
-        <h2 class="empty-title">
-          {{searchTerm || currentFilter !== 'all' ? 'No se encontraron conversaciones' : 'No tienes conversaciones'}}
-        </h2>
-
-        <p class="empty-description">
-          {{searchTerm || currentFilter !== 'all' ?
-          'Prueba con otros términos de búsqueda o filtros' :
-          'Comienza colaborando en proyectos para iniciar conversaciones con otros usuarios'}}
+        <h3 class="empty-title">
+          {{ allConversations.length === 0 ? 'No tienes conversaciones' : 'No se encontraron resultados' }}
+        </h3>
+        <p class="empty-description" *ngIf="allConversations.length === 0">
+          Cuando tengas proyectos activos con freelancers o clientes, aparecerán aquí las conversaciones.
         </p>
-
-        <ion-button *ngIf="!searchTerm && currentFilter === 'all'" (click)="onStartNewChat()">
+        <p class="empty-description" *ngIf="allConversations.length > 0">
+          Intenta ajustar los filtros de búsqueda para encontrar lo que buscas.
+        </p>
+        <ion-button *ngIf="allConversations.length === 0" (click)="onStartNewChat()" fill="outline">
           <ion-icon name="add-outline" slot="start"></ion-icon>
           Explorar Proyectos
         </ion-button>
       </div>
+
+      <!-- Conversation Items -->
+      <div class="conversation-item" *ngFor="let conversation of conversations; trackBy: trackConversation"
+        (click)="onConversationClick(conversation)">
+
+        <!-- Conversation Header -->
+        <div class="conversation-header">
+          <div class="participant-info">
+            <div class="avatar">
+              {{ conversation.participantInitials }}
+            </div>
+            <div class="participant-details">
+              <h3 class="participant-name">{{ conversation.participantName }}</h3>
+              <p class="project-title">{{ conversation.projectTitle }}</p>
+            </div>
+          </div>
+
+          <div class="conversation-meta">
+            <span class="timestamp" *ngIf="conversation.lastMessage">
+              {{ formatTimestamp(conversation.lastActivity) }}
+            </span>
+            <div class="unread-badge" *ngIf="conversation.unreadCount > 0"
+              [class.hidden]="conversation.unreadCount === 0">
+              {{ conversation.unreadCount }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Message -->
+        <div class="last-message" *ngIf="conversation.lastMessage">
+          <p class="message-content" [class.system-message]="conversation.lastMessage.isSystemMessage">
+            {{ formatLastMessage(conversation.lastMessage) }}
+          </p>
+
+          <div class="message-attachments"
+            *ngIf="conversation.lastMessage.attachments && conversation.lastMessage.attachments.length > 0">
+            <ion-icon name="attach-outline"></ion-icon>
+            <span>{{ conversation.lastMessage.attachments.length }} archivo{{
+              conversation.lastMessage.attachments.length !== 1 ? 's' : '' }}</span>
+          </div>
+        </div>
+
+        <!-- No Messages State -->
+        <div class="last-message" *ngIf="!conversation.lastMessage">
+          <p class="message-content system-message">
+            Conversación iniciada
+          </p>
+        </div>
+
+        <!-- Conversation Status -->
+        <div class="conversation-status">
+          <div class="status-indicators">
+            <div class="status-chip" [ngClass]="getStatusChipClass(conversation.projectStatus)">
+              {{ getStatusLabel(conversation.projectStatus) }}
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <ion-button fill="outline" size="small"
+              (click)="onConversationClick(conversation); $event.stopPropagation()">
+              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+              Abrir
+            </ion-button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
 </ion-content>

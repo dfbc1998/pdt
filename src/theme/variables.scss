@@ -1,2 +1,321 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+
+
+// themes/variables.scss - FreeWork Themes Configuration
+
+// =============================================================================
+// FREEWORK THEME SYSTEM
+// =============================================================================
+
+// Base Theme Variables
+:root {
+    // Brand Colors
+    --fw-brand-primary: #3b82f6;
+    --fw-brand-secondary: #a855f7;
+
+    // Theme: Light (Default)
+    --fw-theme-background: #ffffff;
+    --fw-theme-surface: #f8fafc;
+    --fw-theme-surface-variant: #f1f5f9;
+    --fw-theme-border: #e2e8f0;
+    --fw-theme-text-primary: #1e293b;
+    --fw-theme-text-secondary: #64748b;
+    --fw-theme-text-tertiary: #94a3b8;
+}
+
+// =============================================================================
+// LIGHT THEME
+// =============================================================================
+[data-theme="light"] {
+    // Backgrounds
+    --fw-bg-primary: #ffffff;
+    --fw-bg-secondary: #f8fafc;
+    --fw-bg-tertiary: #f1f5f9;
+    --fw-bg-accent: #eff6ff;
+
+    // Surfaces
+    --fw-surface-primary: #ffffff;
+    --fw-surface-secondary: #f8fafc;
+    --fw-surface-elevated: #ffffff;
+
+    // Borders
+    --fw-border-primary: #e2e8f0;
+    --fw-border-secondary: #cbd5e1;
+    --fw-border-accent: #3b82f6;
+
+    // Text Colors
+    --fw-text-primary: #0f172a;
+    --fw-text-secondary: #475569;
+    --fw-text-tertiary: #64748b;
+    --fw-text-quaternary: #94a3b8;
+    --fw-text-on-primary: #ffffff;
+    --fw-text-on-surface: #0f172a;
+
+    // Interactive Colors
+    --fw-interactive-primary: #3b82f6;
+    --fw-interactive-primary-hover: #2563eb;
+    --fw-interactive-primary-active: #1d4ed8;
+    --fw-interactive-secondary: #f1f5f9;
+    --fw-interactive-secondary-hover: #e2e8f0;
+
+    // Status Colors remain the same for light theme
+    --fw-status-success: #22c55e;
+    --fw-status-warning: #f59e0b;
+    --fw-status-error: #ef4444;
+    --fw-status-info: #3b82f6;
+
+    // Shadows
+    --fw-shadow-color: rgba(15, 23, 42, 0.1);
+    --fw-shadow-sm: 0 1px 2px 0 var(--fw-shadow-color);
+    --fw-shadow: 0 1px 3px 0 var(--fw-shadow-color), 0 1px 2px 0 var(--fw-shadow-color);
+    --fw-shadow-md: 0 4px 6px -1px var(--fw-shadow-color), 0 2px 4px -1px var(--fw-shadow-color);
+    --fw-shadow-lg: 0 10px 15px -3px var(--fw-shadow-color), 0 4px 6px -2px var(--fw-shadow-color);
+}
+
+// =============================================================================
+// DARK THEME
+// =============================================================================
+[data-theme="dark"] {
+    // Backgrounds
+    --fw-bg-primary: #0f172a;
+    --fw-bg-secondary: #1e293b;
+    --fw-bg-tertiary: #334155;
+    --fw-bg-accent: #1e3a8a;
+
+    // Surfaces
+    --fw-surface-primary: #1e293b;
+    --fw-surface-secondary: #334155;
+    --fw-surface-elevated: #475569;
+
+    // Borders
+    --fw-border-primary: #334155;
+    --fw-border-secondary: #475569;
+    --fw-border-accent: #60a5fa;
+
+    // Text Colors
+    --fw-text-primary: #f8fafc;
+    --fw-text-secondary: #cbd5e1;
+    --fw-text-tertiary: #94a3b8;
+    --fw-text-quaternary: #64748b;
+    --fw-text-on-primary: #ffffff;
+    --fw-text-on-surface: #f8fafc;
+
+    // Interactive Colors
+    --fw-interactive-primary: #60a5fa;
+    --fw-interactive-primary-hover: #3b82f6;
+    --fw-interactive-primary-active: #2563eb;
+    --fw-interactive-secondary: #334155;
+    --fw-interactive-secondary-hover: #475569;
+
+    // Status Colors (adjusted for dark theme)
+    --fw-status-success: #4ade80;
+    --fw-status-warning: #fbbf24;
+    --fw-status-error: #f87171;
+    --fw-status-info: #60a5fa;
+
+    // Shadows (darker for dark theme)
+    --fw-shadow-color: rgba(0, 0, 0, 0.4);
+    --fw-shadow-sm: 0 1px 2px 0 var(--fw-shadow-color);
+    --fw-shadow: 0 1px 3px 0 var(--fw-shadow-color), 0 1px 2px 0 var(--fw-shadow-color);
+    --fw-shadow-md: 0 4px 6px -1px var(--fw-shadow-color), 0 2px 4px -1px var(--fw-shadow-color);
+    --fw-shadow-lg: 0 10px 15px -3px var(--fw-shadow-color), 0 4px 6px -2px var(--fw-shadow-color);
+}
+
+// =============================================================================
+// THEME VARIANTS
+// =============================================================================
+
+// Blue Theme (Professional)
+[data-theme="blue"] {
+    --fw-interactive-primary: #1e40af;
+    --fw-interactive-primary-hover: #1d4ed8;
+    --fw-accent-primary: #3b82f6;
+    --fw-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+}
+
+// Purple Theme (Creative)
+[data-theme="purple"] {
+    --fw-interactive-primary: #7c3aed;
+    --fw-interactive-primary-hover: #6d28d9;
+    --fw-accent-primary: #a855f7;
+    --fw-gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+}
+
+// Green Theme (Success)
+[data-theme="green"] {
+    --fw-interactive-primary: #059669;
+    --fw-interactive-primary-hover: #047857;
+    --fw-accent-primary: #10b981;
+    --fw-gradient-primary: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+// =============================================================================
+// COMPONENT THEME OVERRIDES
+// =============================================================================
+
+// Header Theme Overrides
+[data-theme="dark"] {
+    .fw-header-toolbar {
+        --background: var(--fw-surface-primary);
+        --color: var(--fw-text-primary);
+        --border-color: var(--fw-border-primary);
+    }
+
+    .fw-brand-name {
+        color: var(--fw-text-primary);
+    }
+
+    .fw-brand-tagline {
+        color: var(--fw-text-tertiary);
+    }
+}
+
+// Card Theme Overrides
+[data-theme="dark"] {
+    .fw-card {
+        background: var(--fw-surface-primary);
+        border-color: var(--fw-border-primary);
+    }
+
+    .fw-card-header {
+        background: var(--fw-surface-secondary);
+        border-color: var(--fw-border-primary);
+    }
+}
+
+// Form Theme Overrides
+[data-theme="dark"] {
+    .fw-form-input {
+        background: var(--fw-surface-primary);
+        border-color: var(--fw-border-primary);
+        color: var(--fw-text-primary);
+
+        &::placeholder {
+            color: var(--fw-text-tertiary);
+        }
+
+        &:focus {
+            border-color: var(--fw-interactive-primary);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+    }
+
+    .fw-form-label {
+        color: var(--fw-text-secondary);
+    }
+}
+
+// Button Theme Overrides
+[data-theme="dark"] {
+    .fw-btn-secondary {
+        background: var(--fw-surface-secondary);
+        color: var(--fw-text-primary);
+        border-color: var(--fw-border-primary);
+
+        &:hover {
+            background: var(--fw-surface-elevated);
+            border-color: var(--fw-border-secondary);
+        }
+    }
+}
+
+// =============================================================================
+// IONIC THEME INTEGRATION
+// =============================================================================
+
+// Light Theme Ionic Variables
+[data-theme="light"] {
+    --ion-background-color: var(--fw-bg-primary);
+    --ion-background-color-rgb: 255, 255, 255;
+
+    --ion-text-color: var(--fw-text-primary);
+    --ion-text-color-rgb: 15, 23, 42;
+
+    --ion-color-step-50: var(--fw-bg-secondary);
+    --ion-color-step-100: var(--fw-bg-tertiary);
+    --ion-color-step-150: var(--fw-border-primary);
+    --ion-color-step-200: var(--fw-border-secondary);
+
+    --ion-toolbar-background: var(--fw-surface-primary);
+    --ion-toolbar-color: var(--fw-text-primary);
+
+    --ion-item-background: var(--fw-surface-primary);
+    --ion-item-color: var(--fw-text-primary);
+}
+
+// Dark Theme Ionic Variables
+[data-theme="dark"] {
+    --ion-background-color: var(--fw-bg-primary);
+    --ion-background-color-rgb: 15, 23, 42;
+
+    --ion-text-color: var(--fw-text-primary);
+    --ion-text-color-rgb: 248, 250, 252;
+
+    --ion-color-step-50: var(--fw-bg-secondary);
+    --ion-color-step-100: var(--fw-bg-tertiary);
+    --ion-color-step-150: var(--fw-border-primary);
+    --ion-color-step-200: var(--fw-border-secondary);
+
+    --ion-toolbar-background: var(--fw-surface-primary);
+    --ion-toolbar-color: var(--fw-text-primary);
+
+    --ion-item-background: var(--fw-surface-primary);
+    --ion-item-color: var(--fw-text-primary);
+}
+
+// =============================================================================
+// THEME UTILITIES
+// =============================================================================
+
+// Theme transition for smooth switching
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+// Prevent transition on theme change for better performance
+.theme-transition-disabled * {
+    transition: none !important;
+}
+
+// =============================================================================
+// ACCESSIBILITY & HIGH CONTRAST
+// =============================================================================
+
+// High contrast theme for accessibility
+[data-theme="high-contrast"] {
+    --fw-bg-primary: #000000;
+    --fw-text-primary: #ffffff;
+    --fw-border-primary: #ffffff;
+    --fw-interactive-primary: #00ff00;
+    --fw-status-error: #ff0000;
+    --fw-status-warning: #ffff00;
+    --fw-status-success: #00ff00;
+}
+
+// Reduced motion for accessibility
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+@media print {
+    [data-theme] {
+        --fw-bg-primary: #ffffff;
+        --fw-text-primary: #000000;
+        --fw-border-primary: #000000;
+
+        // Remove shadows and gradients for print
+        --fw-shadow: none;
+        --fw-shadow-sm: none;
+        --fw-shadow-md: none;
+        --fw-shadow-lg: none;
+        --fw-gradient-primary: #3b82f6;
+    }
+}

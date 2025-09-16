@@ -1,3 +1,43 @@
-<p>
-  chat-room works!
-</p>
+<!-- src/app/features/chat/chat-room/chat-room.component.html -->
+<app-header [title]="currentProject?.title || 'Chat'" [showBackButton]="true">
+
+  <ion-button slot="end" fill="clear" (click)="showProjectDetails()" *ngIf="currentProject">
+    <ion-icon name="information-circle-outline"></ion-icon>
+  </ion-button>
+</app-header>
+
+<ion-content class="chat-room-container">
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p class="loading-text">Cargando chat...</p>
+  </div>
+
+  <!-- Chat Content -->
+  <div class="chat-content" *ngIf="!isLoading">
+
+    <!-- Project Info Header -->
+    <app-project-info [project]="currentProject" [participantName]="participantName"
+      (onProjectClick)="showProjectDetails()">
+    </app-project-info>
+
+    <!-- Messages List -->
+    <app-message-list [messages]="messages" [currentUserId]="currentUser?.uid || ''">
+    </app-message-list>
+
+    <!-- Empty State -->
+    <div class="empty-messages-state" *ngIf="messages.length === 0">
+      <div class="empty-icon">
+        <ion-icon name="chatbubble-outline"></ion-icon>
+      </div>
+      <h3>Comienza la conversación</h3>
+      <p>Aún no hay mensajes en este chat. ¡Envía el primer mensaje!</p>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- Message Input -->
+<app-message-input [disabled]="isLoading" (onSendMessage)="onNewMessage($event)">
+</app-message-input>
