@@ -233,9 +233,24 @@ export class ProjectService {
         }
     }
 
-    // Get all published projects
+    // Get all published projects - CORREGIDA
     async getPublishedProjects(limitCount: number = 20): Promise<ApiResponse<Project[]>> {
         try {
+            console.log('🔍 [ProjectService] Loading published projects for freelancer view...');
+
+            // Verificar que el usuario esté autenticado
+            const currentUser = this.authService.currentUser;
+            if (!currentUser) {
+                console.error('❌ [ProjectService] No authenticated user found');
+                return {
+                    success: false,
+                    error: 'User not authenticated'
+                };
+            }
+
+            console.log('✅ [ProjectService] User authenticated:', currentUser.uid, 'Role:', currentUser.role);
+
+            // Crear query para proyectos publicados
             const projectsQuery = query(
                 collection(this.firestore, this.COLLECTION_NAME),
                 where('status', '==', ProjectStatus.PUBLISHED),
@@ -243,7 +258,11 @@ export class ProjectService {
                 limit(limitCount)
             );
 
+            console.log('📊 [ProjectService] Executing Firestore query...');
             const querySnapshot = await getDocs(projectsQuery);
+
+            console.log(`📋 [ProjectService] Found ${querySnapshot.docs.length} published projects`);
+
             const projects: Project[] = querySnapshot.docs.map(doc => {
                 const data = doc.data();
                 return {
@@ -257,11 +276,21 @@ export class ProjectService {
                 } as Project;
             });
 
+            console.log('✅ [ProjectService] Successfully processed projects:', projects.length);
+
             return {
                 success: true,
                 data: projects
             };
         } catch (error: any) {
+            console.error('❌ [ProjectService] Error getting published projects:', error);
+
+            // Log detalles específicos del error de Firestore
+            if (error.code) {
+                console.error('🔥 [Firestore Error Code]:', error.code);
+                console.error('🔥 [Firestore Error Message]:', error.message);
+            }
+
             return {
                 success: false,
                 error: error.message || 'Failed to get published projects'
