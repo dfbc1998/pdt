@@ -1,3 +1,406 @@
-<p>
-  proposal-create works!
-</p>
+<!-- src/app/features/proposals/proposal-create/proposal-create.component.html -->
+<app-header [title]="'Crear Propuesta'" [showBackButton]="true" (backClick)="goBack()">
+</app-header>
+
+<ion-content class="fw-content">
+  @if (isLoading) {
+  <app-loading message="Cargando proyecto..."></app-loading>
+  } @else {
+  <div class="fw-container">
+    <!-- Project Summary -->
+    @if (project) {
+    <ion-card class="fw-card project-summary">
+      <ion-card-header>
+        <ion-card-title class="fw-text-primary">{{ project.title }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="project-info">
+          <div class="info-item">
+            <ion-icon name="cash" class="fw-text-accent"></ion-icon>
+            <span>{{ project.budget.amount | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="time" class="fw-text-accent"></ion-icon>
+            <span>{{ project.timeline.duration }} {{ getTimelineLabel(project.timeline.type) }}</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="document" class="fw-text-accent"></ion-icon>
+            <span>{{ project.category }}</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    }
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <h2 class="fw-text-lg fw-font-semibold">{{ getStepTitle() }}</h2>
+        <span class="step-counter">Paso {{ currentStep }} de {{ totalSteps }}</span>
+      </div>
+      <ion-progress-bar [value]="getStepProgress() / 100" class="fw-progress-bar">
+      </ion-progress-bar>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="proposalForm" (ngSubmit)="submitProposal()">
+
+      <!-- Step 1: Cover Letter -->
+      @if (currentStep === 1) {
+      <ion-card class="fw-card form-step">
+        <ion-card-header>
+          <ion-card-title class="step-title">
+            <ion-icon name="document" class="fw-text-accent"></ion-icon>
+            Carta de Presentación
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="step-description">
+            Preséntate al cliente y explica por qué eres la mejor opción para este proyecto.
+          </p>
+
+          <ion-item class="fw-form-item">
+            <ion-textarea formControlName="coverLetter" placeholder="Escribe tu carta de presentación aquí..." rows="8"
+              maxlength="2000" class="fw-textarea">
+            </ion-textarea>
+          </ion-item>
+
+          <div class="form-feedback">
+            <div class="word-count">
+              <span [class.text-warning]="getCoverLetterWordCount() < 50">
+                {{ getCoverLetterWordCount() }} palabras
+              </span>
+              <span class="min-words">(mínimo 50 palabras recomendadas)</span>
+            </div>
+
+            @if (proposalForm.get('coverLetter')?.hasError('required') && proposalForm.get('coverLetter')?.touched) {
+            <ion-note color="danger">La carta de presentación es requerida</ion-note>
+            }
+            @if (proposalForm.get('coverLetter')?.hasError('minlength')) {
+            <ion-note color="danger">La carta debe tener al menos 100 caracteres</ion-note>
+            }
+          </div>
+
+          <!-- Cover Letter Tips -->
+          <div class="tips-section">
+            <ion-button fill="clear" size="small" (click)="showCoverLetterTips = !showCoverLetterTips">
+              <ion-icon name="help" slot="start"></ion-icon>
+              Consejos para tu carta
+            </ion-button>
+
+            @if (showCoverLetterTips) {
+            <div class="tips-content">
+              <ul>
+                <li>Menciona tu experiencia relevante</li>
+                <li>Explica tu metodología de trabajo</li>
+                <li>Destaca qué te hace único</li>
+                <li>Haz preguntas específicas sobre el proyecto</li>
+                <li>Mantén un tono profesional pero amigable</li>
+              </ul>
+            </div>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 2: Budget -->
+      @if (currentStep === 2) {
+      <ion-card class="fw-card form-step">
+        <ion-card-header>
+          <ion-card-title class="step-title">
+            <ion-icon name="cash" class="fw-text-accent"></ion-icon>
+            Presupuesto Propuesto
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div formGroupName="budget">
+            <!-- Budget Type -->
+            <ion-item class="fw-form-item">
+              <ion-label position="stacked">Tipo de Presupuesto</ion-label>
+              <ion-select formControlName="type" placeholder="Selecciona el tipo">
+                @for (type of budgetTypes; track type.value) {
+                <ion-select-option [value]="type.value">
+                  {{ type.label }}
+                </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+
+            <!-- Budget Amount -->
+            <ion-item class="fw-form-item">
+              <ion-label position="stacked">
+                @if (proposalForm.get('budget.type')?.value === 'hourly') {
+                Tarifa por Hora (USD)
+                } @else {
+                Precio Total (USD)
+                }
+              </ion-label>
+              <ion-input formControlName="amount" type="number" min="1" placeholder="0">
+                <div slot="start">$</div>
+              </ion-input>
+            </ion-item>
+
+            <!-- Project Budget Reference -->
+            @if (project) {
+            <div class="budget-reference">
+              <ion-note>
+                <ion-icon name="informationCircle"></ion-icon>
+                Presupuesto del cliente: {{ project.budget.amount | currency:'USD':'symbol':'1.0-0' }}
+              </ion-note>
+            </div>
+            }
+
+            <!-- Budget Validation -->
+            @if (proposalForm.get('budget.amount')?.hasError('required') && proposalForm.get('budget.amount')?.touched)
+            {
+            <ion-note color="danger">El monto es requerido</ion-note>
+            }
+            @if (proposalForm.get('budget.amount')?.hasError('min')) {
+            <ion-note color="danger">El monto debe ser mayor a 0</ion-note>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 3: Timeline -->
+      @if (currentStep === 3) {
+      <ion-card class="fw-card form-step">
+        <ion-card-header>
+          <ion-card-title class="step-title">
+            <ion-icon name="calendar" class="fw-text-accent"></ion-icon>
+            Cronograma Propuesto
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div formGroupName="timeline">
+            <ion-grid>
+              <ion-row>
+                <ion-col size="8">
+                  <ion-item class="fw-form-item">
+                    <ion-label position="stacked">Duración</ion-label>
+                    <ion-input formControlName="duration" type="number" min="1" placeholder="0">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-item class="fw-form-item">
+                    <ion-label position="stacked">Unidad</ion-label>
+                    <ion-select formControlName="unit">
+                      @for (unit of timelineTypes; track unit.value) {
+                      <ion-select-option [value]="unit.value">
+                        {{ unit.label }}
+                      </ion-select-option>
+                      }
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <ion-item class="fw-form-item">
+              <ion-textarea formControlName="description"
+                placeholder="Describe tu metodología y fases del proyecto (opcional)" rows="4">
+              </ion-textarea>
+            </ion-item>
+
+            <!-- Timeline Reference -->
+            @if (project) {
+            <div class="timeline-reference">
+              <ion-note>
+                <ion-icon name="informationCircle"></ion-icon>
+                Cronograma del cliente: {{ project.timeline.duration }} {{ getTimelineLabel(project.timeline.type) }}
+              </ion-note>
+            </div>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Step 4: Additional Details -->
+      @if (currentStep === 4) {
+      <!-- Milestones Section -->
+      <ion-card class="fw-card form-step">
+        <ion-card-header>
+          <ion-card-title class="step-title">
+            <ion-icon name="checkmark" class="fw-text-accent"></ion-icon>
+            Hitos del Proyecto (Opcional)
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="step-description">
+            Divide el proyecto en hitos para facilitar el seguimiento y los pagos.
+          </p>
+
+          @for (milestone of milestonesArray.controls; track $index; let i = $index) {
+          <div class="milestone-item" [formGroupName]="i">
+            <div class="milestone-header">
+              <h4>Hito {{ i + 1 }}</h4>
+              <ion-button fill="clear" color="danger" size="small" (click)="removeMilestone(i)">
+                <ion-icon name="remove"></ion-icon>
+              </ion-button>
+            </div>
+
+            <ion-item class="fw-form-item">
+              <ion-label position="stacked">Título del Hito</ion-label>
+              <ion-input formControlName="title" placeholder="Ej: Diseño inicial"></ion-input>
+            </ion-item>
+
+            <ion-item class="fw-form-item">
+              <ion-textarea formControlName="description" placeholder="Describe qué incluye este hito" rows="3">
+              </ion-textarea>
+            </ion-item>
+
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6">
+                  <ion-item class="fw-form-item">
+                    <ion-label position="stacked">Monto (USD)</ion-label>
+                    <ion-input formControlName="amount" type="number" min="1" placeholder="0">
+                      <div slot="start">$</div>
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-item class="fw-form-item">
+                    <ion-label position="stacked">Duración (días)</ion-label>
+                    <ion-input formControlName="duration" type="number" min="1" placeholder="0">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Deliverables -->
+            <div class="deliverables-section">
+              <ion-label class="deliverables-label">Entregables:</ion-label>
+              @for (deliverable of getDeliverables(i).controls; track $index; let j = $index) {
+              <div class="deliverable-item">
+                <ion-input [formControlName]="j" placeholder="Describe el entregable">
+                </ion-input>
+                @if (getDeliverables(i).controls.length > 1) {
+                <ion-button fill="clear" color="danger" size="small" (click)="removeDeliverable(i, j)">
+                  <ion-icon name="remove"></ion-icon>
+                </ion-button>
+                }
+              </div>
+              }
+
+              <ion-button fill="clear" size="small" (click)="addDeliverable(i)">
+                <ion-icon name="add" slot="start"></ion-icon>
+                Agregar Entregable
+              </ion-button>
+            </div>
+          </div>
+          }
+
+          <ion-button fill="outline" class="fw-btn-secondary" (click)="addMilestone()">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Agregar Hito
+          </ion-button>
+
+          @if (milestonesArray.length > 0) {
+          <div class="milestone-summary">
+            <ion-note>
+              Total en hitos: {{ getTotalMilestoneAmount() | currency:'USD':'symbol':'1.0-0' }}
+            </ion-note>
+          </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Questions Section -->
+      <ion-card class="fw-card form-step">
+        <ion-card-header>
+          <ion-card-title class="step-title">
+            <ion-icon name="help" class="fw-text-accent"></ion-icon>
+            Preguntas Adicionales (Opcional)
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="step-description">
+            Responde preguntas frecuentes o agrega información adicional relevante.
+          </p>
+
+          <!-- Common Questions -->
+          @if (questionsArray.length === 0) {
+          <div class="common-questions">
+            <ion-label class="section-label">Preguntas Frecuentes:</ion-label>
+            @for (question of commonQuestions; track question) {
+            <ion-chip class="fw-chip-outline" (click)="addCommonQuestion(question)">
+              <ion-icon name="add"></ion-icon>
+              <ion-label>{{ question }}</ion-label>
+            </ion-chip>
+            }
+          </div>
+          }
+
+          <!-- Added Questions -->
+          @for (question of questionsArray.controls; track $index; let i = $index) {
+          <div class="question-item" [formGroupName]="i">
+            <div class="question-header">
+              <h4>Pregunta {{ i + 1 }}</h4>
+              <ion-button fill="clear" color="danger" size="small" (click)="removeQuestion(i)">
+                <ion-icon name="remove"></ion-icon>
+              </ion-button>
+            </div>
+
+            <ion-item class="fw-form-item">
+              <ion-label position="stacked">Pregunta</ion-label>
+              <ion-input formControlName="question" placeholder="Escribe la pregunta"></ion-input>
+            </ion-item>
+
+            <ion-item class="fw-form-item">
+              <ion-textarea formControlName="answer" placeholder="Tu respuesta" rows="3">
+              </ion-textarea>
+            </ion-item>
+          </div>
+          }
+
+          <ion-button fill="outline" class="fw-btn-secondary" (click)="addQuestion()">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Agregar Pregunta Personalizada
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+      }
+
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        @if (currentStep > 1) {
+        <ion-button fill="outline" class="fw-btn-secondary" (click)="previousStep()">
+          <ion-icon name="arrowBack" slot="start"></ion-icon>
+          Anterior
+        </ion-button>
+        }
+
+        @if (currentStep < totalSteps) { <ion-button class="fw-btn-primary" (click)="nextStep()"
+          [disabled]="!isCurrentStepValid()">
+          Siguiente
+          <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+          }
+
+          @if (currentStep === totalSteps) {
+          <ion-button type="submit" class="fw-btn-primary submit-btn" [disabled]="!proposalForm.valid || isSubmitting">
+            @if (isSubmitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+            Enviando...
+            } @else {
+            <ion-icon name="save" slot="start"></ion-icon>
+            Enviar Propuesta
+            }
+          </ion-button>
+          }
+      </div>
+    </form>
+  </div>
+  }
+
+  <!-- Exit Confirmation Alert -->
+  <ion-alert [isOpen]="showExitAlert" header="¿Salir sin guardar?"
+    message="Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?" [buttons]="alertButtons">
+  </ion-alert>
+</ion-content>

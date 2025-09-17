@@ -1,0 +1,473 @@
+// src/app/features/proposals/proposal-create/proposal-create.component.scss
+
+.fw-content {
+    --background: var(--fw-gray-50);
+}
+
+.fw-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--fw-space-4);
+}
+
+// Project Summary Card
+.project-summary {
+    margin-bottom: var(--fw-space-6);
+    border: 2px solid var(--fw-primary-100);
+
+    .project-info {
+        display: flex;
+        gap: var(--fw-space-4);
+        flex-wrap: wrap;
+        margin-top: var(--fw-space-2);
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--fw-space-2);
+            font-size: 0.9rem;
+            color: var(--fw-gray-600);
+
+            ion-icon {
+                font-size: 1.1rem;
+            }
+        }
+    }
+}
+
+// Progress Section
+.progress-section {
+    margin-bottom: var(--fw-space-6);
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--fw-space-3);
+
+        h2 {
+            margin: 0;
+            color: var(--fw-gray-800);
+            font-family: var(--fw-font-family-display);
+        }
+
+        .step-counter {
+            font-size: 0.9rem;
+            color: var(--fw-gray-500);
+            font-weight: 500;
+        }
+    }
+}
+
+.fw-progress-bar {
+    --background: var(--fw-gray-200);
+    --progress-background: var(--fw-gradient-primary);
+    height: 8px;
+    border-radius: var(--fw-radius-lg);
+}
+
+// Form Steps
+.form-step {
+    margin-bottom: var(--fw-space-6);
+
+    .step-title {
+        display: flex;
+        align-items: center;
+        gap: var(--fw-space-3);
+        font-size: 1.3rem;
+        font-family: var(--fw-font-family-display);
+
+        ion-icon {
+            font-size: 1.5rem;
+        }
+    }
+
+    .step-description {
+        color: var(--fw-gray-600);
+        margin-bottom: var(--fw-space-4);
+        line-height: 1.5;
+    }
+}
+
+// Form Items
+.fw-form-item {
+    --background: white;
+    --border-radius: var(--fw-radius-lg);
+    --border-width: 2px;
+    --border-color: var(--fw-gray-200);
+    margin-bottom: var(--fw-space-4);
+
+    &.item-has-focus {
+        --border-color: var(--fw-primary-500);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    ion-label {
+        font-weight: 600;
+        color: var(--fw-gray-700);
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+        --color: var(--fw-gray-800);
+        font-size: 1rem;
+    }
+}
+
+.fw-textarea {
+    --background: white;
+    --color: var(--fw-gray-800);
+    font-family: var(--fw-font-family-primary);
+    line-height: 1.6;
+}
+
+// Form Feedback
+.form-feedback {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--fw-space-2);
+    margin-bottom: var(--fw-space-4);
+
+    .word-count {
+        display: flex;
+        align-items: center;
+        gap: var(--fw-space-2);
+        font-size: 0.9rem;
+
+        .text-warning {
+            color: var(--fw-warning-500);
+            font-weight: 600;
+        }
+
+        .min-words {
+            color: var(--fw-gray-500);
+        }
+    }
+}
+
+// Tips Section
+.tips-section {
+    margin-top: var(--fw-space-4);
+    padding: var(--fw-space-4);
+    background: var(--fw-gray-50);
+    border-radius: var(--fw-radius-lg);
+    border: 1px solid var(--fw-gray-200);
+
+    .tips-content {
+        margin-top: var(--fw-space-3);
+
+        ul {
+            margin: 0;
+            padding-left: var(--fw-space-5);
+
+            li {
+                margin-bottom: var(--fw-space-2);
+                color: var(--fw-gray-600);
+                line-height: 1.5;
+            }
+        }
+    }
+}
+
+// Budget Reference
+.budget-reference,
+.timeline-reference {
+    margin-top: var(--fw-space-4);
+    padding: var(--fw-space-3);
+    background: var(--fw-primary-50);
+    border-radius: var(--fw-radius-lg);
+    border: 1px solid var(--fw-primary-200);
+
+    ion-note {
+        display: flex;
+        align-items: center;
+        gap: var(--fw-space-2);
+        color: var(--fw-primary-700);
+        font-size: 0.9rem;
+
+        ion-icon {
+            font-size: 1.1rem;
+        }
+    }
+}
+
+// Milestone Items
+.milestone-item {
+    padding: var(--fw-space-4);
+    background: var(--fw-gray-50);
+    border-radius: var(--fw-radius-lg);
+    border: 2px solid var(--fw-gray-200);
+    margin-bottom: var(--fw-space-4);
+
+    .milestone-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--fw-space-4);
+
+        h4 {
+            margin: 0;
+            color: var(--fw-gray-800);
+            font-family: var(--fw-font-family-display);
+            font-size: 1.1rem;
+        }
+    }
+
+    .deliverables-section {
+        margin-top: var(--fw-space-4);
+
+        .deliverables-label {
+            display: block;
+            font-weight: 600;
+            color: var(--fw-gray-700);
+            margin-bottom: var(--fw-space-3);
+        }
+
+        .deliverable-item {
+            display: flex;
+            align-items: center;
+            gap: var(--fw-space-2);
+            margin-bottom: var(--fw-space-2);
+
+            ion-input {
+                flex: 1;
+                --background: white;
+                --border-radius: var(--fw-radius-lg);
+                --border-width: 1px;
+                --border-color: var(--fw-gray-300);
+            }
+        }
+    }
+}
+
+.milestone-summary {
+    margin-top: var(--fw-space-4);
+    padding: var(--fw-space-3);
+    background: var(--fw-success-50);
+    border-radius: var(--fw-radius-lg);
+    border: 1px solid var(--fw-success-200);
+
+    ion-note {
+        color: var(--fw-success-700);
+        font-weight: 600;
+    }
+}
+
+// Questions Section
+.question-item {
+    padding: var(--fw-space-4);
+    background: var(--fw-gray-50);
+    border-radius: var(--fw-radius-lg);
+    border: 2px solid var(--fw-gray-200);
+    margin-bottom: var(--fw-space-4);
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--fw-space-4);
+
+        h4 {
+            margin: 0;
+            color: var(--fw-gray-800);
+            font-family: var(--fw-font-family-display);
+            font-size: 1.1rem;
+        }
+    }
+}
+
+.common-questions {
+    margin-bottom: var(--fw-space-4);
+
+    .section-label {
+        display: block;
+        font-weight: 600;
+        color: var(--fw-gray-700);
+        margin-bottom: var(--fw-space-3);
+    }
+
+    .fw-chip-outline {
+        --background: white;
+        --color: var(--fw-primary-600);
+        border: 2px solid var(--fw-primary-200);
+        margin: var(--fw-space-1);
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            --background: var(--fw-primary-50);
+            --border-color: var(--fw-primary-300);
+            transform: translateY(-2px);
+        }
+
+        ion-icon {
+            font-size: 1rem;
+        }
+    }
+}
+
+// Navigation Buttons
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--fw-space-4);
+    margin-top: var(--fw-space-8);
+    margin-bottom: var(--fw-space-6);
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+
+        ion-button {
+            width: 100%;
+        }
+    }
+}
+
+.fw-btn-primary {
+    --background: var(--fw-gradient-primary);
+    --color: white;
+    --border-radius: var(--fw-radius-xl);
+    --box-shadow: var(--fw-shadow);
+    --padding-start: var(--fw-space-6);
+    --padding-end: var(--fw-space-6);
+    --padding-top: var(--fw-space-3);
+    --padding-bottom: var(--fw-space-3);
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover:not([disabled]) {
+        --box-shadow: var(--fw-shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    &[disabled] {
+        --opacity: 0.6;
+    }
+
+    &.submit-btn {
+        --background: var(--fw-success-500);
+
+        &:hover:not([disabled]) {
+            --background: var(--fw-success-600);
+        }
+    }
+}
+
+.fw-btn-secondary {
+    --color: var(--fw-primary-600);
+    --border-color: var(--fw-primary-300);
+    --border-radius: var(--fw-radius-xl);
+    --padding-start: var(--fw-space-6);
+    --padding-end: var(--fw-space-6);
+    --padding-top: var(--fw-space-3);
+    --padding-bottom: var(--fw-space-3);
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+        --background: var(--fw-primary-50);
+        --border-color: var(--fw-primary-400);
+        transform: translateY(-2px);
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .fw-container {
+        padding: var(--fw-space-3);
+    }
+
+    .project-info {
+        flex-direction: column;
+        gap: var(--fw-space-2);
+    }
+
+    .progress-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fw-space-2);
+    }
+
+    .form-feedback {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fw-space-2);
+    }
+
+    .milestone-header,
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fw-space-2);
+    }
+}
+
+// Loading and Error States
+.error-state {
+    text-align: center;
+    padding: var(--fw-space-8);
+    color: var(--fw-danger-500);
+
+    ion-icon {
+        font-size: 3rem;
+        margin-bottom: var(--fw-space-4);
+    }
+}
+
+// Animation for step transitions
+.form-step {
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Focus states
+ion-input:focus-within,
+ion-textarea:focus-within,
+ion-select:focus-within {
+    --border-color: var(--fw-primary-500);
+    --box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+// Validation states
+.ng-invalid.ng-touched {
+    --border-color: var(--fw-danger-500);
+
+    &:focus-within {
+        --box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+}
+
+.ng-valid.ng-touched {
+    --border-color: var(--fw-success-500);
+}
+
+// Custom scrollbar
+.fw-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fw-content::-webkit-scrollbar-track {
+    background: var(--fw-gray-100);
+}
+
+.fw-content::-webkit-scrollbar-thumb {
+    background: var(--fw-gray-300);
+    border-radius: var(--fw-radius-lg);
+
+    &:hover {
+        background: var(--fw-gray-400);
+    }
+}

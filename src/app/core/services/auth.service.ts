@@ -219,7 +219,6 @@ export class AuthService {
         }
     }
 
-
     private redirectAfterLogin(role: UserRole): void {
         this.ngZone.run(() => {
             switch (role) {
@@ -326,8 +325,6 @@ export class AuthService {
         }
     }
 
-    // TAMBIÉN REEMPLAZAR el método createUserDocument si existe:
-
     private async createUserDocument(user: User): Promise<void> {
         try {
             const userRef = doc(this.firestore, 'users', user.uid);
@@ -381,9 +378,27 @@ export class AuthService {
         }
     }
 
-    // AGREGAR este getter para acceso desde otros componentes:
-
     getCurrentFirebaseUser(): FirebaseUser | null {
         return this.auth.currentUser;
+    }
+
+    async checkUserDocumentExists(uid: string): Promise<boolean> {
+        try {
+            const userRef = doc(this.firestore, 'users', uid);
+            const userSnap = await getDoc(userRef);
+
+            console.log(`🔍 [AuthService] User document exists for ${uid}:`, userSnap.exists());
+
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                console.log('📄 [AuthService] User document data:', userData);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error('❌ [AuthService] Error checking user document:', error);
+            return false;
+        }
     }
 }
