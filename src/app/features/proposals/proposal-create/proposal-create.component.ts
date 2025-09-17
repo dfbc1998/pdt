@@ -22,12 +22,18 @@ import {
   IonButton,
   IonIcon,
   IonChip,
+  IonCheckbox,
+  IonDatetime,
+  IonPopover,
+  IonList,
+  IonItemDivider,
   IonGrid,
   IonRow,
   IonCol,
   IonSpinner,
   IonAlert,
   IonNote,
+  IonText,
   IonProgressBar,
   ToastController,
   AlertController
@@ -95,12 +101,18 @@ import {
     IonButton,
     IonIcon,
     IonChip,
+    IonCheckbox,
+    IonDatetime,
+    IonPopover,
+    IonList,
+    IonItemDivider,
     IonGrid,
     IonRow,
     IonCol,
     IonSpinner,
     IonAlert,
     IonNote,
+    IonText,
     IonProgressBar,
     HeaderComponent,
     LoadingComponent
@@ -336,11 +348,13 @@ export class ProposalCreateComponent implements OnInit, OnDestroy {
   // Milestone Management
   addMilestone(): void {
     const milestoneGroup = this.formBuilder.group({
-      title: ['', Validators.required],
-      description: ['', Validators.required],
+      title: ['', [Validators.required]],
+      description: ['', [Validators.required]],
       amount: [0, [Validators.required, Validators.min(1)]],
       duration: [1, [Validators.required, Validators.min(1)]],
-      deliverables: this.formBuilder.array([this.formBuilder.control('', Validators.required)])
+      deliverables: this.formBuilder.array([
+        this.formBuilder.control('', [Validators.required])
+      ])
     });
 
     this.milestonesArray.push(milestoneGroup);
@@ -352,7 +366,7 @@ export class ProposalCreateComponent implements OnInit, OnDestroy {
 
   addDeliverable(milestoneIndex: number): void {
     const deliverables = this.getDeliverables(milestoneIndex);
-    deliverables.push(this.formBuilder.control('', Validators.required));
+    deliverables.push(this.formBuilder.control('', [Validators.required]));
   }
 
   removeDeliverable(milestoneIndex: number, deliverableIndex: number): void {
@@ -365,8 +379,8 @@ export class ProposalCreateComponent implements OnInit, OnDestroy {
   // Question Management
   addQuestion(questionText: string = ''): void {
     const questionGroup = this.formBuilder.group({
-      question: [questionText, Validators.required],
-      answer: ['', Validators.required],
+      question: [questionText, [Validators.required]],
+      answer: ['', [Validators.required]],
       isRequired: [true]
     });
 
