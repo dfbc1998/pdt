@@ -331,13 +331,18 @@ export class ProposalCreateComponent implements OnInit, OnDestroy {
   }
 
   isCurrentStepValid(): boolean {
+    if (!this.proposalForm) return false;
+
     switch (this.currentStep) {
       case 1:
-        return this.proposalForm.get('coverLetter')?.valid || false;
+        const coverLetter = this.proposalForm.get('coverLetter');
+        return coverLetter ? coverLetter.valid : false;
       case 2:
-        return this.proposalForm.get('budget')?.valid || false;
+        const budget = this.proposalForm.get('budget');
+        return budget ? budget.valid : false;
       case 3:
-        return this.proposalForm.get('timeline')?.valid || false;
+        const timeline = this.proposalForm.get('timeline');
+        return timeline ? timeline.valid : false;
       case 4:
         return true; // Step 4 is optional
       default:
@@ -515,6 +520,54 @@ export class ProposalCreateComponent implements OnInit, OnDestroy {
       case 'flexible': return 'flexible';
       default: return type;
     }
+  }
+
+  // Debug method to check form validity
+  debugFormValidity(): void {
+    console.log('=== FORM DEBUG ===');
+    console.log('Form valid:', this.proposalForm?.valid);
+    console.log('Form value:', this.proposalForm?.value);
+    console.log('Form errors:', this.getFormErrors());
+    console.log('Current step:', this.currentStep);
+    console.log('Step valid:', this.isCurrentStepValid());
+  }
+
+  private getFormErrors(): any {
+    if (!this.proposalForm) return {};
+
+    const errors: any = {};
+
+    Object.keys(this.proposalForm.controls).forEach(key => {
+      const control = this.proposalForm.get(key);
+      if (control && control.errors) {
+        errors[key] = control.errors;
+      }
+
+      // Check nested form groups
+      if (control && typeof control === 'object' && 'controls' in control) {
+        const nestedErrors = this.getNestedErrors(control as any);
+        if (Object.keys(nestedErrors).length > 0) {
+          errors[key] = nestedErrors;
+        }
+      }
+    });
+
+    return errors;
+  }
+
+  private getNestedErrors(group: any): any {
+    const errors: any = {};
+
+    if (group && group.controls) {
+      Object.keys(group.controls).forEach(key => {
+        const control = group.get(key);
+        if (control && control.errors) {
+          errors[key] = control.errors;
+        }
+      });
+    }
+
+    return errors;
   }
 
   // Navigation and Utility Methods

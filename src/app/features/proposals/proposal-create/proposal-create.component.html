@@ -274,7 +274,7 @@
             </ion-grid>
 
             <!-- Deliverables -->
-            <div class="deliverables-section">
+            <div class="deliverables-section" formArrayName="deliverables">
               <ion-label class="deliverables-label">Entregables:</ion-label>
               @for (deliverable of getDeliverables(i).controls; track $index; let j = $index) {
               <div class="deliverable-item">
