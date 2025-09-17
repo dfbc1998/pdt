@@ -16,72 +16,6 @@ export class ProposalService {
 
     constructor() { }
 
-    // Submit a new proposal
-    async submitProposal(proposalData: Omit<Proposal, 'id' | 'submittedAt' | 'viewedByClient'>): Promise<ApiResponse<Proposal>> {
-        try {
-            const currentUser = this.authService.currentUser;
-            if (!currentUser || !this.authService.isFreelancer) {
-                return {
-                    success: false,
-                    error: 'Only freelancers can submit proposals'
-                };
-            }
-
-            // Check if freelancer has already submitted a proposal
-            const existingProposal = await this.checkExistingProposal(proposalData.projectId, currentUser.uid);
-            if (existingProposal) {
-                return {
-                    success: false,
-                    error: 'You have already submitted a proposal for this project'
-                };
-            }
-
-            // Verify project exists and is accepting proposals
-            const projectResponse = await this.projectService.getProjectById(proposalData.projectId);
-            if (!projectResponse.success || !projectResponse.data) {
-                return {
-                    success: false,
-                    error: 'Project not found'
-                };
-            }
-
-            const project = projectResponse.data;
-            if (project.status !== 'published') {
-                return {
-                    success: false,
-                    error: 'This project is not accepting proposals'
-                };
-            }
-
-            const proposalToCreate = {
-                ...proposalData,
-                freelancerId: currentUser.uid,
-                submittedAt: new Date(),
-                viewedByClient: false,
-                isShortlisted: false,
-                status: ProposalStatus.SUBMITTED
-            };
-
-            const proposalRef = await addDoc(collection(this.firestore, this.COLLECTION_NAME), proposalToCreate);
-
-            const createdProposal: Proposal = {
-                id: proposalRef.id,
-                ...proposalToCreate
-            };
-
-            return {
-                success: true,
-                data: createdProposal,
-                message: 'Proposal submitted successfully'
-            };
-        } catch (error: any) {
-            return {
-                success: false,
-                error: error.message || 'Failed to submit proposal'
-            };
-        }
-    }
-
     // Get proposal by ID
     async getProposalById(proposalId: string): Promise<ApiResponse<Proposal>> {
         try {
@@ -406,6 +340,114 @@ export class ProposalService {
             return {
                 success: false,
                 error: error.message || 'Failed to get proposal statistics'
+            };
+        }
+    }
+
+    // Método submitProposal corregido con debugging
+    // Método submitProposal corregido con debugging
+    async submitProposal(proposalData: Omit<Proposal, 'id' | 'submittedAt' | 'viewedByClient'>): Promise<ApiResponse<Proposal>> {
+        try {
+            console.log('🚀 [ProposalService] Starting proposal submission...');
+
+            const currentUser = this.authService.currentUser;
+            if (!currentUser || !this.authService.isFreelancer) {
+                console.error('❌ [ProposalService] Authentication failed or user is not freelancer');
+                return {
+                    success: false,
+                    error: 'Only freelancers can submit proposals'
+                };
+            }
+
+            console.log('✅ [ProposalService] User authenticated:', currentUser.uid, 'Role:', currentUser.role);
+
+            // Check if freelancer has already submitted a proposal
+            console.log('🔍 [ProposalService] Checking for existing proposal...');
+            const existingProposal = await this.checkExistingProposal(proposalData.projectId, currentUser.uid);
+            if (existingProposal) {
+                console.error('❌ [ProposalService] Proposal already exists');
+                return {
+                    success: false,
+                    error: 'You have already submitted a proposal for this project'
+                };
+            }
+
+            // Verify project exists and is accepting proposals
+            console.log('🔍 [ProposalService] Verifying project status...');
+            const projectResponse = await this.projectService.getProjectById(proposalData.projectId);
+            if (!projectResponse.success || !projectResponse.data) {
+                console.error('❌ [ProposalService] Project not found');
+                return {
+                    success: false,
+                    error: 'Project not found'
+                };
+            }
+
+            const project = projectResponse.data;
+            if (project.status !== 'published') {
+                console.error('❌ [ProposalService] Project not published, status:', project.status);
+                return {
+                    success: false,
+                    error: 'This project is not accepting proposals'
+                };
+            }
+
+            console.log('✅ [ProposalService] Project verified, status:', project.status);
+
+            // Prepare proposal data
+            const proposalToCreate = {
+                projectId: proposalData.projectId,
+                freelancerId: currentUser.uid,
+                coverLetter: proposalData.coverLetter,
+                proposedBudget: proposalData.proposedBudget,
+                proposedTimeline: proposalData.proposedTimeline,
+                milestones: proposalData.milestones || [],
+                attachments: proposalData.attachments || [],
+                questions: proposalData.questions || [],
+                status: ProposalStatus.SUBMITTED,
+                submittedAt: new Date(),
+                viewedByClient: false,
+                isShortlisted: false
+                // respondedAt y clientFeedback se omiten intencionalmente (undefined por defecto)
+            };
+
+            console.log('📝 [ProposalService] Proposal data prepared:', {
+                projectId: proposalToCreate.projectId,
+                freelancerId: proposalToCreate.freelancerId,
+                status: proposalToCreate.status,
+                coverLetterLength: proposalToCreate.coverLetter.length,
+                budgetAmount: proposalToCreate.proposedBudget.amount,
+                timelineDuration: proposalToCreate.proposedTimeline.duration,
+                milestonesCount: proposalToCreate.milestones.length,
+                questionsCount: proposalToCreate.questions.length
+            });
+
+            console.log('💾 [ProposalService] Saving to Firestore...');
+            const proposalRef = await addDoc(collection(this.firestore, this.COLLECTION_NAME), proposalToCreate);
+            console.log('✅ [ProposalService] Proposal saved with ID:', proposalRef.id);
+
+            const createdProposal: Proposal = {
+                id: proposalRef.id,
+                ...proposalToCreate,
+                // Campos opcionales que pueden ser undefined
+                respondedAt: undefined,
+                clientFeedback: undefined
+            };
+
+            return {
+                success: true,
+                data: createdProposal,
+                message: 'Proposal submitted successfully'
+            };
+        } catch (error: any) {
+            console.error('💥 [ProposalService] Error submitting proposal:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            console.error('Error details:', error);
+
+            return {
+                success: false,
+                error: error.message || 'Failed to submit proposal'
             };
         }
     }

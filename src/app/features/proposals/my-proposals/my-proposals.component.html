@@ -1,3 +1,263 @@
-<p>
-  my-proposals works!
-</p>
+<!-- src/app/features/proposals/my-proposals/my-proposals.component.html -->
+<app-header title="Mis Propuestas"></app-header>
+
+<ion-content class="proposals-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (isLoading && !isRefreshing) {
+  <app-loading message="Cargando tus propuestas..."></app-loading>
+  } @else {
+  <div class="proposals-container">
+
+    <!-- Stats Dashboard -->
+    <div class="stats-dashboard">
+      <div class="stats-header">
+        <h2 class="stats-title">Dashboard de Propuestas</h2>
+        <p class="stats-subtitle">Resumen de tu actividad como freelancer</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-icon">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total Enviadas</div>
+          </div>
+        </div>
+
+        <div class="stat-card success">
+          <div class="stat-icon">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.accepted }}</div>
+            <div class="stat-label">Seleccionadas</div>
+          </div>
+        </div>
+
+        <div class="stat-card warning">
+          <div class="stat-icon">
+            <ion-icon name="star-outline"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.shortlisted }}</div>
+            <div class="stat-label">Pre-seleccionadas</div>
+          </div>
+        </div>
+
+        <div class="stat-card accent">
+          <div class="stat-icon">
+            <ion-icon name="trending-up-outline"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.successRate }}%</div>
+            <div class="stat-label">Tasa de Éxito</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Section -->
+    <div class="action-section">
+      <ion-button class="browse-projects-btn" expand="block" (click)="browseProjects()">
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        Buscar Nuevos Proyectos
+      </ion-button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+      <ion-searchbar (ionInput)="onSearchChange($event)" placeholder="Buscar propuestas..." class="custom-searchbar">
+      </ion-searchbar>
+    </div>
+
+    <!-- Filter Segments -->
+    <div class="filter-section">
+      <ion-segment [value]="selectedFilter" (ionChange)="onSegmentChange($event)" class="custom-segment">
+        <ion-segment-button value="all">
+          <ion-label>
+            Todas
+            <ion-badge class="segment-badge">{{ getFilterCount('all') }}</ion-badge>
+          </ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button value="submitted">
+          <ion-label>
+            Pendientes
+            <ion-badge class="segment-badge">{{ getFilterCount('submitted') }}</ion-badge>
+          </ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button value="shortlisted">
+          <ion-label>
+            Pre-seleccionadas
+            <ion-badge class="segment-badge">{{ getFilterCount('shortlisted') }}</ion-badge>
+          </ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button value="accepted">
+          <ion-label>
+            Seleccionadas
+            <ion-badge class="segment-badge">{{ getFilterCount('accepted') }}</ion-badge>
+          </ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Proposals List -->
+    <div class="proposals-list">
+      @if (filteredProposals.length === 0 && !isLoading) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <h3 class="empty-title">
+          @if (selectedFilter === 'all') {
+          No tienes propuestas aún
+          } @else {
+          No hay propuestas {{ getStatusLabel(selectedFilter).toLowerCase() }}
+          }
+        </h3>
+        <p class="empty-description">
+          @if (selectedFilter === 'all') {
+          Comienza explorando proyectos interesantes y envía tu primera propuesta para mostrar tu talento.
+          } @else {
+          No tienes propuestas con el estado "{{ getStatusLabel(selectedFilter) }}" en este momento.
+          }
+        </p>
+        @if (selectedFilter === 'all') {
+        <ion-button class="empty-action-btn" (click)="browseProjects()">
+          <ion-icon name="search-outline" slot="start"></ion-icon>
+          Explorar Proyectos
+        </ion-button>
+        }
+      </div>
+      } @else {
+      @for (proposal of filteredProposals; track proposal.id) {
+      <div class="proposal-card">
+        <div class="proposal-header">
+          <div class="proposal-project">
+            <h3 class="project-title">
+              {{ proposal.project?.title || 'Proyecto no disponible' }}
+            </h3>
+            <div class="project-meta">
+              <span class="meta-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ formatTimeAgo(proposal.submittedAt) }}
+              </span>
+              @if (proposal.viewedByClient) {
+              <span class="meta-item viewed">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                Visto por cliente
+              </span>
+              }
+            </div>
+          </div>
+
+          <div class="proposal-status">
+            <ion-badge [class]="getStatusBadgeClass(proposal.status)">
+              <ion-icon [name]="getStatusIcon(proposal.status)"></ion-icon>
+              {{ getStatusLabel(proposal.status) }}
+            </ion-badge>
+          </div>
+        </div>
+
+        <div class="proposal-content">
+          <!-- Proposal Details -->
+          <div class="proposal-details">
+            <div class="detail-item">
+              <ion-icon name="cash-outline" class="detail-icon"></ion-icon>
+              <span class="detail-value">
+                {{ proposal.proposedBudget.amount | currency:'USD':'symbol':'1.0-0' }}
+                @if (proposal.proposedBudget.type === 'hourly') {
+                /hora
+                }
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <ion-icon name="time-outline" class="detail-icon"></ion-icon>
+              <span class="detail-value">
+                {{ proposal.proposedTimeline.duration }}
+                @switch (proposal.proposedTimeline.unit) {
+                @case ('days') { días }
+                @case ('weeks') { semanas }
+                @case ('months') { meses }
+                }
+              </span>
+            </div>
+
+            @if (proposal.milestones.length > 0) {
+            <div class="detail-item">
+              <ion-icon name="checkmark-outline" class="detail-icon"></ion-icon>
+              <span class="detail-value">{{ proposal.milestones.length }} hitos</span>
+            </div>
+            }
+          </div>
+
+          <!-- Cover Letter Preview -->
+          <div class="cover-letter-preview">
+            <p class="cover-letter-text">
+              {{ proposal.coverLetter.substring(0, 120) }}{{ proposal.coverLetter.length > 120 ? '...' : '' }}
+            </p>
+          </div>
+
+          <!-- Client Feedback -->
+          @if (proposal.clientFeedback) {
+          <div class="client-feedback">
+            <div class="feedback-header">
+              <ion-icon name="chatbubble-outline"></ion-icon>
+              <span>Respuesta del cliente:</span>
+            </div>
+            <p class="feedback-text">{{ proposal.clientFeedback }}</p>
+          </div>
+          }
+
+          <!-- Response Date -->
+          @if (proposal.respondedAt) {
+          <div class="response-info">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>Respondido {{ formatTimeAgo(proposal.respondedAt) }}</span>
+          </div>
+          }
+        </div>
+
+        <!-- Actions -->
+        <div class="proposal-actions">
+          <ion-button fill="clear" size="small" class="action-btn primary" (click)="viewProposal(proposal.id)">
+            <ion-icon name="eye-outline" slot="start"></ion-icon>
+            Ver Detalles
+          </ion-button>
+
+          @if (canEdit(proposal)) {
+          <ion-button fill="clear" size="small" class="action-btn secondary" (click)="editProposal(proposal.id)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+          }
+
+          @if (canWithdraw(proposal)) {
+          <ion-button fill="clear" size="small" class="action-btn danger" (click)="withdrawProposal(proposal)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Retirar
+          </ion-button>
+          }
+
+          @if (proposal.status === 'accepted') {
+          <ion-button fill="solid" size="small" class="action-btn success" (click)="goToProject(proposal.projectId)">
+            <ion-icon name="briefcase-outline" slot="start"></ion-icon>
+            Ver Proyecto
+          </ion-button>
+          }
+        </div>
+      </div>
+      }
+      }
+    </div>
+  </div>
+  }
+</ion-content>
