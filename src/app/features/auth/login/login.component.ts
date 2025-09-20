@@ -86,14 +86,7 @@ export class LoginComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    // Validar que el formulario sea válido
-    if (!this.loginForm.valid) {
-      this.markFormGroupTouched(this.loginForm);
-      return;
-    }
-
-    // Evitar múltiples submissions
-    if (this.isLoading) {
+    if (this.loginForm.invalid || this.isLoading) {
       return;
     }
 
@@ -101,33 +94,30 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const loginData: LoginRequest = {
-        email: this.loginForm.value.email.trim(),
-        password: this.loginForm.value.password
-      };
-
-      console.log('Attempting login with:', { email: loginData.email });
+      const loginData = this.loginForm.value;
+      console.log('🔐 Attempting login with:', { email: loginData.email });
 
       const result = await this.authService.login(loginData);
 
       if (result.success) {
-        console.log('Login successful');
+        console.log('✅ Login successful');
 
         // Check if user needs recovery (has null data but success = true)
         if (!result.data) {
-          console.log('User needs account recovery');
+          console.log('🔧 User needs account recovery');
           await this.router.navigate(['/auth/user-recovery']);
         } else {
-          console.log('User authenticated successfully');
-          // Success - user will be redirected by the auth service or auth guard
+          console.log('👤 User authenticated successfully, redirecting to dashboard');
+          // CAMBIO PRINCIPAL: Ir directamente al dashboard optimizado
+          // El nuevo DashboardRedirectComponent se encargará de la redirección automática
           await this.router.navigate(['/dashboard']);
         }
       } else {
         this.errorMessage = result.error || 'Error al iniciar sesión';
-        console.error('Login failed:', result.error);
+        console.error('❌ Login failed:', result.error);
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('💥 Login error:', error);
       this.errorMessage = error.message || 'Error inesperado al iniciar sesión';
     } finally {
       this.isLoading = false;
@@ -155,19 +145,20 @@ export class LoginComponent implements OnInit {
       };
 
       const credentials = demoCredentials[userType];
-      console.log('Attempting demo login as:', userType);
+      console.log('🎭 Attempting demo login as:', userType);
 
       const result = await this.authService.login(credentials);
 
       if (result.success) {
-        console.log('Demo login successful');
+        console.log('✅ Demo login successful, redirecting to dashboard');
+        // CAMBIO: También usar el dashboard optimizado para login demo
         await this.router.navigate(['/dashboard']);
       } else {
         this.errorMessage = result.error || 'Error al iniciar sesión con cuenta demo';
-        console.error('Demo login failed:', result.error);
+        console.error('❌ Demo login failed:', result.error);
       }
     } catch (error: any) {
-      console.error('Demo login error:', error);
+      console.error('💥 Demo login error:', error);
       this.errorMessage = error.message || 'Error inesperado';
     } finally {
       this.isLoading = false;

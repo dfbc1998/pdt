@@ -3,7 +3,7 @@ import { Injectable, inject, NgZone } from '@angular/core';
 import { Auth, User as FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import { User, UserRole, LoginRequest, RegisterRequest, ApiResponse } from '../interfaces';
 
 @Injectable({
@@ -164,12 +164,36 @@ export class AuthService {
 
     async logout(): Promise<void> {
         try {
-            await signOut(this.auth);
+            console.log('🚪 Logging out user...');
+
+            // Clear current user first
             this.currentUserSubject.next(null);
-            this.router.navigate(['/auth/login']);
+
+            // Sign out from Firebase
+            await this.auth.signOut();
+
+            // Clear any cached data
+            this.clearCachedData();
+
+            console.log('✅ User logged out successfully');
+
+            // Navigate to login
+            await this.router.navigate(['/auth/login']);
+
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('❌ Error during logout:', error);
+
+            // Even if logout fails, clear local state and redirect
+            this.currentUserSubject.next(null);
+            this.clearCachedData();
+            await this.router.navigate(['/auth/login']);
         }
+    }
+
+    private clearCachedData(): void {
+        // Clear any cached user data, tokens, etc.
+        // Add your specific cleanup logic here
+        console.log('🧹 Clearing cached data...');
     }
 
     async resetPassword(email: string): Promise<ApiResponse<void>> {
@@ -220,21 +244,7 @@ export class AuthService {
     }
 
     private redirectAfterLogin(role: UserRole): void {
-        this.ngZone.run(() => {
-            switch (role) {
-                case UserRole.CLIENT:
-                    this.router.navigate(['/dashboard/client']);
-                    break;
-                case UserRole.FREELANCER:
-                    this.router.navigate(['/dashboard/freelancer']);
-                    break;
-                case UserRole.ADMIN:
-                    this.router.navigate(['/dashboard/admin']);
-                    break;
-                default:
-                    this.router.navigate(['/dashboard']);
-            }
-        });
+        console.log('🎯 User logged in with role:', role, '- letting DashboardRedirectComponent handle navigation');
     }
 
     private redirectAfterRegistration(role: UserRole): void {
@@ -339,8 +349,6 @@ export class AuthService {
         }
     }
 
-    // Y AGREGAR este método si no existe:
-
     async recreateUserDocument(role: UserRole): Promise<ApiResponse<User>> {
         try {
             const firebaseUser = this.auth.currentUser;
@@ -401,4 +409,29 @@ export class AuthService {
             return false;
         }
     }
+
+    public isUserReady(): Observable<boolean> {
+        return this.currentUser$.pipe(
+            map(user => {
+                if (!user) return false;
+                if (!user.role) return false;
+                if (!user.email) return false;
+                return true;
+            })
+        );
+    }
+
+    public getDashboardRoute(role?: UserRole): string {
+        const userRole = role || this.currentUser?.role;
+
+        const dashboardRoutes: { [key: string]: string } = {
+            [UserRole.CLIENT]: '/dashboard/client',
+            [UserRole.FREELANCER]: '/dashboard/freelancer',
+            [UserRole.ADMIN]: '/dashboard/admin'
+        };
+
+        return dashboardRoutes[userRole as string] || '/dashboard/client';
+    }
+
+
 }

@@ -1,3 +1,4 @@
+// src/app/app.routes.ts - ACTUALIZACIÓN COMPLETA
 import { Routes } from '@angular/router';
 import { AuthGuard, RoleGuard, GuestGuard, ProfileSetupGuard, AdminGuard, ProjectOwnerGuard } from './core/guards';
 import { UserRole } from './core/interfaces';
@@ -41,7 +42,8 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./features/dashboard/main-dashboard/main-dashboard.component').then(m => m.MainDashboardComponent)
+        // CAMBIO PRINCIPAL: Reemplazamos MainDashboardComponent con DashboardRedirectComponent
+        loadComponent: () => import('./shared/components/dashboard-redirect/dashboard-redirect.component').then(m => m.DashboardRedirectComponent)
       },
       {
         path: 'client',
@@ -86,22 +88,30 @@ export const routes: Routes = [
         path: ':id/edit',
         canActivate: [ProjectOwnerGuard],
         loadComponent: () => import('./features/projects/project-edit/project-edit.component').then(m => m.ProjectEditComponent)
-      },
-      {
-        path: ':id/proposals',
-        canActivate: [ProjectOwnerGuard],
-        loadComponent: () => import('./features/proposals/proposal-list/proposal-list.component').then(m => m.ProposalListComponent)
       }
     ]
   },
 
-  // Proposal routes
+  // Proposals routes
   {
     path: 'proposals',
     canActivate: [AuthGuard],
     children: [
       {
         path: '',
+        redirectTo: 'received',
+        pathMatch: 'full'
+      },
+      {
+        path: 'received',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.CLIENT] },
+        loadComponent: () => import('./features/proposals/received-proposals/received-proposals.component').then(m => m.ReceivedProposalsComponent)
+      },
+      {
+        path: 'my-proposals',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.FREELANCER] },
         loadComponent: () => import('./features/proposals/my-proposals/my-proposals.component').then(m => m.MyProposalsComponent)
       },
       {
@@ -113,12 +123,6 @@ export const routes: Routes = [
       {
         path: ':id',
         loadComponent: () => import('./features/proposals/proposal-detail/proposal-detail.component').then(m => m.ProposalDetailComponent)
-      },
-      {
-        path: ':id/edit',
-        canActivate: [RoleGuard],
-        data: { roles: [UserRole.FREELANCER] },
-        loadComponent: () => import('./features/proposals/proposal-edit/proposal-edit.component').then(m => m.ProposalEditComponent)
       }
     ]
   },

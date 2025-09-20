@@ -1,7 +1,8 @@
 // src/app/core/guards/auth.guard.ts - REEMPLAZAR COMPLETO
 import { Injectable, inject } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
-import { Observable, map, take, filter, switchMap } from 'rxjs';
+import { Observable, map, take, filter, switchMap, timeout, catchError } from 'rxjs';
+import { of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -12,27 +13,44 @@ export class AuthGuard implements CanActivate {
     private router = inject(Router);
 
     canActivate(): Observable<boolean | UrlTree> {
-        // Esperar a que termine de cargar el estado de autenticación
+        console.log('🔐 AuthGuard: Checking authentication...');
+
         return this.authService.isLoading$.pipe(
-            filter(isLoading => !isLoading), // Solo continuar cuando ya no esté cargando
+            // Wait for auth to finish loading, but with timeout
+            filter(isLoading => {
+                console.log('🔄 AuthGuard: Auth loading state:', isLoading);
+                return !isLoading;
+            }),
             take(1),
-            switchMap(() => this.authService.currentUser$.pipe(take(1))),
+            timeout(15000), // 15 second timeout for auth loading
+            switchMap(() => {
+                console.log('✅ AuthGuard: Auth finished loading, checking user...');
+                return this.authService.currentUser$.pipe(take(1));
+            }),
             map(user => {
-                // Si no hay usuario autenticado, redirigir a login
+                console.log('👤 AuthGuard: Current user:', user ? `${user.email} (${user.role})` : 'null');
+
+                // If no user, redirect to login
                 if (!user) {
-                    console.log('No authenticated user, redirecting to login');
+                    console.log('❌ AuthGuard: No user found, redirecting to login');
                     return this.router.createUrlTree(['/auth/login']);
                 }
 
-                // Si el usuario existe y tiene rol, permitir acceso
+                // If user exists and has role, allow access
                 if (user && user.role) {
-                    console.log('User authenticated with role:', user.role);
+                    console.log('✅ AuthGuard: User authenticated with role, allowing access');
                     return true;
                 }
 
-                // Si hay problemas con el usuario, redirigir a recuperación
-                console.log('User exists but incomplete data, redirecting to recovery');
+                // If user exists but has incomplete data, redirect to recovery
+                console.log('⚠️ AuthGuard: User incomplete, redirecting to recovery');
                 return this.router.createUrlTree(['/auth/user-recovery']);
+            }),
+            catchError(error => {
+                console.error('💥 AuthGuard: Error during authentication check:', error);
+
+                // On timeout or other errors, redirect to login
+                return of(this.router.createUrlTree(['/auth/login']));
             })
         );
     }
