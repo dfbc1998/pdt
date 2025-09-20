@@ -1,3 +1,289 @@
-<p>
-  file-manager works!
-</p>
+<!-- src/app/features/files/file-manager/file-manager.component.html - COMPLETO DESDE CERO -->
+<app-header title="Gestor de Archivos" [showBackButton]="true"></app-header>
+
+<ion-content class="file-manager-content">
+  <div class="file-manager-container">
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando archivos...</p>
+    </div>
+    }
+
+    <!-- Main Content -->
+    @if (!isLoading) {
+    <!-- Statistics Cards -->
+    <ion-grid class="stats-grid">
+      <ion-row>
+        <ion-col size="12" size-md="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-content">
+                <ion-icon name="document-outline" class="stat-icon"></ion-icon>
+                <div class="stat-info">
+                  <h3>{{ fileStats.totalFiles }}</h3>
+                  <p>Archivos Totales</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-content">
+                <ion-icon name="resize-outline" class="stat-icon storage"></ion-icon>
+                <div class="stat-info">
+                  <h3>{{ formatFileSize(fileStats.totalSize) }}</h3>
+                  <p>Espacio Usado</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-content">
+                <ion-icon name="image-outline" class="stat-icon images"></ion-icon>
+                <div class="stat-info">
+                  <h3>{{ getImageFilesCount() }}</h3>
+                  <p>Imágenes</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-content">
+                <ion-icon name="folder-outline" class="stat-icon projects"></ion-icon>
+                <div class="stat-info">
+                  <h3>{{ getProjectFilesCount() }}</h3>
+                  <p>Proyectos</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Filters and Controls -->
+    <ion-card class="controls-card">
+      <ion-card-content>
+        <!-- Search Bar -->
+        <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchChange($event)" placeholder="Buscar archivos..."
+          show-clear-button="focus" class="custom-searchbar">
+        </ion-searchbar>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <ion-segment [(ngModel)]="selectedCategory" (ionChange)="onCategorySegmentChange($event)" scrollable="true"
+              class="category-segment">
+              @for (category of fileCategories; track category.value) {
+              <ion-segment-button [value]="category.value">
+                <ion-icon [name]="category.icon"></ion-icon>
+                <ion-label>{{ category.label }}</ion-label>
+              </ion-segment-button>
+              }
+            </ion-segment>
+          </div>
+
+          <!-- View and Sort Controls -->
+          <div class="view-controls">
+            <!-- Selection Controls -->
+            @if (selectedFiles.size > 0) {
+            <div class="selection-controls">
+              <ion-chip color="primary">
+                <ion-label>{{ selectedFiles.size }} seleccionado(s)</ion-label>
+              </ion-chip>
+              <ion-button fill="clear" size="small" color="danger" (click)="deleteSelectedFiles()">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+            }
+
+            <!-- View Mode Toggle -->
+            <ion-button fill="outline" size="small" (click)="toggleViewMode()">
+              <ion-icon [name]="viewMode === 'grid' ? 'list-outline' : 'grid-outline'" slot="start"></ion-icon>
+              {{ viewMode === 'grid' ? 'Lista' : 'Cuadrícula' }}
+            </ion-button>
+
+            <!-- Sort Options -->
+            <ion-button fill="outline" size="small" (click)="onSortChange('date')">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              Fecha
+              @if (sortBy === 'date') {
+              <ion-icon [name]="sortDirection === 'desc' ? 'chevron-down' : 'chevron-up'" slot="end">
+              </ion-icon>
+              }
+            </ion-button>
+
+            <ion-button fill="outline" size="small" (click)="onSortChange('name')">
+              Nombre
+              @if (sortBy === 'name') {
+              <ion-icon [name]="sortDirection === 'desc' ? 'chevron-down' : 'chevron-up'" slot="end">
+              </ion-icon>
+              }
+            </ion-button>
+
+            <ion-button fill="outline" size="small" (click)="onSortChange('size')">
+              Tamaño
+              @if (sortBy === 'size') {
+              <ion-icon [name]="sortDirection === 'desc' ? 'chevron-down' : 'chevron-up'" slot="end">
+              </ion-icon>
+              }
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Files Display -->
+    <ion-card class="files-card">
+      @if (displayedFiles.length > 0) {
+      <ion-card-header>
+        <div class="files-header">
+          <ion-card-title>
+            Archivos ({{ displayedFiles.length }})
+          </ion-card-title>
+
+          <ion-button fill="clear" size="small" (click)="selectAllFiles()">
+            <ion-checkbox [checked]="selectedFiles.size === displayedFiles.length && displayedFiles.length > 0"
+              [indeterminate]="selectedFiles.size > 0 && selectedFiles.size < displayedFiles.length">
+            </ion-checkbox>
+            Seleccionar Todo
+          </ion-button>
+        </div>
+      </ion-card-header>
+      }
+
+      <ion-card-content>
+        <!-- Empty State -->
+        @if (displayedFiles.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="document-outline" class="empty-icon"></ion-icon>
+          <h3>No hay archivos</h3>
+          <p>No se encontraron archivos que coincidan con los filtros aplicados.</p>
+          <ion-button fill="outline" (click)="goToUpload()">
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            Subir Archivos
+          </ion-button>
+        </div>
+        }
+
+        <!-- Grid View -->
+        @if (viewMode === 'grid' && displayedFiles.length > 0) {
+        <ion-grid class="files-grid">
+          <ion-row>
+            @for (file of displayedFiles; track file.id) {
+            <ion-col size="6" size-md="4" size-lg="3">
+              <div class="file-card" [class.selected]="isFileSelected(file.id)">
+                <!-- Selection Checkbox -->
+                <ion-checkbox class="file-checkbox" [checked]="isFileSelected(file.id)"
+                  (ionChange)="toggleFileSelection(file.id)">
+                </ion-checkbox>
+
+                <!-- File Icon/Preview -->
+                <div class="file-preview">
+                  @if (file.type.startsWith('image/')) {
+                  <img [src]="file.downloadUrl" [alt]="file.originalName" class="file-image">
+                  } @else {
+                  <ion-icon [name]="getFileIcon(file)" class="file-icon"></ion-icon>
+                  }
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info">
+                  <h4 class="file-name">{{ file.originalName }}</h4>
+                  <p class="file-details">
+                    {{ formatFileSize(file.size) }} • {{ formatDate(file.uploadedAt) }}
+                  </p>
+                  <ion-chip size="small"
+                    [color]="getCategoryIcon(file.category) === 'image-outline' ? 'secondary' : 'primary'">
+                    <ion-icon [name]="getCategoryIcon(file.category)"></ion-icon>
+                    <ion-label>{{ getCategoryLabel(file.category) }}</ion-label>
+                  </ion-chip>
+                </div>
+
+                <!-- Actions -->
+                <div class="file-actions">
+                  <ion-button fill="clear" size="small" (click)="downloadFile(file)">
+                    <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" color="danger" (click)="deleteFile(file)">
+                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </div>
+              </div>
+            </ion-col>
+            }
+          </ion-row>
+        </ion-grid>
+        }
+
+        <!-- List View -->
+        @if (viewMode === 'list' && displayedFiles.length > 0) {
+        <ion-list class="files-list">
+          @for (file of displayedFiles; track file.id) {
+          <ion-item-sliding>
+            <ion-item class="file-list-item" [class.selected]="isFileSelected(file.id)">
+              <!-- Selection Checkbox -->
+              <ion-checkbox slot="start" [checked]="isFileSelected(file.id)" (ionChange)="toggleFileSelection(file.id)">
+              </ion-checkbox>
+
+              <!-- File Icon -->
+              <ion-icon [name]="getFileIcon(file)" slot="start" class="file-list-icon">
+              </ion-icon>
+
+              <!-- File Info -->
+              <ion-label>
+                <h3>{{ file.originalName }}</h3>
+                <p>
+                  {{ formatFileSize(file.size) }} •
+                  {{ getCategoryLabel(file.category) }} •
+                  {{ formatDate(file.uploadedAt) }}
+                </p>
+              </ion-label>
+
+              <!-- Quick Actions -->
+              <ion-button fill="clear" slot="end" (click)="downloadFile(file)">
+                <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <!-- Sliding Actions -->
+            <ion-item-options side="end">
+              <ion-item-option color="primary" (click)="downloadFile(file)">
+                <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+              </ion-item-option>
+              <ion-item-option color="danger" (click)="deleteFile(file)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+          }
+        </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+    }
+
+    <!-- Floating Action Button -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="goToUpload()">
+        <ion-icon name="add-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+
+  </div>
+</ion-content>

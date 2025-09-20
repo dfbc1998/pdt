@@ -1,0 +1,435 @@
+/* src/app/features/files/file-manager/file-manager.component.scss */
+
+.file-manager-content {
+    --background: #f8fafc;
+}
+
+.file-manager-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    gap: 16px;
+    color: #718096;
+
+    ion-spinner {
+        --color: #667eea;
+        width: 40px;
+        height: 40px;
+    }
+
+    p {
+        font-size: 1rem;
+        margin: 0;
+    }
+}
+
+/* Statistics Grid */
+.stats-grid {
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    ion-card-content {
+        padding: 20px;
+    }
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .stat-icon {
+        font-size: 32px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #667eea;
+        color: #ffffff;
+
+        &.storage {
+            background: #48bb78;
+        }
+
+        &.images {
+            background: #ed8936;
+        }
+
+        &.projects {
+            background: #9f7aea;
+        }
+    }
+
+    .stat-info {
+        flex: 1;
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0 0 4px 0;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #718096;
+            margin: 0;
+        }
+    }
+}
+
+/* Controls Card */
+.controls-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    .custom-searchbar {
+        --background: #ffffff;
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
+    }
+}
+
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.filter-group {
+    .category-segment {
+        --background: #f7fafc;
+        border-radius: 8px;
+        overflow-x: auto;
+
+        ion-segment-button {
+            --background: transparent;
+            --background-checked: #667eea;
+            --color: #4a5568;
+            --color-checked: #ffffff;
+            --border-radius: 6px;
+            margin: 4px;
+            min-width: 120px;
+
+            ion-icon {
+                margin-bottom: 4px;
+            }
+
+            ion-label {
+                font-size: 0.8rem;
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+.view-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .selection-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        ion-chip {
+            --background: #667eea;
+            --color: #ffffff;
+        }
+    }
+
+    ion-button {
+        --border-radius: 6px;
+        --padding-top: 8px;
+        --padding-bottom: 8px;
+        text-transform: none;
+        font-size: 0.85rem;
+    }
+}
+
+/* Files Card */
+.files-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    margin-bottom: 80px;
+    /* Space for FAB */
+}
+
+.files-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    ion-card-title {
+        color: #2d3748;
+        font-size: 1.2rem;
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+
+    .empty-icon {
+        font-size: 64px;
+        color: #cbd5e0;
+        margin-bottom: 16px;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        color: #4a5568;
+        margin: 0 0 8px 0;
+    }
+
+    p {
+        font-size: 0.9rem;
+        margin: 0 0 20px 0;
+    }
+
+    ion-button {
+        --border-radius: 8px;
+    }
+}
+
+/* Grid View */
+.files-grid {
+    padding: 8px 0;
+}
+
+.file-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    padding: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+
+    &:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+    }
+
+    &.selected {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+
+    .file-checkbox {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 2;
+    }
+
+    .file-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 80px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        background: #f7fafc;
+
+        .file-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .file-icon {
+            font-size: 40px;
+            color: #667eea;
+        }
+    }
+
+    .file-info {
+        text-align: center;
+        margin-bottom: 12px;
+
+        .file-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-details {
+            font-size: 0.75rem;
+            color: #718096;
+            margin: 0 0 8px 0;
+        }
+
+        ion-chip {
+            --background: #f7fafc;
+            --color: #4a5568;
+            font-size: 0.7rem;
+            height: 24px;
+        }
+    }
+
+    .file-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+
+        ion-button {
+            --padding: 8px;
+            --border-radius: 6px;
+        }
+    }
+}
+
+/* List View */
+.files-list {
+    background: transparent;
+    padding: 0;
+}
+
+.file-list-item {
+    --background: #ffffff;
+    --border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+        --background: #f0f4ff;
+        border-color: #667eea;
+    }
+
+    .file-list-icon {
+        font-size: 24px;
+        color: #667eea;
+        margin-right: 8px;
+    }
+
+    ion-label {
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2d3748;
+            margin: 0 0 4px 0;
+        }
+
+        p {
+            font-size: 0.8rem;
+            color: #718096;
+            margin: 0;
+        }
+    }
+}
+
+/* Floating Action Button */
+ion-fab {
+    ion-fab-button {
+        --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --background-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        --color: #ffffff;
+        --box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .file-manager-container {
+        padding: 12px;
+    }
+
+    .view-controls {
+        flex-direction: column;
+        align-items: stretch;
+
+        .selection-controls {
+            justify-content: center;
+        }
+    }
+
+    .filter-group .category-segment {
+        ion-segment-button {
+            min-width: 100px;
+
+            ion-label {
+                font-size: 0.7rem;
+            }
+        }
+    }
+
+    .file-card {
+        padding: 12px;
+
+        .file-preview {
+            height: 60px;
+        }
+
+        .file-info .file-name {
+            font-size: 0.85rem;
+        }
+    }
+
+    .files-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid ion-col {
+        padding: 4px;
+    }
+
+    .stat-content {
+        gap: 12px;
+
+        .stat-icon {
+            font-size: 24px;
+            padding: 8px;
+        }
+
+        .stat-info h3 {
+            font-size: 1.4rem;
+        }
+    }
+
+    .file-card {
+        padding: 8px;
+    }
+}

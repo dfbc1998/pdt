@@ -351,6 +351,13 @@ export class FileManagerComponent implements OnInit, OnDestroy {
     this.categorySubject.next(category);
   }
 
+  onCategorySegmentChange(event: any): void {
+    const value = event.detail.value;
+    if (value) {
+      this.onCategoryChange(value);
+    }
+  }
+
   onSortChange(sortBy: SortOption): void {
     if (this.sortBy === sortBy) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -514,6 +521,16 @@ export class FileManagerComponent implements OnInit, OnDestroy {
   getCategoryIcon(category: FileCategory): string {
     const categoryData = this.fileCategories.find(c => c.value === category);
     return categoryData?.icon || 'document-outline';
+  }
+
+  // Helper methods for statistics
+  getImageFilesCount(): number {
+    return (this.fileStats.byCategory[FileCategory.PORTFOLIO_IMAGE] || 0) +
+      (this.fileStats.byCategory[FileCategory.PROFILE_PHOTO] || 0);
+  }
+
+  getProjectFilesCount(): number {
+    return this.fileStats.byCategory[FileCategory.PROJECT_ATTACHMENT] || 0;
   }
 
   // Navigation
