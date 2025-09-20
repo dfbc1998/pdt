@@ -1,3 +1,4 @@
+// src/app/features/auth/login/login.component.ts - REEMPLAZAR COMPLETO
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -8,10 +9,22 @@ import {
   IonIcon,
   IonSpinner,
   IonItem,
-  IonLabel
+  IonLabel,
+  IonInput,
+  IonCheckbox
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { logInOutline, eyeOutline, eyeOffOutline, briefcaseOutline, mailOutline, alertCircleOutline, businessOutline, personOutline, arrowForwardOutline } from 'ionicons/icons';
+import {
+  logInOutline,
+  eyeOutline,
+  eyeOffOutline,
+  briefcaseOutline,
+  mailOutline,
+  alertCircleOutline,
+  businessOutline,
+  personOutline,
+  arrowForwardOutline
+} from 'ionicons/icons';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { LoginRequest } from '../../../core/interfaces';
@@ -19,7 +32,11 @@ import { LoginRequest } from '../../../core/interfaces';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonLabel, IonItem,
+  imports: [
+    IonLabel,
+    IonItem,
+    IonInput,
+    IonCheckbox,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -29,8 +46,8 @@ import { LoginRequest } from '../../../core/interfaces';
     IonIcon,
     IonSpinner,
   ],
-  templateUrl: `login.component.html`,
-  styleUrls: [`login.component.scss`]
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -43,7 +60,17 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
 
   constructor() {
-    addIcons({ briefcaseOutline, mailOutline, alertCircleOutline, logInOutline, businessOutline, personOutline, arrowForwardOutline, eyeOutline, eyeOffOutline });
+    addIcons({
+      briefcaseOutline,
+      mailOutline,
+      alertCircleOutline,
+      logInOutline,
+      businessOutline,
+      personOutline,
+      arrowForwardOutline,
+      eyeOutline,
+      eyeOffOutline
+    });
   }
 
   ngOnInit() {
@@ -59,37 +86,59 @@ export class LoginComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.loginForm.valid && !this.isLoading) {
-      this.isLoading = true;
-      this.errorMessage = '';
+    // Validar que el formulario sea válido
+    if (!this.loginForm.valid) {
+      this.markFormGroupTouched(this.loginForm);
+      return;
+    }
 
-      try {
-        const loginData: LoginRequest = {
-          email: this.loginForm.value.email,
-          password: this.loginForm.value.password
-        };
+    // Evitar múltiples submissions
+    if (this.isLoading) {
+      return;
+    }
 
-        const result = await this.authService.login(loginData);
+    this.isLoading = true;
+    this.errorMessage = '';
 
-        if (result.success) {
-          // Check if user needs recovery (has null data but success = true)
-          if (!result.data) {
-            console.log('User needs account recovery');
-            this.router.navigate(['/auth/user-recovery']);
-          }
-          // else: Success - user will be redirected by the auth service or auth guard
+    try {
+      const loginData: LoginRequest = {
+        email: this.loginForm.value.email.trim(),
+        password: this.loginForm.value.password
+      };
+
+      console.log('Attempting login with:', { email: loginData.email });
+
+      const result = await this.authService.login(loginData);
+
+      if (result.success) {
+        console.log('Login successful');
+
+        // Check if user needs recovery (has null data but success = true)
+        if (!result.data) {
+          console.log('User needs account recovery');
+          await this.router.navigate(['/auth/user-recovery']);
         } else {
-          this.errorMessage = result.error || 'Error al iniciar sesión';
+          console.log('User authenticated successfully');
+          // Success - user will be redirected by the auth service or auth guard
+          await this.router.navigate(['/dashboard']);
         }
-      } catch (error: any) {
-        this.errorMessage = error.message || 'Error inesperado';
-      } finally {
-        this.isLoading = false;
+      } else {
+        this.errorMessage = result.error || 'Error al iniciar sesión';
+        console.error('Login failed:', result.error);
       }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      this.errorMessage = error.message || 'Error inesperado al iniciar sesión';
+    } finally {
+      this.isLoading = false;
     }
   }
 
   async loginAsDemo(userType: 'client' | 'freelancer'): Promise<void> {
+    if (this.isLoading) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -106,12 +155,19 @@ export class LoginComponent implements OnInit {
       };
 
       const credentials = demoCredentials[userType];
+      console.log('Attempting demo login as:', userType);
+
       const result = await this.authService.login(credentials);
 
-      if (!result.success) {
+      if (result.success) {
+        console.log('Demo login successful');
+        await this.router.navigate(['/dashboard']);
+      } else {
         this.errorMessage = result.error || 'Error al iniciar sesión con cuenta demo';
+        console.error('Demo login failed:', result.error);
       }
     } catch (error: any) {
+      console.error('Demo login error:', error);
       this.errorMessage = error.message || 'Error inesperado';
     } finally {
       this.isLoading = false;
@@ -143,5 +199,16 @@ export class LoginComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }

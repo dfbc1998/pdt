@@ -1,7 +1,8 @@
-// src/app/shared/components/header/header.component.ts
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+// src/app/shared/components/header/header.component.ts - REEMPLAZAR COMPLETO
+import { Component, Input, Output, EventEmitter, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import {
   IonHeader,
   IonToolbar,
@@ -9,25 +10,26 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonBadge,
+  IonMenuButton,
   IonPopover,
   IonList,
   IonItem,
   IonLabel,
   IonAvatar,
+  IonBadge,
   NavController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
   notificationsOutline,
-  searchOutline,
-  menuOutline,
-  personOutline,
   settingsOutline,
-  logOutOutline,
   helpCircleOutline,
-  chevronDownOutline
+  logOutOutline,
+  chevronDownOutline,
+  personCircleOutline,
+  searchOutline,
+  menuOutline
 } from 'ionicons/icons';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -44,75 +46,97 @@ import { User } from '../../../core/interfaces';
     IonButtons,
     IonButton,
     IonIcon,
-    IonBadge,
+    IonMenuButton,
     IonPopover,
     IonList,
     IonItem,
     IonLabel,
-    IonAvatar
+    IonAvatar,
+    IonBadge
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent {
-  @Input() title: string = '';
-  @Input() showBackButton: boolean = false;
-  @Input() showSearchButton: boolean = false;
-  @Input() showNotifications: boolean = true;
-  @Input() showUserMenu: boolean = true;
-  @Input() transparent: boolean = false;
-  @Input() customColor: string = '';
+export class HeaderComponent implements OnInit, OnDestroy {
+  // Input properties - TODAS las propiedades que los componentes necesitan
+  @Input() title = 'FreeWork';
+  @Input() showBackButton = false;
+  @Input() showMenu = true;
+  @Input() showNotifications = true;
+  @Input() showUserMenu = true;
+  @Input() showSearchButton = false;
+  @Input() transparent = false;
+  @Input() customColor = '';
 
+  // Output events - TODOS los eventos que los componentes necesitan
   @Output() onBackClick = new EventEmitter<void>();
-  @Output() onSearchClick = new EventEmitter<void>();
   @Output() onNotificationClick = new EventEmitter<void>();
   @Output() onMenuClick = new EventEmitter<void>();
+  @Output() onSearchClick = new EventEmitter<void>();
+  @Output() backClick = new EventEmitter<void>(); // Alias para compatibilidad
 
+  private destroy$ = new Subject<void>();
   private authService = inject(AuthService);
   private navController = inject(NavController);
   public router = inject(Router);
 
   currentUser: User | null = null;
-  notificationCount = 3; // Mock notification count
   isUserMenuOpen = false;
+  notificationCount = 0;
 
   constructor() {
     addIcons({
       arrowBackOutline,
       notificationsOutline,
-      searchOutline,
-      menuOutline,
-      personOutline,
       settingsOutline,
-      logOutOutline,
       helpCircleOutline,
-      chevronDownOutline
-    });
-
-    // Subscribe to current user
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
+      logOutOutline,
+      chevronDownOutline,
+      personCircleOutline,
+      searchOutline,
+      menuOutline
     });
   }
 
+  ngOnInit(): void {
+    this.setupSubscriptions();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupSubscriptions(): void {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
+  }
+
+  // Métodos de navegación y acciones
   onBack(): void {
-    if (this.onBackClick.observers.length > 0) {
-      this.onBackClick.emit();
-    } else {
+    // Emitir ambos eventos para compatibilidad
+    this.onBackClick.emit();
+    this.backClick.emit();
+
+    // Si nadie está escuchando los eventos, usar navegación por defecto
+    if (this.onBackClick.observers.length === 0 && this.backClick.observers.length === 0) {
       this.navController.back();
     }
   }
 
-  onSearch(): void {
-    this.onSearchClick.emit();
-  }
-
-  onNotifications(): void {
+  onNotification(): void {
     this.onNotificationClick.emit();
   }
 
   onMenu(): void {
     this.onMenuClick.emit();
+  }
+
+  onSearch(): void {
+    this.onSearchClick.emit();
   }
 
   getUserInitials(): string {

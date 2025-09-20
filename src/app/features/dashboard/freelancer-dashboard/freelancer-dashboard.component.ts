@@ -1,20 +1,28 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subject, BehaviorSubject, Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+// Ionic Components
 import {
   IonContent,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
   IonButton,
   IonIcon,
   IonGrid,
   IonRow,
   IonCol,
-  IonItem,
-  IonLabel
+  IonBadge,
+  IonChip,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
+  ToastController, IonAvatar
 } from '@ionic/angular/standalone';
+
+// Ionicons
 import { addIcons } from 'ionicons';
 import {
   briefcaseOutline,
@@ -24,15 +32,40 @@ import {
   searchOutline,
   eyeOutline,
   chatbubbleOutline,
-  personOutline
+  personOutline,
+  cashOutline,
+  timeOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  sendOutline,
+  addOutline,
+  refreshOutline,
+  statsChartOutline,
+  calendarOutline,
+  folderOutline,
+  heartOutline,
+  layersOutline
 } from 'ionicons/icons';
 
+// Shared Components
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-import { LoadingComponent } from '../../../shared/components/loading/loading.component';
+
+// Core Services and Interfaces
 import { AuthService } from '../../../core/services/auth.service';
 import { ProposalService } from '../../../core/services/proposal.service';
-import { User, Proposal } from '../../../core/interfaces';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { ProjectService } from '../../../core/services/project.service';
+import {
+  User,
+  Proposal,
+  Project,
+  ProposalStatus,
+  ProjectStatus,
+  DashboardStats,
+  ProposalWithProject,
+  ApiResponse
+} from '../../../core/interfaces';
+
+
 
 @Component({
   selector: 'app-freelancer-dashboard',
@@ -41,255 +74,73 @@ import { Observable, BehaviorSubject } from 'rxjs';
     CommonModule,
     IonContent,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
     IonButton,
     IonIcon,
     IonGrid,
     IonRow,
     IonCol,
-    IonItem,
-    IonLabel,
-    HeaderComponent,
-    LoadingComponent
+    IonBadge,
+    IonChip,
+    IonRefresher,
+    IonRefresherContent,
+    IonSpinner,
+    HeaderComponent
   ],
-  template: `
-    <app-header title="Dashboard Freelancer"></app-header>
-    
-    <ion-content class="ion-padding">
-      <div class="container mx-auto">
-        @if (isLoading$ | async) {
-          <app-loading message="Cargando dashboard..."></app-loading>
-        } @else {
-          <!-- Welcome Section -->
-          @if (currentUser$ | async; as user) {
-            <div class="mb-6">
-              <h1 class="text-2xl font-bold text-gray-800 mb-2">
-                ¡Hola, {{ user.displayName || 'Freelancer' }}!
-              </h1>
-              <p class="text-gray-600">Encuentra nuevos proyectos y gestiona tus propuestas.</p>
-            </div>
-          }
-
-          <!-- Quick Stats -->
-          <ion-grid class="mb-6">
-            <ion-row>
-              <ion-col size="12" size-md="3" size-lg="3">
-                <ion-card class="stats-card">
-                  <ion-card-content class="text-center">
-                    <ion-icon name="document-text-outline" class="text-4xl text-primary-600 mb-2"></ion-icon>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ stats.totalProposals || 0 }}</h3>
-                    <p class="text-sm text-gray-600">Propuestas Enviadas</p>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-              
-              <ion-col size="12" size-md="3" size-lg="3">
-                <ion-card class="stats-card">
-                  <ion-card-content class="text-center">
-                    <ion-icon name="briefcase-outline" class="text-4xl text-success-600 mb-2"></ion-icon>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ stats.activeProjects || 0 }}</h3>
-                    <p class="text-sm text-gray-600">Proyectos Activos</p>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-              
-              <ion-col size="12" size-md="3" size-lg="3">
-                <ion-card class="stats-card">
-                  <ion-card-content class="text-center">
-                    <ion-icon name="star-outline" class="text-4xl text-warning-600 mb-2"></ion-icon>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ stats.successRate || 0 }}%</h3>
-                    <p class="text-sm text-gray-600">Tasa de Éxito</p>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-              
-              <ion-col size="12" size-md="3" size-lg="3">
-                <ion-card class="stats-card">
-                  <ion-card-content class="text-center">
-                    <ion-icon name="trending-up-outline" class="text-4xl text-secondary-600 mb-2"></ion-icon>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ stats.completedProjects || 0 }}</h3>
-                    <p class="text-sm text-gray-600">Proyectos Completados</p>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- Quick Actions -->
-          <ion-card class="mb-6">
-            <ion-card-header>
-              <ion-card-title>Acciones Rápidas</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <ion-grid>
-                <ion-row>
-                  <ion-col size="12" size-md="3">
-                    <ion-button expand="block" (click)="browseProjects()" class="action-button">
-                      <ion-icon name="search-outline" slot="start"></ion-icon>
-                      Buscar Proyectos
-                    </ion-button>
-                  </ion-col>
-                  <ion-col size="12" size-md="3">
-                    <ion-button expand="block" fill="outline" (click)="viewMyProposals()" class="action-button">
-                      <ion-icon name="eye-outline" slot="start"></ion-icon>
-                      Mis Propuestas
-                    </ion-button>
-                  </ion-col>
-                  <ion-col size="12" size-md="3">
-                    <ion-button expand="block" fill="outline" (click)="viewMessages()" class="action-button">
-                      <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-                      Mensajes
-                    </ion-button>
-                  </ion-col>
-                  <ion-col size="12" size-md="3">
-                    <ion-button expand="block" fill="outline" (click)="editProfile()" class="action-button">
-                      <ion-icon name="person-outline" slot="start"></ion-icon>
-                      Editar Perfil
-                    </ion-button>
-                  </ion-col>
-                </ion-row>
-              </ion-grid>
-            </ion-card-content>
-          </ion-card>
-
-          <!-- Recent Proposals -->
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>Propuestas Recientes</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              @if (recentProposals.length > 0) {
-                <div class="space-y-2">
-                  @for (proposal of recentProposals; track proposal.id) {
-                    <ion-item button (click)="viewProposal(proposal.id)" class="proposal-item">
-                      <ion-label>
-                        <h3 class="font-semibold">Propuesta para proyecto</h3>
-                        <p class="text-sm text-gray-600">{{ proposal.coverLetter | slice:0:100 }}...</p>
-                        <div class="flex items-center mt-2">
-                          <span class="badge" [class]="getProposalBadgeClass(proposal.status)">
-                            {{ getProposalStatusText(proposal.status) }}
-                          </span>
-                          <span class="text-xs text-gray-500 ml-2">
-                            {{ proposal.submittedAt | date:'short' }}
-                          </span>
-                        </div>
-                      </ion-label>
-                    </ion-item>
-                  }
-                </div>
-                
-                <div class="text-center mt-4">
-                  <ion-button fill="clear" (click)="viewAllProposals()">
-                    Ver todas las propuestas
-                  </ion-button>
-                </div>
-              } @else {
-                <div class="text-center py-8">
-                  <ion-icon name="document-text-outline" class="text-6xl text-gray-300 mb-4"></ion-icon>
-                  <h3 class="text-lg font-semibold text-gray-600 mb-2">No has enviado propuestas aún</h3>
-                  <p class="text-gray-500 mb-4">Busca proyectos interesantes y envía tu primera propuesta</p>
-                  <ion-button (click)="browseProjects()">
-                    <ion-icon name="search-outline" slot="start"></ion-icon>
-                    Buscar Proyectos
-                  </ion-button>
-                </div>
-              }
-            </ion-card-content>
-          </ion-card>
-        }
-      </div>
-    </ion-content>
-  `,
-  styles: [`
-    .container {
-      max-width: 1200px;
-    }
-
-    .stats-card {
-      border-radius: 1rem;
-      transition: transform 0.2s ease;
-    }
-
-    .stats-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .action-button {
-      --border-radius: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .proposal-item {
-      --background: white;
-      --border-radius: 0.5rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #e5e7eb;
-    }
-
-    .proposal-item:hover {
-      --background: #f9fafb;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .badge-submitted {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-
-    .badge-shortlisted {
-      background-color: #fef3c7;
-      color: #d97706;
-    }
-
-    .badge-accepted {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-
-    .badge-rejected {
-      background-color: #fee2e2;
-      color: #dc2626;
-    }
-
-    .badge-withdrawn {
-      background-color: #f3f4f6;
-      color: #374151;
-    }
-
-    .space-y-2 > * + * {
-      margin-top: 0.5rem;
-    }
-  `]
+  templateUrl: './freelancer-dashboard.component.html',
+  styleUrls: ['./freelancer-dashboard.component.scss']
 })
-export class FreelancerDashboardComponent implements OnInit {
+export class FreelancerDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   private authService = inject(AuthService);
   private proposalService = inject(ProposalService);
+  private projectService = inject(ProjectService);
   private router = inject(Router);
+  private toastController = inject(ToastController);
 
+  // Observable states
   currentUser$: Observable<User | null> = this.authService.currentUser$;
   private isLoadingSubject = new BehaviorSubject<boolean>(true);
   isLoading$ = this.isLoadingSubject.asObservable();
 
-  stats = {
+  // Component data
+  currentUser: User | null = null;
+  stats: DashboardStats = {
     totalProposals: 0,
+    acceptedProposals: 0,
+    pendingProposals: 0,
+    rejectedProposals: 0,
     activeProjects: 0,
     completedProjects: 0,
-    successRate: 0
+    successRate: 0,
+    avgResponseTime: 2.5
   };
 
-  recentProposals: Proposal[] = [];
+  recentProposals: ProposalWithProject[] = [];
+  availableProjects: Project[] = [];
+  tips: string[] = [
+    'Las propuestas personalizadas tienen 5x más probabilidad de éxito.',
+    'Mantén tu perfil actualizado con proyectos recientes.',
+    'Responde a mensajes en menos de 2 horas para mejores oportunidades.',
+    'Especialízate en 2-3 áreas para destacar como experto.'
+  ];
+  dailyTip: string = '';
 
   constructor() {
+    this.registerIcons();
+    this.setDailyTip();
+  }
+
+  ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private registerIcons(): void {
     addIcons({
       briefcaseOutline,
       documentTextOutline,
@@ -298,92 +149,236 @@ export class FreelancerDashboardComponent implements OnInit {
       searchOutline,
       eyeOutline,
       chatbubbleOutline,
-      personOutline
+      personOutline,
+      cashOutline,
+      timeOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline,
+      sendOutline,
+      addOutline,
+      refreshOutline,
+      statsChartOutline,
+      calendarOutline,
+      folderOutline,
+      heartOutline,
+      layersOutline
     });
   }
 
-  ngOnInit() {
-    this.loadDashboardData();
+  private initializeComponent(): void {
+    this.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        if (user) {
+          this.loadDashboardData();
+        } else {
+          this.router.navigate(['/auth/login']);
+        }
+      });
   }
 
   private async loadDashboardData(): Promise<void> {
+    if (!this.currentUser) return;
+
     try {
-      const currentUser = this.authService.currentUser;
-      if (!currentUser) return;
+      this.isLoadingSubject.next(true);
+      console.log('🔄 Loading freelancer dashboard data...');
 
-      // Load user's proposals
-      const proposalsResponse = await this.proposalService.getProposalsByFreelancer(currentUser.uid);
-      if (proposalsResponse.success && proposalsResponse.data) {
-        const proposals = proposalsResponse.data;
+      // Load proposals and projects in parallel
+      await Promise.all([
+        this.loadProposals(),
+        this.loadAvailableProjects()
+      ]);
 
-        // Calculate stats
-        const acceptedProposals = proposals.filter(p => p.status === 'accepted').length;
-        this.stats = {
-          totalProposals: proposals.length,
-          activeProjects: proposals.filter(p => p.status === 'accepted').length,
-          completedProjects: 0, // This would need to come from project status
-          successRate: proposals.length > 0 ? Math.round((acceptedProposals / proposals.length) * 100) : 0
-        };
-
-        // Get recent proposals (last 5)
-        this.recentProposals = proposals.slice(0, 5);
-      }
-
-      // Get proposal statistics
-      const statsResponse = await this.proposalService.getFreelancerProposalStats(currentUser.uid);
-      if (statsResponse.success && statsResponse.data) {
-        this.stats.successRate = statsResponse.data.successRate;
-      }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('❌ Error loading dashboard data:', error);
+      await this.showToast('Error al cargar datos del dashboard', 'danger');
     } finally {
       this.isLoadingSubject.next(false);
     }
   }
 
-  browseProjects(): void {
+  private async loadProposals(): Promise<void> {
+    if (!this.currentUser) return;
+
+    try {
+      const response: ApiResponse<Proposal[]> = await this.proposalService.getProposalsByFreelancer(this.currentUser.uid);
+
+      if (response.success && response.data) {
+        const proposals = response.data;
+        console.log('✅ Proposals loaded:', proposals.length);
+
+        // Load project details for recent proposals
+        const recentProposalsWithProjects = await Promise.all(
+          proposals.slice(0, 5).map(async (proposal) => {
+            try {
+              const projectResponse = await this.projectService.getProjectById(proposal.projectId);
+              return {
+                ...proposal,
+                project: projectResponse.success ? projectResponse.data : undefined
+              } as ProposalWithProject;
+            } catch (error) {
+              console.warn('Failed to load project for proposal:', proposal.id);
+              return proposal as ProposalWithProject;
+            }
+          })
+        );
+
+        this.recentProposals = recentProposalsWithProjects;
+        this.calculateStats(proposals);
+      }
+    } catch (error) {
+      console.error('Error loading proposals:', error);
+    }
+  }
+
+  private async loadAvailableProjects(): Promise<void> {
+    try {
+      // Use temporary method if main method fails due to index
+      let response: ApiResponse<Project[]>;
+
+      try {
+        response = await this.projectService.getPublishedProjects();
+      } catch (indexError) {
+        console.log('Index required, using temporary method');
+        // Fallback to temporary method if it exists
+        const tempMethod = (this.projectService as any).getPublishedProjectsTemp;
+        if (tempMethod) {
+          response = await tempMethod.call(this.projectService);
+        } else {
+          // If no temporary method, create empty response
+          response = { success: true, data: [] };
+        }
+      }
+
+      if (response.success && response.data) {
+        // Show only first 3 projects as recommendations
+        this.availableProjects = response.data.slice(0, 3);
+        console.log('✅ Available projects loaded:', this.availableProjects.length);
+      }
+    } catch (error) {
+      console.error('Error loading available projects:', error);
+      this.availableProjects = [];
+    }
+  }
+
+  private calculateStats(proposals: Proposal[]): void {
+    const total = proposals.length;
+    const accepted = proposals.filter(p => p.status === ProposalStatus.ACCEPTED).length;
+    const pending = proposals.filter(p => p.status === ProposalStatus.SUBMITTED).length;
+    const rejected = proposals.filter(p => p.status === ProposalStatus.REJECTED).length;
+
+    this.stats = {
+      totalProposals: total,
+      acceptedProposals: accepted,
+      pendingProposals: pending,
+      rejectedProposals: rejected,
+      activeProjects: accepted, // Simplified: accepted proposals = active projects
+      completedProjects: 0, // Would need project status to calculate
+      successRate: total > 0 ? Math.round((accepted / total) * 100) : 0,
+      avgResponseTime: 2.5 // Static for now
+    };
+
+    console.log('📊 Stats calculated:', this.stats);
+  }
+
+  private setDailyTip(): void {
+    const randomIndex = Math.floor(Math.random() * this.tips.length);
+    this.dailyTip = this.tips[randomIndex];
+  }
+
+  // Event handlers
+  async onRefresh(event: any): Promise<void> {
+    await this.loadDashboardData();
+    event.target.complete();
+  }
+
+  // Navigation methods
+  navigateToProjects(): void {
     this.router.navigate(['/projects']);
   }
 
-  viewMyProposals(): void {
+  navigateToMyProposals(): void {
     this.router.navigate(['/proposals']);
   }
 
-  viewMessages(): void {
-    this.router.navigate(['/messages']);
+  navigateToProfile(): void {
+    this.router.navigate(['/profile/edit']);
   }
 
-  editProfile(): void {
-    this.router.navigate(['/profile/edit']);
+  navigateToMessages(): void {
+    this.router.navigate(['/messages']);
   }
 
   viewProposal(proposalId: string): void {
     this.router.navigate(['/proposals', proposalId]);
   }
 
-  viewAllProposals(): void {
-    this.router.navigate(['/proposals']);
+  viewProject(projectId: string): void {
+    this.router.navigate(['/projects', projectId]);
   }
 
-  getProposalBadgeClass(status: string): string {
-    switch (status) {
-      case 'submitted': return 'badge-submitted';
-      case 'shortlisted': return 'badge-shortlisted';
-      case 'accepted': return 'badge-accepted';
-      case 'rejected': return 'badge-rejected';
-      case 'withdrawn': return 'badge-withdrawn';
-      default: return 'badge-submitted';
+  createProposal(projectId: string): void {
+    this.router.navigate(['/proposals/create', projectId]);
+  }
+
+  // Helper methods
+  getProposalStatusColor(status: ProposalStatus): string {
+    const colors: { [key in ProposalStatus]: string } = {
+      [ProposalStatus.SUBMITTED]: 'primary',
+      [ProposalStatus.SHORTLISTED]: 'warning',
+      [ProposalStatus.ACCEPTED]: 'success',
+      [ProposalStatus.REJECTED]: 'danger',
+      [ProposalStatus.WITHDRAWN]: 'medium'
+    };
+    return colors[status] || 'medium';
+  }
+
+  getProposalStatusLabel(status: ProposalStatus): string {
+    const labels: { [key in ProposalStatus]: string } = {
+      [ProposalStatus.SUBMITTED]: 'Enviada',
+      [ProposalStatus.SHORTLISTED]: 'Preseleccionada',
+      [ProposalStatus.ACCEPTED]: 'Aceptada',
+      [ProposalStatus.REJECTED]: 'Rechazada',
+      [ProposalStatus.WITHDRAWN]: 'Retirada'
+    };
+    return labels[status] || status;
+  }
+
+  getTimeAgo(date: Date): string {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) {
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      return diffInHours === 0 ? 'Hace unos minutos' : `Hace ${diffInHours}h`;
+    } else if (diffInDays === 1) {
+      return 'Ayer';
+    } else if (diffInDays < 7) {
+      return `Hace ${diffInDays} días`;
+    } else {
+      return date.toLocaleDateString('es-ES');
     }
   }
 
-  getProposalStatusText(status: string): string {
-    switch (status) {
-      case 'submitted': return 'Enviada';
-      case 'shortlisted': return 'Preseleccionada';
-      case 'accepted': return 'Aceptada';
-      case 'rejected': return 'Rechazada';
-      case 'withdrawn': return 'Retirada';
-      default: return 'Enviada';
-    }
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+
+  private async showToast(message: string, color: string = 'primary'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }

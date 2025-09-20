@@ -1,3 +1,189 @@
-<p>
-  file-upload works!
-</p>
+<!-- src/app/features/files/file-upload/file-upload.component.html -->
+<app-header title="Subir Archivos" [showBackButton]="true"></app-header>
+
+<ion-content class="file-upload-content">
+  <div class="upload-container">
+
+    <!-- Category Selection -->
+    <ion-card class="category-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="folder-outline"></ion-icon>
+          Categoría de Archivo
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label position="stacked">Selecciona la categoría</ion-label>
+          <ion-select [(ngModel)]="selectedCategory" placeholder="Elige una categoría" [disabled]="isUploading">
+            <ion-select-option *ngFor="let category of fileCategories" [value]="category.value">
+              {{ category.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Upload Area -->
+    <ion-card class="upload-area-card">
+      <ion-card-content>
+        <!-- Drop Zone -->
+        <div class="drop-zone" [class.drag-over]="isDragOver" [class.disabled]="isUploading"
+          (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+          (click)="openFilePicker()">
+
+          <div class="drop-zone-content">
+            <ion-icon name="cloud-upload-outline" class="upload-icon"></ion-icon>
+            <h3>Arrastra archivos aquí o haz clic para seleccionar</h3>
+            <p>Máximo {{ maxFiles }} archivos • Tamaño máximo {{ formatFileSize(maxFileSize) }}</p>
+
+            <ion-button fill="outline" [disabled]="isUploading" class="select-button">
+              <ion-icon name="document-outline" slot="start"></ion-icon>
+              Seleccionar Archivos
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input #fileInput type="file" multiple [accept]="allowedTypes.join(',')" (change)="onFileInputChange($event)"
+          style="display: none;">
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Upload Queue -->
+    <ion-card *ngIf="uploadQueue.length > 0" class="queue-card">
+      <ion-card-header>
+        <div class="queue-header">
+          <ion-card-title>
+            <ion-icon name="document-outline"></ion-icon>
+            Archivos en Cola ({{ uploadQueue.length }})
+          </ion-card-title>
+
+          <div class="queue-actions">
+            @if (!isUploading) {
+            <ion-button fill="clear" size="small" (click)="clearQueue()">
+              <ion-icon name="close-outline"></ion-icon>
+              Limpiar Todo
+            </ion-button>
+            }
+
+            @if (hasCompletedOrErrorFiles()) {
+            <ion-button fill="clear" size="small" (click)="clearCompleted()">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Limpiar Completados
+            </ion-button>
+            }
+          </div>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Upload Progress Summary -->
+        @if (isUploading) {
+        <div class="upload-summary">
+          <div class="summary-text">
+            <span>Subiendo archivos...</span>
+            <span class="progress-text">
+              {{ getCompletedFilesCount() }} / {{ uploadQueue.length }}
+            </span>
+          </div>
+          <ion-progress-bar [value]="getTotalProgress()">
+          </ion-progress-bar>
+        </div>
+        }
+
+        <!-- File List -->
+        <ion-list class="file-list">
+          <ion-item *ngFor="let upload of uploadQueue; let i = index" class="file-item"
+            [class]="'status-' + upload.status">
+
+            <ion-icon [name]="getFileIcon(upload.file)" slot="start" [color]="getStatusColor(upload.status)">
+            </ion-icon>
+
+            <ion-label>
+              <h3>{{ upload.file.name }}</h3>
+              <p class="file-details">
+                {{ formatFileSize(upload.file.size) }}
+                @if (upload.status === 'error') {
+                <span class="error-text">
+                  • {{ upload.error }}
+                </span>
+                }
+                @if (upload.status === 'completed') {
+                <span class="success-text">
+                  • Subido exitosamente
+                </span>
+                }
+              </p>
+
+              <!-- Progress Bar -->
+              @if (upload.status === 'uploading') {
+              <ion-progress-bar [value]="upload.progress / 100" color="primary">
+              </ion-progress-bar>
+              }
+            </ion-label>
+
+            <!-- Status Icon -->
+            <ion-icon [name]="getStatusIcon(upload.status)" [color]="getStatusColor(upload.status)" slot="end">
+            </ion-icon>
+
+            <!-- Remove Button -->
+            @if (!isUploading || upload.status === 'error') {
+            <ion-button fill="clear" size="small" slot="end" (click)="removeFromQueue(i)">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+            }
+          </ion-item>
+        </ion-list>
+
+        <!-- Upload Actions -->
+        <div class="upload-actions">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <ion-button expand="block" [disabled]="isUploading || uploadQueue.length === 0" (click)="startUpload()"
+                  class="upload-button">
+                  @if (isUploading) {
+                  <ion-spinner name="crescent" slot="start"></ion-spinner>
+                  } @else {
+                  <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                  }
+                  {{ isUploading ? 'Subiendo...' : 'Subir Archivos' }}
+                </ion-button>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                @if (hasFailedFiles()) {
+                <ion-button expand="block" fill="outline" color="warning" [disabled]="isUploading"
+                  (click)="retryFailed()">
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Reintentar Fallidos
+                </ion-button>
+                }
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Help & Info -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <h3>
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Información de Subida
+        </h3>
+
+        <ul class="info-list">
+          <li>Tipos de archivo permitidos: PDF, Word, Excel, PowerPoint, imágenes, archivos comprimidos</li>
+          <li>Tamaño máximo por archivo: {{ formatFileSize(maxFileSize) }}</li>
+          <li>Máximo {{ maxFiles }} archivos por sesión</li>
+          <li>Los archivos se almacenan de forma segura en la nube</li>
+          <li>Puedes gestionar tus archivos desde el <a (click)="goToFileManager()">Gestor de Archivos</a></li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>

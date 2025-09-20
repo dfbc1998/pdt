@@ -1,8 +1,5 @@
 <ion-app>
-  @if (isLoading$ | async) {
-  <ion-loading [isOpen]="true" message="Cargando..." spinner="crescent">
+  <ion-loading *ngIf="isLoading$ | async" message="Cargando FreeWork...">
   </ion-loading>
-  } @else {
   <ion-router-outlet></ion-router-outlet>
-  }
 </ion-app>

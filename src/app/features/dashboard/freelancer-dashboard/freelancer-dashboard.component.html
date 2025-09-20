@@ -1,3 +1,335 @@
-<p>
-  freelancer-dashboard works!
-</p>
+<!-- src/app/features/dashboard/freelancer-dashboard/freelancer-dashboard.component.html - REEMPLAZAR COMPLETO -->
+<app-header title="Dashboard Freelancer"></app-header>
+
+<ion-content class="dashboard-content">
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (isLoading$ | async) {
+  <div class="loading-container">
+    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+    <p class="loading-text">Cargando dashboard...</p>
+  </div>
+  } @else {
+  <div class="dashboard-container">
+
+    <!-- Welcome Section -->
+    @if (currentUser$ | async; as user) {
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h1 class="welcome-title">¡Hola, {{ user.displayName || 'Freelancer' }}!</h1>
+          <p class="welcome-subtitle">Bienvenido a tu dashboard de FreeWork</p>
+        </div>
+        <div class="welcome-actions">
+          <ion-button fill="solid" (click)="navigateToProjects()" class="primary-action">
+            <ion-icon name="search-outline" slot="start"></ion-icon>
+            Explorar Proyectos
+          </ion-button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Daily Tip -->
+    <div class="daily-tip">
+      <ion-card class="tip-card">
+        <ion-card-content>
+          <div class="tip-content">
+            <div class="tip-icon">
+              <ion-icon name="star-outline"></ion-icon>
+            </div>
+            <div class="tip-text">
+              <h3>💡 Consejo del día</h3>
+              <p>{{ dailyTip }}</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-section">
+      <h2 class="section-title">Tu rendimiento</h2>
+
+      <ion-grid class="stats-grid">
+        <ion-row>
+          <ion-col size="6" size-md="3">
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <div class="stat-content">
+                  <div class="stat-icon success">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                  </div>
+                  <div class="stat-info">
+                    <h3 class="stat-number">{{ stats.totalProposals }}</h3>
+                    <p class="stat-label">Propuestas</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="6" size-md="3">
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <div class="stat-content">
+                  <div class="stat-icon primary">
+                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                  </div>
+                  <div class="stat-info">
+                    <h3 class="stat-number">{{ stats.acceptedProposals }}</h3>
+                    <p class="stat-label">Aceptadas</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="6" size-md="3">
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <div class="stat-content">
+                  <div class="stat-icon warning">
+                    <ion-icon name="trending-up-outline"></ion-icon>
+                  </div>
+                  <div class="stat-info">
+                    <h3 class="stat-number">{{ stats.successRate }}%</h3>
+                    <p class="stat-label">Éxito</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="6" size-md="3">
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <div class="stat-content">
+                  <div class="stat-icon info">
+                    <ion-icon name="briefcase-outline"></ion-icon>
+                  </div>
+                  <div class="stat-info">
+                    <h3 class="stat-number">{{ stats.activeProjects }}</h3>
+                    <p class="stat-label">Activos</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+      <h2 class="section-title">Acciones rápidas</h2>
+
+      <ion-grid class="actions-grid">
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            <ion-card class="action-card" button (click)="navigateToProjects()">
+              <ion-card-content>
+                <div class="action-content">
+                  <div class="action-icon">
+                    <ion-icon name="search-outline"></ion-icon>
+                  </div>
+                  <div class="action-info">
+                    <h3>Buscar Proyectos</h3>
+                    <p>Encuentra nuevas oportunidades</p>
+                  </div>
+                  <ion-icon name="chevron-forward-outline" class="action-arrow"></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" size-md="6">
+            <ion-card class="action-card" button (click)="navigateToMyProposals()">
+              <ion-card-content>
+                <div class="action-content">
+                  <div class="action-icon">
+                    <ion-icon name="folder-outline"></ion-icon>
+                  </div>
+                  <div class="action-info">
+                    <h3>Mis Propuestas</h3>
+                    <p>Gestiona tus envíos</p>
+                  </div>
+                  <ion-icon name="chevron-forward-outline" class="action-arrow"></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" size-md="6">
+            <ion-card class="action-card" button (click)="navigateToProfile()">
+              <ion-card-content>
+                <div class="action-content">
+                  <div class="action-icon">
+                    <ion-icon name="person-outline"></ion-icon>
+                  </div>
+                  <div class="action-info">
+                    <h3>Actualizar Perfil</h3>
+                    <p>Mejora tu presencia</p>
+                  </div>
+                  <ion-icon name="chevron-forward-outline" class="action-arrow"></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" size-md="6">
+            <ion-card class="action-card" button (click)="navigateToMessages()">
+              <ion-card-content>
+                <div class="action-content">
+                  <div class="action-icon">
+                    <ion-icon name="chatbubble-outline"></ion-icon>
+                  </div>
+                  <div class="action-info">
+                    <h3>Mensajes</h3>
+                    <p>Comunícate con clientes</p>
+                  </div>
+                  <ion-icon name="chevron-forward-outline" class="action-arrow"></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <!-- Recent Proposals -->
+    <div class="recent-proposals-section">
+      <div class="section-header">
+        <h2 class="section-title">Propuestas recientes</h2>
+        <ion-button fill="clear" (click)="navigateToMyProposals()" class="see-all-btn">
+          Ver todas
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      @if (recentProposals.length > 0) {
+      <div class="proposals-list">
+        @for (proposal of recentProposals; track proposal.id) {
+        <ion-card class="proposal-card" button (click)="viewProposal(proposal.id)">
+          <ion-card-content>
+            <div class="proposal-content">
+              <div class="proposal-header">
+                <h3 class="proposal-title">{{ proposal.project?.title || 'Proyecto sin título' }}</h3>
+                <ion-badge [color]="getProposalStatusColor(proposal.status)" class="status-badge">
+                  {{ getProposalStatusLabel(proposal.status) }}
+                </ion-badge>
+              </div>
+
+              <div class="proposal-details">
+                <div class="proposal-meta">
+                  <span class="proposal-amount">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    {{ formatCurrency(proposal.proposedBudget.amount) }}
+                  </span>
+                  <span class="proposal-date">
+                    <ion-icon name="time-outline"></ion-icon>
+                    {{ getTimeAgo(proposal.submittedAt) }}
+                  </span>
+                </div>
+
+                <p class="proposal-excerpt">
+                  {{ proposal.coverLetter.substring(0, 100) }}{{ proposal.coverLetter.length > 100 ? '...' : '' }}
+                </p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+        }
+      </div>
+      } @else {
+      <ion-card class="empty-state">
+        <ion-card-content>
+          <div class="empty-content">
+            <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+            <h3>No hay propuestas aún</h3>
+            <p>Comienza explorando proyectos y enviando propuestas</p>
+            <ion-button fill="solid" (click)="navigateToProjects()">
+              <ion-icon name="search-outline" slot="start"></ion-icon>
+              Explorar Proyectos
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+    </div>
+
+    <!-- Recommended Projects -->
+    @if (availableProjects.length > 0) {
+    <div class="recommended-projects-section">
+      <div class="section-header">
+        <h2 class="section-title">Proyectos recomendados</h2>
+        <ion-button fill="clear" (click)="navigateToProjects()" class="see-all-btn">
+          Ver todos
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="projects-list">
+        @for (project of availableProjects; track project.id) {
+        <ion-card class="project-card" button (click)="viewProject(project.id)">
+          <ion-card-content>
+            <div class="project-content">
+              <div class="project-header">
+                <h3 class="project-title">{{ project.title }}</h3>
+                <div class="project-badges">
+                  @if (project.isFeatured) {
+                  <ion-badge color="warning">
+                    <ion-icon name="star-outline"></ion-icon>
+                    Destacado
+                  </ion-badge>
+                  }
+                  <ion-chip class="category-chip">
+                    {{ project.category }}
+                  </ion-chip>
+                </div>
+              </div>
+
+              <p class="project-description">
+                {{ project.description.substring(0, 120) }}{{ project.description.length > 120 ? '...' : '' }}
+              </p>
+
+              <div class="project-meta">
+                <span class="project-budget">
+                  <ion-icon name="cash-outline"></ion-icon>
+                  @if (project.budget.type === 'fixed') {
+                  {{ formatCurrency(project.budget.amount || 0) }}
+                  } @else if (project.budget.type === 'range') {
+                  {{ formatCurrency(project.budget.minAmount || 0) }} - {{ formatCurrency(project.budget.maxAmount || 0)
+                  }}
+                  } @else {
+                  {{ formatCurrency(project.budget.amount || 0) }}/hora
+                  }
+                </span>
+                <span class="project-proposals">
+                  <ion-icon name="people-outline"></ion-icon>
+                  {{ project.proposalCount }} propuestas
+                </span>
+              </div>
+
+              <div class="project-actions">
+                <ion-button fill="solid" size="small" (click)="createProposal(project.id); $event.stopPropagation()">
+                  <ion-icon name="send-outline" slot="start"></ion-icon>
+                  Enviar Propuesta
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+        }
+      </div>
+    </div>
+    }
+
+  </div>
+  }
+</ion-content>

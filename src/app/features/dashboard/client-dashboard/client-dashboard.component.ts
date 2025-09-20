@@ -14,10 +14,8 @@ import {
   IonRow,
   IonCol,
   IonItem,
-  IonLabel,
   IonBadge,
   IonList,
-  IonSpinner,
   ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -57,10 +55,8 @@ import { Observable, BehaviorSubject } from 'rxjs';
     IonRow,
     IonCol,
     IonItem,
-    IonLabel,
     IonBadge,
     IonList,
-    IonSpinner,
     HeaderComponent,
     LoadingComponent
   ],

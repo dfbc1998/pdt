@@ -7,24 +7,14 @@ import {
   IonItem,
   IonLabel,
   IonInput,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
   IonButton,
   IonIcon,
-  IonToast,
   IonSpinner,
-  IonGrid,
-  IonRow,
-  IonCol
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { mailOutline, arrowBackOutline, checkmarkCircleOutline, alertCircleOutline, sendOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
-import { LoadingComponent } from '../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-forgot-password',

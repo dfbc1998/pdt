@@ -1,438 +1,325 @@
-// src/app/shared/components/header/header.component.scss
+/* src/app/shared/components/header/header.component.scss */
 
-ion-header {
+.fw-header {
+    --background: #ffffff;
+    --border-color: #e2e8f0;
+    --color: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
     &.transparent {
-        ion-toolbar {
-            --background: transparent;
-            backdrop-filter: blur(20px);
-        }
+        --background: transparent;
+        --border-color: transparent;
+        box-shadow: none;
     }
 
     &.custom-color {
-        ion-toolbar {
-            --background: var(--fw-gradient-primary);
-            --color: white;
-        }
+        --background: var(--custom-bg-color, #667eea);
+        --color: #ffffff;
     }
 }
 
-.fw-header-toolbar {
-    --background: white;
-    --color: var(--fw-gray-800);
-    --border-color: var(--fw-gray-200);
-    height: 64px;
-    border-bottom: 1px solid var(--fw-gray-200);
-    box-shadow: var(--fw-shadow-sm);
+.fw-toolbar {
+    --background: var(--background);
+    --border-color: var(--border-color);
+    --color: var(--color);
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 64px;
 }
 
-// Left Section
+/* Left Section */
 .fw-header-start {
     display: flex;
     align-items: center;
-    gap: var(--fw-space-3);
+    gap: 12px;
 }
 
-.fw-back-button,
-.fw-menu-button {
-    --color: var(--fw-gray-600);
-    --border-radius: 16px;
+.fw-back-button {
+    --color: var(--color);
+    --background: transparent;
+    --padding: 8px;
+    --border-radius: 8px;
 
     &:hover {
-        --background: var(--fw-gray-100);
+        --background: rgba(0, 0, 0, 0.05);
     }
 }
 
-// Brand Section
+.fw-menu-button {
+    --color: var(--color);
+    --background: transparent;
+}
+
+/* Brand Section */
 .fw-brand {
     display: flex;
     align-items: center;
-    gap: var(--fw-space-3);
-    margin-left: var(--fw-space-2);
+    gap: 12px;
+    margin-left: 8px;
 }
 
 .fw-logo {
-    .fw-logo-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--fw-gradient-primary);
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--fw-shadow);
-        position: relative;
-        overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
-        }
+.fw-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
 
-        &:hover::before {
-            transform: translateX(100%);
-        }
-
-        .fw-logo-text {
-            font-family: var(--fw-font-family-display);
-            font-weight: 800;
-            font-size: 1.125rem;
-            color: white;
-            letter-spacing: -0.5px;
-        }
-    }
+.fw-logo-text {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .fw-brand-text {
     display: flex;
     flex-direction: column;
-
-    .fw-brand-name {
-        font-family: var(--fw-font-family-display);
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: var(--fw-gray-800);
-        line-height: 1;
-        letter-spacing: -0.5px;
-    }
-
-    .fw-brand-tagline {
-        font-size: 0.75rem;
-        color: var(--fw-gray-500);
-        font-weight: 500;
-        margin-top: 1px;
-    }
+    gap: 2px;
 }
 
-// Title Section
-.fw-header-title {
+.fw-brand-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color);
+    line-height: 1;
+    letter-spacing: -0.3px;
+}
+
+/* Title */
+.fw-title {
+    --color: var(--color);
+    font-size: 18px;
     font-weight: 600;
-    font-size: var(--fw-text-lg);
-    color: var(--fw-gray-800);
     text-align: center;
 }
 
-// Right Section
-.fw-header-end {
+/* Right Actions */
+.fw-actions {
     display: flex;
     align-items: center;
-    gap: var(--fw-space-2);
+    gap: 8px;
 }
 
 .fw-search-button,
-.fw-notifications-button {
-    --color: var(--fw-gray-600);
-    --border-radius: var(--fw-radius-lg);
+.fw-notification-button {
+    --color: var(--color);
+    --background: transparent;
+    --padding: 8px;
+    --border-radius: 8px;
     position: relative;
 
     &:hover {
-        --background: var(--fw-gray-100);
+        --background: rgba(0, 0, 0, 0.05);
     }
 }
 
-.fw-notifications-button {
-    .fw-notification-badge {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: var(--fw-danger-500);
-        color: white;
-        font-size: 0.625rem;
-        font-weight: 600;
-        min-width: 18px;
-        height: 18px;
-        border-radius: var(--fw-radius-full);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid white;
-        box-shadow: var(--fw-shadow);
-    }
+.fw-notification-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 600;
 }
 
-// User Menu
+/* User Menu */
 .fw-user-menu {
     position: relative;
 }
 
 .fw-user-button {
-    --color: var(--fw-gray-700);
-    --border-radius: var(--fw-radius-xl);
-    --padding-start: 8px;
-    --padding-end: 12px;
-    border: 1px solid var(--fw-gray-200);
-
-    &:hover {
-        --background: var(--fw-gray-50);
-        border-color: var(--fw-gray-300);
-    }
-}
-
-.fw-user-info {
+    --color: var(--color);
+    --background: transparent;
+    --padding: 4px 8px;
+    --border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: var(--fw-space-3);
+    gap: 8px;
+
+    &:hover {
+        --background: rgba(0, 0, 0, 0.05);
+    }
 }
 
 .fw-user-avatar {
     width: 32px;
     height: 32px;
-    border-radius: var(--fw-radius-full);
-    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--fw-gradient-primary);
-    flex-shrink: 0;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .fw-user-initials {
-        color: white;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
+    border-radius: 50%;
 }
 
-.fw-user-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    min-width: 0;
-
-    .fw-user-name {
-        font-weight: 600;
-        font-size: 0.875rem;
-        color: var(--fw-gray-800);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 120px;
-    }
-
-    .fw-user-role {
-        font-size: 0.75rem;
-        color: var(--fw-gray-500);
-        margin-top: -2px;
-    }
+.fw-user-initials {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .fw-dropdown-icon {
-    font-size: 1rem;
-    color: var(--fw-gray-400);
+    font-size: 16px;
     transition: transform 0.2s ease;
 }
 
-// User Dropdown
+/* User Popover */
 .fw-user-popover {
-    --width: 320px;
-    --max-width: 320px;
-    --border-radius: 20px;
-    --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --width: 280px;
+    --max-width: 90vw;
 }
 
-.fw-user-dropdown {
-    padding: 0;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--fw-gray-200);
-    overflow: hidden;
-    backdrop-filter: blur(20px);
+.fw-dropdown-content {
+    padding: 16px 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
-.fw-dropdown-header {
-    padding: var(--fw-space-5);
-    background: linear-gradient(135deg, var(--fw-gray-50) 0%, var(--fw-primary-50) 100%);
-    border-bottom: 1px solid var(--fw-gray-200);
+.fw-user-info {
     display: flex;
     align-items: center;
-    gap: var(--fw-space-4);
-
-    .fw-user-avatar-large {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--fw-radius-full);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--fw-gradient-primary);
-        flex-shrink: 0;
-        box-shadow: var(--fw-shadow);
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .fw-user-initials {
-            color: white;
-            font-weight: 700;
-            font-size: 1.125rem;
-        }
-    }
-
-    .fw-user-info-detail {
-        flex: 1;
-        min-width: 0;
-
-        h4 {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--fw-gray-800);
-            margin: 0 0 var(--fw-space-1) 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        p {
-            font-size: 0.875rem;
-            color: var(--fw-gray-600);
-            margin: 0 0 var(--fw-space-2) 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .fw-role-badge {
-            background: var(--fw-primary-100);
-            color: var(--fw-primary-700);
-            padding: var(--fw-space-1) var(--fw-space-2);
-            border-radius: var(--fw-radius);
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-    }
+    gap: 12px;
+    padding: 0 16px 16px 16px;
 }
 
-.fw-dropdown-list {
-    padding: var(--fw-space-2) 0;
+.fw-user-avatar-large {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
 
-    .fw-dropdown-item {
-        --padding-start: var(--fw-space-5);
-        --padding-end: var(--fw-space-5);
-        --padding-top: var(--fw-space-3);
-        --padding-bottom: var(--fw-space-3);
-        --color: var(--fw-gray-700);
-        --background: transparent;
-        font-size: 0.875rem;
+.fw-user-initials-large {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 
-        &:hover {
-            --background: var(--fw-gray-50);
-        }
+.fw-user-details {
+    flex: 1;
+}
 
-        &.logout {
-            --color: var(--fw-danger-600);
+.fw-user-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
 
-            &:hover {
-                --background: var(--fw-danger-50);
-            }
-        }
-
-        ion-icon {
-            color: var(--fw-gray-500);
-            margin-right: var(--fw-space-3);
-        }
-
-        &.logout ion-icon {
-            color: var(--fw-danger-500);
-        }
-    }
+.fw-user-role {
+    font-size: 13px;
+    color: #718096;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .fw-dropdown-divider {
     height: 1px;
-    background: var(--fw-gray-200);
-    margin: var(--fw-space-2) var(--fw-space-5);
+    background: #e2e8f0;
+    margin: 8px 0;
 }
 
-// Login Button
-.fw-login-button {
-    --background: var(--fw-gradient-primary);
-    --color: white;
-    --border-radius: var(--fw-radius-lg);
-    --padding-start: var(--fw-space-5);
-    --padding-end: var(--fw-space-5);
-    font-weight: 600;
-    font-size: 0.875rem;
-    box-shadow: var(--fw-shadow);
+.fw-dropdown-list {
+    padding: 0;
+    background: transparent;
+}
+
+.fw-dropdown-item {
+    --background: transparent;
+    --color: #4a5568;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 44px;
+    margin: 0;
 
     &:hover {
-        --background: var(--fw-primary-600);
-        transform: translateY(-1px);
-        box-shadow: var(--fw-shadow-lg);
+        --background: #f7fafc;
+    }
+
+    &.logout {
+        --color: #e53e3e;
+
+        &:hover {
+            --background: #fef5f5;
+        }
+    }
+
+    ion-icon {
+        color: var(--color);
+        margin-right: 12px;
+    }
+
+    ion-label {
+        color: var(--color);
+        font-weight: 500;
     }
 }
 
-// Responsive Design
+/* Login Button */
+.fw-login-button {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --background-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    --color: #ffffff;
+    --border-radius: 8px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .fw-brand-text {
         display: none;
     }
 
-    .fw-user-details {
-        display: none;
+    .fw-toolbar {
+        --padding-start: 12px;
+        --padding-end: 12px;
     }
 
-    .fw-user-info {
-        gap: var(--fw-space-2);
+    .fw-user-popover {
+        --width: 260px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fw-actions {
+        gap: 4px;
+    }
+
+    .fw-user-button {
+        --padding: 4px;
     }
 
     .fw-dropdown-icon {
         display: none;
     }
-
-    .fw-header-toolbar {
-        height: 56px;
-    }
-
-    .fw-logo .fw-logo-icon {
-        width: 36px;
-        height: 36px;
-    }
-}
-
-@media (max-width: 480px) {
-    .fw-header-start {
-        gap: var(--fw-space-2);
-    }
-
-    .fw-header-end {
-        gap: var(--fw-space-1);
-    }
-
-    .fw-user-popover {
-        --width: calc(100vw - 32px);
-        --max-width: calc(100vw - 32px);
-    }
-}
-
-// Animations
-@keyframes fw-pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.fw-notification-badge {
-    animation: fw-pulse 2s infinite;
 }

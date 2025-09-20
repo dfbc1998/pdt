@@ -1,0 +1,368 @@
+/* Upload Actions */
+.upload-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.upload-button {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --background-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    --color: #ffffff;
+    --border-radius: 8px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+
+    &:hover:not([disabled]) {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    &[disabled] {
+        --background: #e2e8f0;
+        --color: #a0aec0;
+        opacity: 0.7;
+    }
+}
+
+/* Info Card */
+.info-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        color: #2d3748;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+        padding: 8px 0;
+        color: #4a5568;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        border-bottom: 1px solid #f0f0f0;
+        position: relative;
+        padding-left: 20px;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &::before {
+            content: '•';
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+/* Loading States */
+ion-spinner {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 12px;
+    }
+
+    .drop-zone {
+        padding: 30px 15px;
+    }
+
+    .upload-icon {
+        font-size: 36px;
+    }
+
+    .drop-zone-content h3 {
+        font-size: 1.1rem;
+    }
+
+    .drop-zone-content p {
+        font-size: 0.8rem;
+    }
+
+    .queue-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .queue-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .file-item ion-label h3 {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-container {
+        padding: 8px;
+    }
+
+    .drop-zone {
+        padding: 20px 10px;
+    }
+
+    .file-item {
+        --padding-start: 12px;
+        --padding-end: 12px;
+    }
+}
+
+src/app/features/files/file-upload/file-upload.component.scss */ .file-upload-content {
+    --background: #f8fafc;
+}
+
+.upload-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* Category Card */
+.category-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    ion-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2d3748;
+        font-size: 1.1rem;
+    }
+
+    ion-item {
+        --background: transparent;
+        --inner-padding-end: 0;
+        --padding-start: 0;
+    }
+}
+
+/* Upload Area */
+.upload-area-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    ion-card-content {
+        padding: 0;
+    }
+}
+
+.drop-zone {
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #ffffff;
+
+    &:hover:not(.disabled) {
+        border-color: #667eea;
+        background: #f7fafc;
+        transform: translateY(-2px);
+    }
+
+    &.drag-over {
+        border-color: #667eea;
+        background: #edf2f7;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    }
+
+    &.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        border-color: #e2e8f0;
+    }
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    h3 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.select-button {
+    --border-radius: 8px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+}
+
+/* Queue Card */
+.queue-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+.queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    ion-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2d3748;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+}
+
+.queue-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.upload-summary {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+
+    .summary-text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #2d3748;
+    }
+
+    .progress-text {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+}
+
+/* File List */
+.file-list {
+    background: transparent;
+    padding: 0;
+}
+
+.file-item {
+    --background: #ffffff;
+    --border-radius: 8px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.status-completed {
+        --background: #f0fff4;
+        border-color: #68d391;
+    }
+
+    &.status-error {
+        --background: #fef5f5;
+        border-color: #feb2b2;
+    }
+
+    &.status-uploading {
+        --background: #ebf8ff;
+        border-color: #90cdf4;
+    }
+
+    ion-label {
+        margin: 8px 0;
+
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2d3748;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-details {
+            font-size: 0.8rem;
+            color: #718096;
+            margin: 0;
+        }
+
+        .error-text {
+            color: #e53e3e;
+            font-weight: 500;
+        }
+
+        .success-text {
+            color: #38a169;
+            font-weight: 500;
+        }
+
+        ion-progress-bar {
+            margin-top: 8px;
+            height: 4px;
+            --buffer-background: #e2e8f0;
+            --progress-background: #667eea;
+        }
+    }
+}

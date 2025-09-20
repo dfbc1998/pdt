@@ -1,3 +1,269 @@
-<p>
-  admin-dashboard works!
-</p>
+<app-header title="Panel de Administración"></app-header>
+
+<ion-content class="ion-padding">
+  <div class="admin-dashboard-container">
+    @if (isLoading$ | async) {
+    <app-loading message="Cargando panel de administración..."></app-loading>
+    } @else {
+
+    <!-- Welcome Section -->
+    @if (currentUser$ | async; as user) {
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        Panel de Administración de FreeWork
+      </h1>
+      <p class="welcome-subtitle">
+        Gestión completa de la plataforma y supervisión del sistema
+      </p>
+    </div>
+    }
+
+    <!-- System Alerts -->
+    @if (systemAlerts.length > 0) {
+    <div class="alerts-section">
+      <h2 class="section-title">Alertas del Sistema</h2>
+      @for (alert of systemAlerts; track alert.id) {
+      <ion-card class="alert-card" [class]="'alert-' + alert.type" button (click)="handleAlert(alert)">
+        <ion-card-content>
+          <div class="alert-content">
+            <div class="alert-header">
+              <ion-icon [name]="getAlertIcon(alert.type)" class="alert-icon"></ion-icon>
+              <div class="alert-info">
+                <h3 class="alert-title">{{ alert.title }}</h3>
+                <p class="alert-time">{{ formatDate(alert.timestamp) }}</p>
+              </div>
+              @if (alert.actionRequired) {
+              <ion-badge color="warning" class="action-badge">Acción Requerida</ion-badge>
+              }
+            </div>
+            <p class="alert-message">{{ alert.message }}</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+    </div>
+    }
+
+    <!-- Quick Actions -->
+    <ion-card class="quick-actions-card">
+      <ion-card-header>
+        <ion-card-title>Acciones Rápidas</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="actions-grid">
+          <ion-button (click)="manageUsers()" expand="block" color="primary" class="action-button">
+            <ion-icon name="people-outline" slot="start"></ion-icon>
+            Gestionar Usuarios
+          </ion-button>
+
+          <ion-button (click)="viewAnalytics()" expand="block" fill="outline" class="action-button">
+            <ion-icon name="analytics-outline" slot="start"></ion-icon>
+            Ver Analíticas
+          </ion-button>
+
+          <ion-button (click)="manageProjects()" expand="block" fill="outline" class="action-button">
+            <ion-icon name="folder-outline" slot="start"></ion-icon>
+            Gestionar Proyectos
+          </ion-button>
+
+          <ion-button (click)="systemSettings()" expand="block" fill="outline" class="action-button">
+            <ion-icon name="settings-outline" slot="start"></ion-icon>
+            Configuración
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- System Statistics -->
+    <div class="stats-section">
+      <h2 class="section-title">Estadísticas del Sistema</h2>
+
+      <ion-grid class="stats-grid">
+        <ion-row>
+          <!-- Total Users -->
+          <ion-col size="12" size-sm="6" size-md="3">
+            <ion-card class="stat-card users">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.totalUsers }}</div>
+                    <div class="stat-label">Total Usuarios</div>
+                    <div class="stat-detail">
+                      {{ stats.totalClients }} Clientes, {{ stats.totalFreelancers }} Freelancers
+                    </div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <!-- Total Projects -->
+          <ion-col size="12" size-sm="6" size-md="3">
+            <ion-card class="stat-card projects">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="folder-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.totalProjects }}</div>
+                    <div class="stat-label">Total Proyectos</div>
+                    <div class="stat-detail">
+                      {{ stats.activeProjects }} Activos, {{ stats.completedProjects }} Completados
+                    </div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <!-- Monthly Revenue -->
+          <ion-col size="12" size-sm="6" size-md="3">
+            <ion-card class="stat-card revenue">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="cash-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ formatCurrency(stats.monthlyRevenue) }}</div>
+                    <div class="stat-label">Ingresos del Mes</div>
+                    <div class="stat-detail">
+                      Total: {{ formatCurrency(stats.totalRevenue) }}
+                    </div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <!-- Success Rate -->
+          <ion-col size="12" size-sm="6" size-md="3">
+            <ion-card class="stat-card success">
+              <ion-card-content>
+                <div class="stat-content">
+                  <ion-icon name="trending-up-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-info">
+                    <div class="stat-number">{{ stats.successRate }}%</div>
+                    <div class="stat-label">Tasa de Éxito</div>
+                    <ion-progress-bar [value]="stats.successRate / 100" color="success"></ion-progress-bar>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+      <div class="section-header">
+        <h2 class="section-title">Actividad Reciente</h2>
+        <ion-button fill="clear" (click)="viewReports()" class="see-all-button">
+          Ver Reportes
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-card class="activity-card">
+        <ion-card-content>
+          <ion-list class="activity-list">
+            @for (activity of recentActivity; track activity.id) {
+            <ion-item class="activity-item">
+              <div slot="start" class="activity-icon">
+                <ion-icon [name]="getActivityIcon(activity.type)"></ion-icon>
+              </div>
+              <ion-label>
+                <h3 class="activity-description">{{ activity.description }}</h3>
+                <p class="activity-user">{{ activity.userName }}</p>
+                <p class="activity-time">{{ formatDate(activity.timestamp) }}</p>
+              </ion-label>
+              <ion-button slot="end" fill="clear" size="small">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
+            </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Recent Projects -->
+    @if (recentProjects.length > 0) {
+    <div class="projects-section">
+      <div class="section-header">
+        <h2 class="section-title">Proyectos Recientes</h2>
+        <ion-button fill="clear" (click)="manageProjects()" class="see-all-button">
+          Ver Todos
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="projects-grid">
+        @for (project of recentProjects; track project.id) {
+        <ion-card class="project-card" button (click)="viewProject(project.id!)">
+          <ion-card-header>
+            <div class="project-header">
+              <ion-card-title class="project-title">{{ project.title }}</ion-card-title>
+              <ion-badge [color]="getProjectStatusColor(project.status)" class="status-badge">
+                {{ getProjectStatusLabel(project.status) }}
+              </ion-badge>
+            </div>
+            <div class="project-meta">
+              <span class="budget">{{ formatCurrency(project.budget.amount || 0) }}</span>
+              <span class="category">{{ project.category }}</span>
+            </div>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="project-description">{{ project.description }}</p>
+            <div class="project-footer">
+              <div class="project-stats">
+                <span class="proposals">{{ project.proposalCount }} propuestas</span>
+                <span class="views">{{ project.viewCount }} vistas</span>
+              </div>
+              <div class="project-date">{{ formatDateFull(project.createdAt) }}</div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Management Tools -->
+    <div class="tools-section">
+      <h2 class="section-title">Herramientas de Gestión</h2>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            <ion-card class="tool-card" button (click)="viewReports()">
+              <ion-card-content>
+                <div class="tool-content">
+                  <ion-icon name="stats-chart-outline" class="tool-icon"></ion-icon>
+                  <div class="tool-info">
+                    <h3>Reportes y Analíticas</h3>
+                    <p>Visualiza métricas detalladas de la plataforma</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" size-md="6">
+            <ion-card class="tool-card" button (click)="manageSupport()">
+              <ion-card-content>
+                <div class="tool-content">
+                  <ion-icon name="mail-outline" class="tool-icon"></ion-icon>
+                  <div class="tool-info">
+                    <h3>Centro de Soporte</h3>
+                    <p>Gestiona tickets y consultas de usuarios</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+    }
+  </div>
+</ion-content>

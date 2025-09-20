@@ -1,6 +1,6 @@
-<!-- src/app/shared/components/header/header.component.html -->
-<ion-header [class.transparent]="transparent" [class.custom-color]="customColor">
-  <ion-toolbar class="fw-header-toolbar">
+<!-- src/app/shared/components/header/header.component.html - REEMPLAZAR COMPLETO -->
+<ion-header class="fw-header" [class.transparent]="transparent" [class.custom-color]="customColor">
+  <ion-toolbar class="fw-toolbar">
 
     <!-- Left Section -->
     <ion-buttons slot="start" class="fw-header-start">
@@ -10,12 +10,10 @@
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
 
-      <!-- Menu Button (Mobile) -->
-      <ion-button *ngIf="!showBackButton" fill="clear" (click)="onMenu()" class="fw-menu-button md:hidden">
-        <ion-icon name="menu-outline"></ion-icon>
-      </ion-button>
+      <!-- Menu Button (when not showing back button) -->
+      <ion-menu-button *ngIf="showMenu && !showBackButton" (click)="onMenu()" class="fw-menu-button"></ion-menu-button>
 
-      <!-- Logo & Brand -->
+      <!-- Logo & Brand (when not showing back button) -->
       <div class="fw-brand" *ngIf="!showBackButton">
         <div class="fw-logo">
           <div class="fw-logo-icon">
@@ -24,80 +22,62 @@
         </div>
         <div class="fw-brand-text">
           <span class="fw-brand-name">FreeWork</span>
-          <span class="fw-brand-tagline">Tu trabajo, tu libertad</span>
         </div>
       </div>
     </ion-buttons>
 
     <!-- Center Section - Title -->
-    <ion-title *ngIf="title && showBackButton" class="fw-header-title">
+    <ion-title class="fw-title" *ngIf="title && (showBackButton || !showMenu)">
       {{ title }}
     </ion-title>
 
     <!-- Right Section -->
-    <ion-buttons slot="end" class="fw-header-end">
+    <ion-buttons slot="end" class="fw-actions">
 
       <!-- Search Button -->
-      <ion-button *ngIf="showSearchButton" fill="clear" (click)="onSearch()" class="fw-search-button">
+      <ion-button *ngIf="showSearchButton && currentUser" fill="clear" (click)="onSearch()" class="fw-search-button">
         <ion-icon name="search-outline"></ion-icon>
       </ion-button>
 
       <!-- Notifications -->
-      <ion-button *ngIf="showNotifications && currentUser" fill="clear" (click)="onNotifications()"
-        class="fw-notifications-button">
+      <ion-button *ngIf="showNotifications && currentUser" fill="clear" (click)="onNotification()"
+        class="fw-notification-button">
         <ion-icon name="notifications-outline"></ion-icon>
-        <ion-badge *ngIf="notificationCount > 0" class="fw-notification-badge">
+        <ion-badge *ngIf="notificationCount > 0" color="danger" class="fw-notification-badge">
           {{ notificationCount > 99 ? '99+' : notificationCount }}
         </ion-badge>
       </ion-button>
 
       <!-- User Menu -->
       <div *ngIf="showUserMenu && currentUser" class="fw-user-menu">
-        <ion-button fill="clear" (click)="toggleUserMenu()" class="fw-user-button" id="user-menu-trigger">
-
-          <div class="fw-user-info">
-            <div class="fw-user-avatar">
-              <img *ngIf="currentUser.photoURL" [src]="currentUser.photoURL" [alt]="getUserName()">
-              <span *ngIf="!currentUser.photoURL" class="fw-user-initials">
-                {{ getUserInitials() }}
-              </span>
-            </div>
-
-            <div class="fw-user-details">
-              <span class="fw-user-name">{{ getUserName() }}</span>
-              <span class="fw-user-role">{{ getUserRole() }}</span>
-            </div>
-
-            <ion-icon name="chevron-down-outline" class="fw-dropdown-icon"></ion-icon>
-          </div>
+        <ion-button fill="clear" (click)="toggleUserMenu($event)" class="fw-user-button" id="user-trigger">
+          <ion-avatar class="fw-user-avatar">
+            <span class="fw-user-initials">{{ getUserInitials() }}</span>
+          </ion-avatar>
+          <ion-icon name="chevron-down-outline" class="fw-dropdown-icon"></ion-icon>
         </ion-button>
 
-        <!-- User Dropdown Menu -->
-        <ion-popover trigger="user-menu-trigger" [isOpen]="isUserMenuOpen" (ionPopoverDidDismiss)="closeUserMenu()"
-          showBackdrop="true" side="bottom" alignment="end" class="fw-user-popover">
-
+        <ion-popover trigger="user-trigger" [isOpen]="isUserMenuOpen" (didDismiss)="closeUserMenu()"
+          class="fw-user-popover">
           <ng-template>
-            <div class="fw-user-dropdown" (click)="$event.stopPropagation()">
-
-              <!-- User Info Header -->
-              <div class="fw-dropdown-header">
-                <div class="fw-user-avatar-large">
-                  <img *ngIf="currentUser.photoURL" [src]="currentUser.photoURL" [alt]="getUserName()">
-                  <span *ngIf="!currentUser.photoURL" class="fw-user-initials">
-                    {{ getUserInitials() }}
-                  </span>
-                </div>
-                <div class="fw-user-info-detail">
-                  <h4>{{ getUserName() }}</h4>
-                  <p>{{ currentUser.email }}</p>
-                  <span class="fw-role-badge">{{ getUserRole() }}</span>
+            <div class="fw-dropdown-content">
+              <!-- User Info -->
+              <div class="fw-user-info">
+                <ion-avatar class="fw-user-avatar-large">
+                  <span class="fw-user-initials-large">{{ getUserInitials() }}</span>
+                </ion-avatar>
+                <div class="fw-user-details">
+                  <h3 class="fw-user-name">{{ getUserName() }}</h3>
+                  <p class="fw-user-role">{{ getUserRole() }}</p>
                 </div>
               </div>
 
-              <!-- Dropdown Actions -->
+              <div class="fw-dropdown-divider"></div>
+
+              <!-- Menu Items -->
               <ion-list class="fw-dropdown-list">
                 <ion-item button (click)="goToProfile()" class="fw-dropdown-item">
-                  <ion-icon name="person-outline" slot="start"></ion-icon>
+                  <ion-icon name="person-circle-outline" slot="start"></ion-icon>
                   <ion-label>Mi Perfil</ion-label>
                 </ion-item>
 

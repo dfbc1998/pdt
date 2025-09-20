@@ -43,7 +43,10 @@ import { LoadingComponent } from '../../../shared/components/loading/loading.com
 
 // Core Services and Interfaces
 import { AuthService } from '../../../core/services/auth.service';
-import { User, UserRole } from '../../../core/interfaces';
+import {
+  User,
+  UserRole,
+} from '../../../core/interfaces';
 
 interface QuickAction {
   id: string;
@@ -478,5 +481,29 @@ export class MainDashboardComponent implements OnInit, OnDestroy {
       ]
     });
     await toast.present();
+  }
+
+  // Actualizaciones necesarias para src/app/features/dashboard/main-dashboard/main-dashboard.component.ts
+  private getTimeOfDay(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buenos días';
+    if (hour < 18) return 'Buenas tardes';
+    return 'Buenas noches';
+  }
+
+  // Cambiar el método getDashboardSubtitle para usar FreeWork
+  getDashboardSubtitle(role: string): string {
+    const descriptions: { [key: string]: string } = {
+      [UserRole.CLIENT]: 'Publica proyectos, encuentra talento excepcional y gestiona tu trabajo en FreeWork.',
+      [UserRole.FREELANCER]: 'Descubre oportunidades increíbles, gestiona tus propuestas y construye tu reputación profesional en FreeWork.',
+      [UserRole.ADMIN]: 'Supervisa la plataforma FreeWork completa, gestiona usuarios y mantén la calidad del servicio.'
+    };
+    return descriptions[role] || 'Accede a todas las funcionalidades de tu cuenta en FreeWork.';
+  }
+
+  // También actualizar cualquier mensaje de bienvenida
+  getWelcomeMessage(user: User): string {
+    const timeOfDay = this.getTimeOfDay();
+    return `¡${timeOfDay}, ${user.displayName || 'Usuario'}! Bienvenido a FreeWork.`;
   }
 }

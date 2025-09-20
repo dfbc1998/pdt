@@ -1,458 +1,721 @@
-// src/app/features/dashboard/client-dashboard/client-dashboard.component.scss
+/* Dashboard Styles - Estilos comunes para todos los dashboards de FreeWork */
 
-.dashboard-container {
+/* ===== ESTILOS COMUNES ===== */
+.dashboard-container,
+.admin-dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 16px;
 }
 
-// Welcome Section
+/* Welcome Section */
 .welcome-section {
-    margin-bottom: 2rem;
     text-align: center;
+    margin-bottom: 32px;
+    padding: 24px 0;
+}
+
+.welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+}
+
+.welcome-subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 20px 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.see-all-button {
+    --color: #667eea;
+    font-weight: 500;
+}
+
+/* Quick Actions */
+.quick-actions-card {
+    margin-bottom: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.action-button {
+    --border-radius: 12px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-weight: 500;
+    text-transform: none;
+    transition: all 0.2s ease;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Statistics Cards */
+.stats-section {
+    margin-bottom: 32px;
+}
+
+.stats-grid {
+    margin: 0;
+    padding: 0;
+}
+
+.stat-card {
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.stat-detail {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* Color variations for stat cards */
+.stat-card.users .stat-icon {
+    color: #3b82f6;
+}
+
+.stat-card.projects .stat-icon {
+    color: #10b981;
+}
+
+.stat-card.revenue .stat-icon {
+    color: #f59e0b;
+}
+
+.stat-card.success .stat-icon {
+    color: #8b5cf6;
+}
+
+.stat-card.proposals .stat-icon {
+    color: #ef4444;
+}
+
+.stat-card.active-projects .stat-icon {
+    color: #06b6d4;
+}
+
+.stat-card.earnings .stat-icon {
+    color: #84cc16;
+}
+
+.stat-card.rating .stat-icon {
+    color: #f97316;
+}
+
+.stat-card.completed .stat-icon {
+    color: #22c55e;
+}
+
+/* ===== FREELANCER DASHBOARD ESPECÍFICO ===== */
+
+/* Rating Stars */
+.rating-stars {
+    display: flex;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.star-icon {
+    font-size: 14px;
+    color: #fbbf24;
+}
+
+/* Opportunities */
+.opportunities-section,
+.projects-section {
+    margin-bottom: 32px;
+}
+
+.opportunities-grid,
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.opportunity-card,
+.project-card {
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.opportunity-card:hover,
+.project-card:hover {
+    box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.opportunity-header,
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.opportunity-title,
+.project-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1.3;
+    flex: 1;
+}
+
+.new-chip,
+.status-badge {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.opportunity-meta,
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.budget {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.category {
+    font-size: 0.875rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.opportunity-description,
+.project-description {
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.opportunity-footer,
+.project-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 16px;
+}
+
+.client-info,
+.project-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.client-name {
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.posted-date,
+.project-date {
+    font-size: 0.8rem;
+}
+
+.proposal-info,
+.project-stats {
+    text-align: right;
+}
+
+.proposals-count,
+.proposals {
+    font-weight: 500;
+    color: #7c3aed;
+}
+
+.views {
+    color: #059669;
+}
+
+.propose-button {
+    --border-radius: 8px;
+    font-weight: 500;
+    text-transform: none;
+}
+
+/* Proposals List */
+.proposals-section {
+    margin-bottom: 32px;
+}
+
+.proposals-list {
+    border-radius: 12px;
+    background: transparent;
+}
+
+.proposal-item {
+    --background: #ffffff;
+    --border-color: #e5e7eb;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.proposal-icon {
+    width: 40px;
+    height: 40px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.proposal-icon ion-icon {
+    color: #6b7280;
+    font-size: 20px;
+}
+
+.proposal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.proposal-amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #059669;
+    margin: 0;
+}
+
+.proposal-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Profile Completion */
+.profile-completion-card {
+    margin-bottom: 32px;
+    border-radius: 16px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.completion-text {
+    text-align: center;
+    margin: 8px 0 16px 0;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.complete-profile-button {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-radius: 12px;
+    font-weight: 600;
+    text-transform: none;
+}
+
+/* Empty States */
+.empty-state {
+    margin-bottom: 32px;
+    border-radius: 16px;
+    border: 2px dashed #d1d5db;
+    background: #f9fafb;
+}
+
+.empty-content {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 16px;
+}
+
+.empty-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 8px 0;
+}
+
+.empty-content p {
+    color: #6b7280;
+    margin: 0 0 24px 0;
+}
+
+/* ===== ADMIN DASHBOARD ESPECÍFICO ===== */
+
+/* System Alerts */
+.alerts-section {
+    margin-bottom: 32px;
+}
+
+.alert-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border-left: 4px solid;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.alert-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.alert-card.alert-info {
+    border-left-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.02);
+}
+
+.alert-card.alert-warning {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.02);
+}
+
+.alert-card.alert-error {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.02);
+}
+
+.alert-card.alert-success {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.02);
+}
+
+.alert-content {
+    padding: 0;
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.alert-card.alert-info .alert-icon {
+    color: #3b82f6;
+}
+
+.alert-card.alert-warning .alert-icon {
+    color: #f59e0b;
+}
+
+.alert-card.alert-error .alert-icon {
+    color: #ef4444;
+}
+
+.alert-card.alert-success .alert-icon {
+    color: #10b981;
+}
+
+.alert-info {
+    flex: 1;
+}
+
+.alert-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.alert-time {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.alert-message {
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.action-badge {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Activity Section */
+.activity-section {
+    margin-bottom: 32px;
+}
+
+.activity-card {
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.activity-list {
+    background: transparent;
+}
+
+.activity-item {
+    --background: #ffffff;
+    --border-color: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+    margin-bottom: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.activity-icon ion-icon {
+    color: #667eea;
+    font-size: 20px;
+}
+
+.activity-description {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.activity-user {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #667eea;
+    margin: 0 0 2px 0;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Management Tools */
+.tools-section {
+    margin-bottom: 32px;
+}
+
+.tool-card {
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.tool-card:hover {
+    box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.tool-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tool-icon {
+    font-size: 2.5rem;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.tool-info h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.tool-info p {
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+
+    .dashboard-container,
+    .admin-dashboard-container {
+        padding: 0 12px;
+    }
 
     .welcome-title {
         font-size: 1.75rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
     }
 
     .welcome-subtitle {
         font-size: 1rem;
-        color: #6b7280;
-        margin: 0;
     }
-}
-
-// Quick Actions Card
-.quick-actions-card {
-    margin-bottom: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
     .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-
-        .action-button {
-            --border-radius: 8px;
-            font-weight: 500;
-            height: 44px;
-        }
-    }
-}
-
-// Stats Section
-.stats-section {
-    margin-bottom: 2rem;
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 1rem;
+        grid-template-columns: 1fr;
     }
 
-    .stats-grid {
-        padding: 0;
-
-        .stat-card {
-            margin-bottom: 1rem;
-            border-radius: 12px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            overflow: hidden;
-
-            &:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            }
-
-            ion-card-content {
-                padding: 1.5rem;
-            }
-
-            .stat-content {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-
-                .stat-icon {
-                    font-size: 2.5rem;
-                    flex-shrink: 0;
-                }
-
-                .stat-info {
-                    flex: 1;
-
-                    .stat-number {
-                        font-size: 2rem;
-                        font-weight: 700;
-                        line-height: 1;
-                        margin-bottom: 0.25rem;
-                    }
-
-                    .stat-label {
-                        font-size: 0.875rem;
-                        color: #6b7280;
-                        font-weight: 500;
-                    }
-                }
-            }
-
-            // Card-specific colors
-            &.total-projects {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-
-                .stat-icon {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-            }
-
-            &.published-projects {
-                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                color: white;
-
-                .stat-icon {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-            }
-
-            &.active-projects {
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-                color: white;
-
-                .stat-icon {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-            }
-
-            &.completed-projects {
-                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-                color: white;
-
-                .stat-icon {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-            }
-
-            &.draft-projects {
-                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-                color: white;
-
-                .stat-icon {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-            }
-
-            &.freelancers {
-                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-                color: #1f2937;
-
-                .stat-icon {
-                    color: #6b7280;
-                }
-            }
-        }
+    .opportunities-grid,
+    .projects-grid {
+        grid-template-columns: 1fr;
     }
-}
-
-// Recent Projects Section
-.recent-projects-section {
-    margin-bottom: 2rem;
 
     .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0;
-        }
-
-        .view-all-button {
-            --color: #3b82f6;
-        }
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
-    .empty-state {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        .empty-content {
-            text-align: center;
-            padding: 2rem;
-
-            .empty-icon {
-                font-size: 4rem;
-                color: #d1d5db;
-                margin-bottom: 1rem;
-            }
-
-            h3 {
-                font-size: 1.25rem;
-                font-weight: 600;
-                color: #1f2937;
-                margin-bottom: 0.5rem;
-            }
-
-            p {
-                color: #6b7280;
-                margin-bottom: 1.5rem;
-            }
-        }
+    .stat-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
     }
 
-    .projects-card {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        .projects-content {
-            padding: 0;
-        }
-
-        .projects-list {
-            background: transparent;
-
-            .project-item {
-                --background: transparent;
-                --border-color: #e5e7eb;
-                --border-style: solid;
-                --border-width: 0 0 1px 0;
-                padding: 1.5rem;
-                transition: background-color 0.2s ease;
-
-                &:hover {
-                    --background: #f9fafb;
-                }
-
-                &:last-child {
-                    --border-width: 0;
-                }
-
-                .project-content {
-                    width: 100%;
-
-                    .project-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        margin-bottom: 0.75rem;
-
-                        .project-title {
-                            font-size: 1.125rem;
-                            font-weight: 600;
-                            color: #1f2937;
-                            margin: 0;
-                            flex: 1;
-                            margin-right: 1rem;
-                        }
-
-                        .project-meta {
-                            flex-shrink: 0;
-
-                            ion-badge {
-                                font-size: 0.75rem;
-                                padding: 0.25rem 0.5rem;
-                            }
-                        }
-                    }
-
-                    .project-description {
-                        color: #6b7280;
-                        line-height: 1.5;
-                        margin-bottom: 1rem;
-                    }
-
-                    .project-details {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 1rem;
-                        margin-bottom: 1rem;
-
-                        .detail-item {
-                            display: flex;
-                            align-items: center;
-                            gap: 0.25rem;
-                            font-size: 0.875rem;
-                            color: #6b7280;
-
-                            .detail-icon {
-                                font-size: 1rem;
-                                color: #9ca3af;
-                            }
-
-                            .detail-text {
-                                font-weight: 500;
-                            }
-                        }
-                    }
-
-                    .project-actions {
-                        display: flex;
-                        gap: 0.5rem;
-
-                        ion-button {
-                            --color: #6b7280;
-                            font-size: 0.875rem;
-
-                            &:hover {
-                                --color: #3b82f6;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Refresh Section
-.refresh-section {
-    margin-bottom: 2rem;
-
-    .refresh-button {
-        --color: #6b7280;
-        --border-color: #d1d5db;
-        --border-radius: 8px;
-        font-weight: 500;
-    }
-}
-
-// Responsive Design
-@media (max-width: 768px) {
-    .welcome-section {
-        text-align: left;
-        margin-bottom: 1.5rem;
-
-        .welcome-title {
-            font-size: 1.5rem;
-        }
+    .stat-icon {
+        font-size: 2rem;
     }
 
-    .quick-actions-card .actions-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
+    .stat-number {
+        font-size: 1.75rem;
     }
 
-    .stats-section .stats-grid {
-        ion-col {
-            padding: 0.5rem;
-        }
-
-        .stat-card {
-            margin-bottom: 0.5rem;
-
-            ion-card-content {
-                padding: 1rem;
-            }
-
-            .stat-content {
-                gap: 0.75rem;
-
-                .stat-icon {
-                    font-size: 2rem;
-                }
-
-                .stat-info .stat-number {
-                    font-size: 1.5rem;
-                }
-            }
-        }
+    .opportunity-footer,
+    .project-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 
-    .recent-projects-section {
-        .section-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
+    .tool-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
 
-        .projects-card .projects-list .project-item {
-            padding: 1rem;
-
-            .project-content {
-                .project-header {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 0.5rem;
-
-                    .project-title {
-                        margin-right: 0;
-                    }
-                }
-
-                .project-details {
-                    flex-direction: column;
-                    gap: 0.5rem;
-                }
-
-                .project-actions {
-                    flex-wrap: wrap;
-                    gap: 0.25rem;
-                }
-            }
-        }
+    .alert-header {
+        flex-wrap: wrap;
+        gap: 8px;
     }
 }
 
 @media (max-width: 480px) {
-    .dashboard-container {
-        padding: 0 0.5rem;
+
+    .dashboard-container,
+    .admin-dashboard-container {
+        padding: 0 8px;
     }
 
-    .stats-section .stats-grid {
-        ion-col {
-            padding: 0.25rem;
-        }
+    .quick-actions-card,
+    .stat-card,
+    .opportunity-card,
+    .project-card,
+    .activity-card,
+    .tool-card,
+    .alert-card {
+        margin-left: -8px;
+        margin-right: -8px;
+        border-radius: 12px;
     }
-
-    .recent-projects-section .projects-card .projects-list .project-item {
-        padding: 0.75rem;
-
-        .project-content .project-details {
-            .detail-item {
-                font-size: 0.75rem;
-            }
-        }
-    }
-}
-
-// Loading animation
-.loading-shimmer {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-
-    100% {
-        background-position: 200% 0;
-    }
-}
-
-// Smooth transitions
-* {
-    transition: all 0.2s ease;
-}
-
-// Focus states
-ion-button:focus-visible {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-}
-
-// Card hover effects
-ion-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }

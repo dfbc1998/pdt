@@ -566,7 +566,12 @@ export interface FormState {
 // Dashboard Interfaces
 export interface DashboardStats {
     totalProjects?: number;
+    totalProposals?: number;
     activeProjects?: number;
+    acceptedProposals?: number;
+    pendingProposals?: number;
+    rejectedProposals?: number;
+    avgResponseTime: 2.5
     completedProjects?: number;
     totalEarnings?: number;
     averageRating?: number;
@@ -589,4 +594,8 @@ export interface RecentActivity {
     date: Date;
     projectId?: string;
     amount?: number;
+}
+
+export interface ProposalWithProject extends Proposal {
+    project?: Project;
 }

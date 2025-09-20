@@ -1,3 +1,4 @@
+<!-- src/app/features/auth/login/login.component.html - REEMPLAZAR COMPLETO -->
 <ion-content class="login-content">
   <div class="login-container">
 
@@ -5,7 +6,7 @@
     <div class="welcome-header">
       <div class="logo-section">
         <ion-icon name="briefcase-outline" class="welcome-icon"></ion-icon>
-        <h1>FreelancePro</h1>
+        <h1>FreeWork</h1>
       </div>
       <p class="welcome-subtitle">
         Inicia sesión para acceder a tu cuenta y gestionar tus proyectos.
@@ -26,12 +27,12 @@
 
         <div class="form-header">
           <h2>Iniciar Sesión</h2>
-          <p>¿Nuevo en FreelancePro?
+          <p>¿Nuevo en FreeWork?
             <a routerLink="/auth/register" class="register-link">Regístrate aquí</a>
           </p>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" novalidate>
 
           <!-- Email Field -->
           <div class="form-field">
@@ -39,7 +40,8 @@
               <ion-label position="stacked">
                 <strong>Correo Electrónico</strong>
               </ion-label>
-              <ion-input formControlName="email" type="email" placeholder="tu@correo.com" autocomplete="email">
+              <ion-input formControlName="email" type="email" placeholder="tu@correo.com" autocomplete="email"
+                clearInput="true">
               </ion-input>
               <ion-icon name="mail-outline" slot="end" class="field-icon"></ion-icon>
             </ion-item>
@@ -55,7 +57,7 @@
               <ion-label position="stacked">
                 <strong>Contraseña</strong>
               </ion-label>
-              <ion-input formControlName="password" type="showPassword ? 'text' : 'password'"
+              <ion-input formControlName="password" [type]="showPassword ? 'text' : 'password'"
                 placeholder="Tu contraseña" autocomplete="current-password">
               </ion-input>
               <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()" class="password-toggle">
