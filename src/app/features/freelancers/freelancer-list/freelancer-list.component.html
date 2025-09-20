@@ -1,3 +1,287 @@
-<p>
-  freelancer-list works!
-</p>
+<!-- src/app/features/freelancers/freelancer-list/freelancer-list.component.html -->
+<app-header title="Buscar Freelancers">
+  <ion-button slot="end" fill="clear" (click)="refreshData()" [disabled]="isLoading">
+    <ion-icon name="refresh-outline"></ion-icon>
+  </ion-button>
+</app-header>
+
+<ion-content class="dashboard-content">
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+  <div class="loading-container">
+    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+    <p class="loading-text">Buscando freelancers...</p>
+  </div>
+  } @else {
+  <div class="dashboard-container">
+
+    <!-- Search and Filters Section -->
+    <div class="search-section">
+      <div class="search-content">
+        <div class="search-text">
+          <h1 class="search-title">Encuentra el Freelancer Perfecto</h1>
+          <p class="search-subtitle">Explora perfiles de profesionales talentosos para tu proyecto</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar-section">
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchChange($event)"
+        placeholder="Buscar por habilidades (ej: JavaScript, Design, Marketing)" show-clear-button="focus"
+        class="custom-searchbar">
+      </ion-searchbar>
+    </div>
+
+    <!-- Filter Chips -->
+    <div class="filters-section">
+      <h3 class="section-title">Filtros Rápidos</h3>
+
+      <div class="filter-chips">
+        @for (filter of quickFilters; track filter.value) {
+        <ion-chip [class.active]="selectedFilters.includes(filter.value)" (click)="toggleFilter(filter.value)"
+          class="filter-chip">
+          <ion-icon [name]="filter.icon"></ion-icon>
+          <ion-label>{{ filter.label }}</ion-label>
+        </ion-chip>
+        }
+      </div>
+
+      <!-- Advanced Filters Toggle -->
+      <ion-button fill="clear" (click)="toggleAdvancedFilters()" class="advanced-filters-toggle">
+        <ion-icon [name]="showAdvancedFilters ? 'chevron-up-outline' : 'chevron-down-outline'" slot="start"></ion-icon>
+        Filtros Avanzados
+      </ion-button>
+
+      <!-- Advanced Filters Panel -->
+      @if (showAdvancedFilters) {
+      <div class="advanced-filters">
+        <ion-grid>
+          <ion-row>
+            <!-- Experience Level -->
+            <ion-col size="12" size-md="6">
+              <div class="filter-group">
+                <ion-label class="filter-label">Nivel de Experiencia</ion-label>
+                <ion-select [(ngModel)]="experienceFilter" (ionSelectionChange)="applyFilters()"
+                  placeholder="Seleccionar">
+                  <ion-select-option value="">Todos</ion-select-option>
+                  <ion-select-option value="entry">Junior</ion-select-option>
+                  <ion-select-option value="intermediate">Intermedio</ion-select-option>
+                  <ion-select-option value="expert">Senior/Experto</ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+
+            <!-- Hourly Rate -->
+            <ion-col size="12" size-md="6">
+              <div class="filter-group">
+                <ion-label class="filter-label">Tarifa por Hora (USD)</ion-label>
+                <ion-select [(ngModel)]="rateFilter" (ionSelectionChange)="applyFilters()" placeholder="Seleccionar">
+                  <ion-select-option value="">Cualquier tarifa</ion-select-option>
+                  <ion-select-option value="0-25">$0 - $25</ion-select-option>
+                  <ion-select-option value="25-50">$25 - $50</ion-select-option>
+                  <ion-select-option value="50-100">$50 - $100</ion-select-option>
+                  <ion-select-option value="100+">$100+</ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+
+            <!-- Availability -->
+            <ion-col size="12" size-md="6">
+              <div class="filter-group">
+                <ion-label class="filter-label">Disponibilidad</ion-label>
+                <ion-select [(ngModel)]="availabilityFilter" (ionSelectionChange)="applyFilters()"
+                  placeholder="Seleccionar">
+                  <ion-select-option value="">Todas</ion-select-option>
+                  <ion-select-option value="full_time">Tiempo Completo</ion-select-option>
+                  <ion-select-option value="part_time">Medio Tiempo</ion-select-option>
+                  <ion-select-option value="contract">Por Proyecto</ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+
+            <!-- Rating -->
+            <ion-col size="12" size-md="6">
+              <div class="filter-group">
+                <ion-label class="filter-label">Calificación Mínima</ion-label>
+                <ion-select [(ngModel)]="ratingFilter" (ionSelectionChange)="applyFilters()" placeholder="Seleccionar">
+                  <ion-select-option value="">Cualquier calificación</ion-select-option>
+                  <ion-select-option value="4.5">4.5+ estrellas</ion-select-option>
+                  <ion-select-option value="4.0">4.0+ estrellas</ion-select-option>
+                  <ion-select-option value="3.5">3.5+ estrellas</ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <!-- Clear Filters -->
+          <ion-row>
+            <ion-col>
+              <ion-button fill="clear" color="danger" (click)="clearAllFilters()" class="clear-filters-btn">
+                <ion-icon name="close-outline" slot="start"></ion-icon>
+                Limpiar Filtros
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+      }
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results-summary">
+      <div class="results-info">
+        <h3 class="results-count">{{ filteredFreelancers.length }} freelancers encontrados</h3>
+        <p class="results-description">Profesionales verificados listos para trabajar</p>
+      </div>
+
+      <!-- Sort Options -->
+      <div class="sort-options">
+        <ion-select [(ngModel)]="sortBy" (ionSelectionChange)="applySorting()" placeholder="Ordenar por"
+          interface="popover">
+          <ion-select-option value="rating">Mejor calificados</ion-select-option>
+          <ion-select-option value="rate_low">Tarifa: Menor a Mayor</ion-select-option>
+          <ion-select-option value="rate_high">Tarifa: Mayor a Menor</ion-select-option>
+          <ion-select-option value="experience">Más experiencia</ion-select-option>
+          <ion-select-option value="recent">Más recientes</ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Freelancers Grid -->
+    @if (filteredFreelancers.length > 0) {
+    <div class="freelancers-section">
+      <div class="freelancers-grid">
+        @for (freelancer of filteredFreelancers; track freelancer.id) {
+        <ion-card class="freelancer-card" button (click)="viewFreelancer(freelancer.id)">
+          <ion-card-content>
+
+            <!-- Freelancer Header -->
+            <div class="freelancer-header">
+              <div class="freelancer-avatar">
+                <ion-avatar>
+                  <img [src]="getFreelancerAvatar(freelancer)" [alt]="getFreelancerName(freelancer)">
+                </ion-avatar>
+                @if (freelancer.verificationStatus === 'verified') {
+                <div class="verification-badge">
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                </div>
+                }
+              </div>
+
+              <div class="freelancer-info">
+                <h3 class="freelancer-name">{{ getFreelancerName(freelancer) }}</h3>
+                <p class="freelancer-title">{{ freelancer.title }}</p>
+                <div class="freelancer-location">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ freelancer.location }}</span>
+                </div>
+              </div>
+
+              <div class="freelancer-rate">
+                <div class="rate-amount">${{ freelancer.hourlyRate }}/hr</div>
+                <div class="rate-label">USD</div>
+              </div>
+            </div>
+
+            <!-- Rating and Stats -->
+            <div class="freelancer-stats">
+              <div class="rating-section">
+                <div class="rating-stars">
+                  @for (star of [1,2,3,4,5]; track star) {
+                  <ion-icon [name]="star <= freelancer.averageRating ? 'star' : 'star-outline'" class="star-icon">
+                  </ion-icon>
+                  }
+                </div>
+                <span class="rating-text">{{ freelancer.averageRating || 0 }} ({{ freelancer.completedProjects || 0 }}
+                  proyectos)</span>
+              </div>
+
+              <div class="availability-badge">
+                <ion-chip [color]="getAvailabilityColor(freelancer.availability)" class="availability-chip">
+                  <ion-icon [name]="getAvailabilityIcon(freelancer.availability)"></ion-icon>
+                  <ion-label>{{ getAvailabilityLabel(freelancer.availability) }}</ion-label>
+                </ion-chip>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <p class="freelancer-bio">{{ freelancer.bio }}</p>
+
+            <!-- Skills -->
+            <div class="skills-section">
+              <div class="skills-container">
+                @for (skill of freelancer.skills?.slice(0, 4); track skill) {
+                <ion-chip class="skill-chip">
+                  <ion-label>{{ skill }}</ion-label>
+                </ion-chip>
+                }
+                @if (freelancer.skills && freelancer.skills.length > 4) {
+                <ion-chip class="skill-chip more-skills">
+                  <ion-label>+{{ freelancer.skills.length - 4 }} más</ion-label>
+                </ion-chip>
+                }
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="freelancer-actions">
+              <ion-button fill="outline" size="small" (click)="viewProfile(freelancer.id); $event.stopPropagation()">
+                <ion-icon name="eye-outline" slot="start"></ion-icon>
+                Ver Perfil
+              </ion-button>
+
+              <ion-button fill="solid" color="primary" size="small"
+                (click)="contactFreelancer(freelancer.id); $event.stopPropagation()">
+                <ion-icon name="mail-outline" slot="start"></ion-icon>
+                Contactar
+              </ion-button>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+        }
+      </div>
+
+      <!-- Load More Button -->
+      @if (hasMoreResults) {
+      <div class="load-more-section">
+        <ion-button fill="outline" (click)="loadMoreFreelancers()" [disabled]="isLoadingMore">
+          @if (isLoadingMore) {
+          <ion-spinner name="crescent" slot="start"></ion-spinner>
+          } @else {
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          }
+          Cargar Más
+        </ion-button>
+      </div>
+      }
+    </div>
+    } @else {
+    <!-- Empty State -->
+    <div class="empty-state">
+      <ion-card class="empty-card">
+        <ion-card-content>
+          <div class="empty-content">
+            <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+            <h3>No se encontraron freelancers</h3>
+            <p>Intenta ajustar tus filtros de búsqueda o explora todas las categorías</p>
+            <ion-button fill="solid" color="primary" (click)="clearAllFilters()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Limpiar Filtros
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    }
+
+  </div>
+  }
+</ion-content>

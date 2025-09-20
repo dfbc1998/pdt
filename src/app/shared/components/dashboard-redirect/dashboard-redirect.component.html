@@ -1,0 +1,149 @@
+<!-- src/app/shared/components/dashboard-redirect/dashboard-redirect.component.html -->
+<ion-content class="dashboard-redirect-content">
+    <div class="redirect-container">
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-section">
+
+            <!-- Brand Header -->
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <ion-icon name="layers-outline"></ion-icon>
+                </div>
+                <h1 class="brand-title">FreeWork</h1>
+                <p class="brand-subtitle">Plataforma de Freelancing</p>
+            </div>
+
+            <!-- Loading Card -->
+            <ion-card class="loading-card">
+                <ion-card-content>
+                    <div class="loading-content">
+
+                        <!-- Main Spinner -->
+                        <div class="spinner-container">
+                            <ion-spinner name="crescent" class="main-spinner"></ion-spinner>
+                            <div class="spinner-ring"></div>
+                        </div>
+
+                        <!-- Status Messages -->
+                        <div class="status-section">
+                            <h2 class="loading-title">Preparando tu dashboard</h2>
+                            <p class="loading-message">{{ loadingMessage }}</p>
+                        </div>
+
+                        <!-- Progress Steps -->
+                        <div class="progress-steps">
+                            <div class="step" [class.active]="step >= 1" [class.completed]="step > 1">
+                                <div class="step-icon">
+                                    <ion-icon [name]="step > 1 ? 'checkmark' : 'shield-checkmark-outline'"></ion-icon>
+                                </div>
+                                <span class="step-label">Verificando</span>
+                            </div>
+
+                            <div class="step-connector" [class.active]="step >= 2"></div>
+
+                            <div class="step" [class.active]="step >= 2" [class.completed]="step > 2">
+                                <div class="step-icon">
+                                    <ion-icon [name]="step > 2 ? 'checkmark' : 'person-outline'"></ion-icon>
+                                </div>
+                                <span class="step-label">Cargando</span>
+                            </div>
+
+                            <div class="step-connector" [class.active]="step >= 3"></div>
+
+                            <div class="step" [class.active]="step >= 3" [class.completed]="step > 3">
+                                <div class="step-icon">
+                                    <ion-icon [name]="step > 3 ? 'checkmark' : 'arrow-forward-outline'"></ion-icon>
+                                </div>
+                                <span class="step-label">Redirigiendo</span>
+                            </div>
+                        </div>
+
+                        <!-- Loading Tips -->
+                        <div class="loading-tips" *ngIf="currentTip">
+                            <div class="tip-content">
+                                <div class="tip-icon">
+                                    <ion-icon name="bulb-outline"></ion-icon>
+                                </div>
+                                <div class="tip-text">
+                                    <p>{{ currentTip }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </ion-card-content>
+            </ion-card>
+
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="hasError" class="error-section">
+
+            <!-- Brand Header (Error) -->
+            <div class="brand-header error">
+                <div class="brand-logo error">
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                </div>
+                <h1 class="brand-title">Error de Redirección</h1>
+                <p class="brand-subtitle">Algo salió mal</p>
+            </div>
+
+            <!-- Error Card -->
+            <ion-card class="error-card">
+                <ion-card-content>
+                    <div class="error-content">
+
+                        <!-- Error Icon -->
+                        <div class="error-icon-container">
+                            <ion-icon name="warning-outline" class="error-icon"></ion-icon>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="error-details">
+                            <h3 class="error-title">No pudimos redirigirte</h3>
+                            <p class="error-message">{{ errorMessage }}</p>
+
+                            <!-- Retry Info -->
+                            <div class="retry-info" *ngIf="currentRetry < maxRetries">
+                                <ion-chip color="warning" class="retry-chip">
+                                    <ion-icon name="refresh-outline"></ion-icon>
+                                    <ion-label>Intento {{ currentRetry + 1 }} de {{ maxRetries }}</ion-label>
+                                </ion-chip>
+                            </div>
+                        </div>
+
+                        <!-- Error Actions -->
+                        <div class="error-actions">
+
+                            <!-- Primary Action: Retry -->
+                            <ion-button *ngIf="currentRetry < maxRetries" fill="solid" color="primary" size="large"
+                                (click)="retryRedirect()" class="action-button primary">
+                                <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                                Reintentar
+                            </ion-button>
+
+                            <!-- Secondary Actions Grid -->
+                            <div class="secondary-actions">
+                                <ion-button fill="outline" color="medium" (click)="goToMain()"
+                                    class="action-button secondary">
+                                    <ion-icon name="home-outline" slot="start"></ion-icon>
+                                    Ir a Inicio
+                                </ion-button>
+
+                                <ion-button fill="clear" color="danger" (click)="logout()" class="action-button danger">
+                                    <ion-icon name="log-out-outline" slot="start"></ion-icon>
+                                    Cerrar Sesión
+                                </ion-button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </ion-card-content>
+            </ion-card>
+
+        </div>
+
+    </div>
+</ion-content>
